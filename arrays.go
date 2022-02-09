@@ -2,6 +2,32 @@ package common
 
 import "strings"
 
+// Unique returns unique array items
+func Unique(values []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, value := range values {
+		if _, ok := keys[value]; !ok {
+			keys[value] = true
+			list = append(list, value)
+		}
+	}
+	return list
+}
+
+// EqualStringArrays compares equality of two string arrays
+func EqualStringArrays(a, b []string) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i, v := range a {
+		if v != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // ContainsInteger returns true if integer is found from array
 func ContainsInteger(array []int, value int) bool {
 	for _, currentValue := range array {
