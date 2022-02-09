@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
+	"github.com/golang/glog"
 )
 
 const (
@@ -92,12 +92,26 @@ func EvaluateIncludeDeleted(c *gin.Context) bool {
 	return deleted
 }
 
-// Model is tuned gorm.model
-type Model struct {
-	ID        uint           `json:"id" gorm:"primarykey"`
-	CreatedAt time.Time      `json:"-"`
-	UpdatedAt time.Time      `json:"-"`
-	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+// StartBackgroundWorker begets a goroutine, which executes workerfunc after
+// given interval. Set repeats to 0 for infinite repeats.
+func StartBackgroundWorker(interval time.Duration, repeats int, workerfunc func(...string), arguments ...string) {
+	go func(interval time.Duration, repeats int, workerfunc func(...string), arguments ...string) {
+		wtimer := time.NewTimer(interval)
+		counter := repeats
+		for {
+			<-wtimer.C
+			workerfunc(arguments...)
+
+			if repeats > 0 {
+				counter--
+				if counter == 0 {
+					glog.Infof("Terminating BackgroundWorker after %d repeats", repeats)
+					break
+				}
+			}
+			wtimer.Reset(interval)
+		}
+	}(interval, repeats, workerfunc, arguments...)
 }
 
 var TLSMinVersion = uint16(tls.VersionTLS12)
