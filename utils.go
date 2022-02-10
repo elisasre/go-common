@@ -3,7 +3,6 @@ package common
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/tls"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -60,5 +59,3 @@ func IsHTTPS(r *http.Request) bool {
 		return false
 	}
 }
-
-var TLSMinVersion = uint16(tls.VersionTLS12)
