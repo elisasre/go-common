@@ -3,15 +3,10 @@ package common
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"crypto/tls"
 	"fmt"
 	"math/big"
 	"net/http"
 	"strings"
-	"time"
-
-	"github.com/gin-gonic/gin"
-	"github.com/golang/glog"
 )
 
 const (
@@ -34,15 +29,16 @@ func RandomString(n int) (string, error) {
 	return string(b), nil
 }
 
-// GetSecret ...
-func GetSecret(clusterID uint, clusterName string, secretKey string) string {
-	return fmt.Sprintf("%s.%d.%s", secretKey, clusterID, clusterName)
-}
-
-// ErrorResponse provides HTTP error response
-type ErrorResponse struct {
-	Code    uint   `json:"code" example:"400"`
-	Message string `json:"message" example:"Bad request"`
+// RandomToken returns random sha256 string
+func RandomToken() (string, error) {
+	hash := sha256.New()
+	r, err := RandomString(randomLength)
+	if err != nil {
+		return "", err
+	}
+	hash.Write([]byte(r))
+	bs := hash.Sum(nil)
+	return fmt.Sprintf("%x", bs), nil
 }
 
 // IsHTTPS is a helper function that evaluates the http.Request
@@ -63,55 +59,3 @@ func IsHTTPS(r *http.Request) bool {
 		return false
 	}
 }
-
-// RandomToken returns random sha256 string
-func RandomToken() (string, error) {
-	hash := sha256.New()
-	r, err := RandomString(randomLength)
-	if err != nil {
-		return "", err
-	}
-	hash.Write([]byte(r))
-	bs := hash.Sum(nil)
-	return fmt.Sprintf("%x", bs), nil
-}
-
-// GetClusterName returns unique clustername
-func GetClusterName(name string, id uint) string {
-	return fmt.Sprintf("%s-%d", name, id)
-}
-
-// EvaluateIncludeDeleted Determines whether url parameter includeDeleted evaluates true or false
-func EvaluateIncludeDeleted(c *gin.Context) bool {
-	deleted := false
-	if includeDeleted, ok := c.Get("includeDeleted"); ok {
-		if includeDeletedBool, ok := includeDeleted.(bool); ok {
-			deleted = includeDeletedBool
-		}
-	}
-	return deleted
-}
-
-// StartBackgroundWorker begets a goroutine, which executes workerfunc after
-// given interval. Set repeats to 0 for infinite repeats.
-func StartBackgroundWorker(interval time.Duration, repeats int, workerfunc func(...string), arguments ...string) {
-	go func(interval time.Duration, repeats int, workerfunc func(...string), arguments ...string) {
-		wtimer := time.NewTimer(interval)
-		counter := repeats
-		for {
-			<-wtimer.C
-			workerfunc(arguments...)
-
-			if repeats > 0 {
-				counter--
-				if counter == 0 {
-					glog.Infof("Terminating BackgroundWorker after %d repeats", repeats)
-					break
-				}
-			}
-			wtimer.Reset(interval)
-		}
-	}(interval, repeats, workerfunc, arguments...)
-}
-
-var TLSMinVersion = uint16(tls.VersionTLS12)

@@ -24,6 +24,12 @@ const (
 
 var ignoreMethods = []string{"GET", "HEAD", "OPTIONS", "TRACE"}
 
+// ErrorResponse provides HTTP error response
+type ErrorResponse struct {
+	Code    uint   `json:"code" example:"400"`
+	Message string `json:"message" example:"Bad request"`
+}
+
 func getHeader(c *gin.Context) string {
 	return c.Request.Header.Get(Xcsrf)
 }
