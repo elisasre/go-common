@@ -59,3 +59,24 @@ func IsHTTPS(r *http.Request) bool {
 		return false
 	}
 }
+
+func MinUint(a, b uint) uint {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func EnsureDot(input string) string {
+	if !strings.HasSuffix(input, ".") {
+		return fmt.Sprintf("%s.", input)
+	}
+	return input
+}
+
+func RemoveDot(input string) string {
+	if strings.HasSuffix(input, ".") {
+		return input[:len(input)-1]
+	}
+	return input
+}
