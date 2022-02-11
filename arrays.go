@@ -58,3 +58,29 @@ func containsF(array []string, word string, f func(item, word string) bool) bool
 	}
 	return false
 }
+
+func AnyStartsWith(array []string, word string) bool {
+	for _, item := range array {
+		if strings.HasPrefix(item, word) {
+			return true
+		}
+	}
+	return false
+}
+
+// GetResultDiff returns array of strings that were desired but missing from results
+func GetResultDiff(results []string, desiredResults []string) []string {
+	missingResults := []string{}
+	for _, desiredResult := range desiredResults {
+		found := false
+		for _, result := range results {
+			if desiredResult == result {
+				found = true
+			}
+		}
+		if !found {
+			missingResults = append(missingResults, desiredResult)
+		}
+	}
+	return missingResults
+}
