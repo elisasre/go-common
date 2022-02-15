@@ -20,7 +20,7 @@ func Debug() gin.HandlerFunc {
 
 func TestIgnoredMethods(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	for _, method := range ignoreMethods {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest(method, "/ping", nil)
@@ -31,7 +31,7 @@ func TestIgnoredMethods(t *testing.T) {
 
 func TestCSRFFail(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	r.ServeHTTP(w, req)
@@ -40,7 +40,7 @@ func TestCSRFFail(t *testing.T) {
 
 func TestCSRFMachineUser(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	req.Header.Add(Authorization, "foobar")
@@ -50,7 +50,7 @@ func TestCSRFMachineUser(t *testing.T) {
 
 func TestCSRFJWTMachineUser(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	req.AddCookie(&http.Cookie{Name: "session", Value: "foobar"})
@@ -60,7 +60,7 @@ func TestCSRFJWTMachineUser(t *testing.T) {
 
 func TestCSRFSucceeded(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	req.Header.Add(Xcsrf, "foobar")
@@ -71,7 +71,7 @@ func TestCSRFSucceeded(t *testing.T) {
 
 func TestCSRFIncorrect(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	req.Header.Add(Xcsrf, "foobar")
@@ -82,7 +82,7 @@ func TestCSRFIncorrect(t *testing.T) {
 
 func TestCSRFNoRefererSucceeded(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	req.Header.Add(Xcsrf, "foobar")
@@ -94,7 +94,7 @@ func TestCSRFNoRefererSucceeded(t *testing.T) {
 
 func TestCSRFRefererInvalidURL(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	req.Header.Add(Xcsrf, "foobar")
@@ -107,7 +107,7 @@ func TestCSRFRefererInvalidURL(t *testing.T) {
 
 func TestCSRFRefererHTTPURL(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "/ping", nil)
 	req.Header.Add(Xcsrf, "foobar")
@@ -120,7 +120,7 @@ func TestCSRFRefererHTTPURL(t *testing.T) {
 
 func TestCSRFRefererHTTPSURL(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "https://foo.fi/ping", nil)
 	req.Header.Add(Xcsrf, "foobar")
@@ -133,7 +133,7 @@ func TestCSRFRefererHTTPSURL(t *testing.T) {
 
 func TestCSRFDifferentDomainRefererHTTPSURL(t *testing.T) {
 	r := gin.New()
-	r.Use(CSRF())
+	r.Use(CSRF(nil))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "https://foo.fi/ping", nil)
 	req.Header.Add(Xcsrf, "foobar")
@@ -142,4 +142,17 @@ func TestCSRFDifferentDomainRefererHTTPSURL(t *testing.T) {
 	req.AddCookie(&http.Cookie{Name: CsrfTokenKey, Value: "foobar"})
 	r.ServeHTTP(w, req)
 	assert.Equal(t, 403, w.Code)
+}
+
+func TestCSRFAllowPaths(t *testing.T) {
+	r := gin.New()
+	r.Use(CSRF([]string{"/pingpong"}))
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "https://foo.fi/pingpong", nil)
+	req.Header.Add(Xcsrf, "foobar")
+	req.Header.Add("X-Forwarded-Proto", "https")
+	req.Header.Add("Referer", "https://foo2.fi")
+	req.AddCookie(&http.Cookie{Name: CsrfTokenKey, Value: "foobar"})
+	r.ServeHTTP(w, req)
+	assert.Equal(t, 404, w.Code)
 }
