@@ -55,7 +55,7 @@ func getCookie(c *gin.Context) string {
 }
 
 // CSRF is middleware for handling CSRF protection in gin
-func CSRF() gin.HandlerFunc {
+func CSRF(excludePaths []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// allow machineusers
 		if isAPIUser(c) || isJWTMachineUser(c) {
@@ -66,7 +66,7 @@ func CSRF() gin.HandlerFunc {
 		csrfToken := getCookie(c)
 
 		// Assume that anything not defined as 'safe' by RFC7231 needs protection
-		if ContainsString(ignoreMethods, c.Request.Method) {
+		if ContainsString(ignoreMethods, c.Request.Method) || ContainsString(excludePaths, c.Request.URL.Path) {
 			// set cookie in response if not found
 			if csrfToken == "" {
 				val, err := RandomToken()
