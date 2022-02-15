@@ -149,10 +149,10 @@ func TestCSRFAllowPaths(t *testing.T) {
 	r.Use(CSRF([]string{"/pingpong"}))
 	w := httptest.NewRecorder()
 	req, _ := http.NewRequest("POST", "https://foo.fi/pingpong", nil)
-	req.Header.Add(xcsrf, "foobar")
+	req.Header.Add(Xcsrf, "foobar")
 	req.Header.Add("X-Forwarded-Proto", "https")
 	req.Header.Add("Referer", "https://foo2.fi")
-	req.AddCookie(&http.Cookie{Name: csrfTokenKey, Value: "foobar"})
+	req.AddCookie(&http.Cookie{Name: CsrfTokenKey, Value: "foobar"})
 	r.ServeHTTP(w, req)
 	assert.Equal(t, 404, w.Code)
 }
