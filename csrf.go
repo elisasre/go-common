@@ -24,6 +24,10 @@ const (
 
 var ignoreMethods = []string{"GET", "HEAD", "OPTIONS", "TRACE"}
 
+func (e ErrorResponse) Error() string {
+	return fmt.Sprintf("%d: %s", e.Code, e.Message)
+}
+
 // ErrorResponse provides HTTP error response
 type ErrorResponse struct {
 	Code    uint   `json:"code" example:"400"`
