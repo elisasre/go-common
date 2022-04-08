@@ -30,6 +30,15 @@ func TestInt64(t *testing.T) {
 	assert.Equal(t, &testint, testintptr)
 }
 
+func TestUintValue(t *testing.T) {
+	var testUintValue uint = 7
+	testUintPtr := &testUintValue
+	var uiv interface{} = UintValue(testUintPtr)
+	assert.Equal(t, reflect.Uint, reflect.ValueOf(uiv).Kind())
+	assert.Equal(t, testUintValue, uiv)
+	assert.Equal(t, uint(0), UintValue((*uint)(nil)))
+}
+
 func TestStringToBool(t *testing.T) {
 	testcases := []struct {
 		teststring string

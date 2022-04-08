@@ -37,7 +37,7 @@ func MapToString(input map[string]string) []string {
 	return result
 }
 
-// Int64Value returns pointer to int64
+// Int64Value returns value from pointer
 func Int64Value(v *int64) int64 {
 	if v == nil {
 		return 0
@@ -52,6 +52,14 @@ func Int32(value int32) *int32 {
 
 // Int32Value returns value from pointer
 func Int32Value(v *int32) int32 {
+	if v == nil {
+		return 0
+	}
+	return *v
+}
+
+// UintValue returns value from pointer
+func UintValue(v *uint) uint {
 	if v == nil {
 		return 0
 	}
