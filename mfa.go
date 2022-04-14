@@ -3,7 +3,7 @@ package common
 import (
 	"bytes"
 	"crypto/hmac"
-	"crypto/sha1" //nolint:gosec // TODO https://atlas.elisa.fi/jira/browse/DEV-3364
+	"crypto/sha1" //nolint:gosec // G501: Blocklisted import crypto/md5: weak cryptographic primitive
 	"encoding/base32"
 	"encoding/binary"
 	"fmt"
@@ -13,7 +13,7 @@ import (
 )
 
 // Append extra 0s if the length of otp is less than 6
-// If otp is "1234", it will return it as "001234"
+// If otp is "1234", it will return it as "001234".
 func prefix0(otp string) string {
 	if len(otp) == 6 {
 		return otp
@@ -68,7 +68,7 @@ func getTOTPToken(secret string) (string, error) {
 	return getHOTPToken(secret, interval)
 }
 
-// MfaValidation validates TOTP mfa with given secret and token
+// MfaValidation validates TOTP mfa with given secret and token.
 func MfaValidation(secret string, token string) error {
 	curToken, err := getTOTPToken(secret)
 	if err != nil {

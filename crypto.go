@@ -3,7 +3,7 @@ package common
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"crypto/md5"
+	"crypto/md5" //nolint:gosec // G501: Blocklisted import crypto/md5: weak cryptographic primitive
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/hex"
@@ -21,7 +21,7 @@ func Base64decode(v string) (string, error) {
 }
 
 func createHash(key string) string {
-	hasher := md5.New() //nolint:gosec // TODO https://atlas.elisa.fi/jira/browse/DEV-3364
+	hasher := md5.New() //nolint:gosec // G501: Blocklisted import crypto/md5: weak cryptographic primitive
 	hasher.Write([]byte(key))
 	return hex.EncodeToString(hasher.Sum(nil))
 }
@@ -42,7 +42,7 @@ func Encrypt(data []byte, passphrase string) []byte {
 	return ciphertext
 }
 
-// Decrypt the secret
+// Decrypt the secret.
 func Decrypt(data []byte, passphrase string) []byte {
 	key := []byte(createHash(passphrase))
 	block, err := aes.NewCipher(key)

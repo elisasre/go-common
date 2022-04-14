@@ -2,7 +2,7 @@ package common
 
 import "strings"
 
-// Unique returns unique array items
+// Unique returns unique array items.
 func Unique(values []string) []string {
 	keys := make(map[string]bool)
 	list := []string{}
@@ -15,7 +15,7 @@ func Unique(values []string) []string {
 	return list
 }
 
-// EqualStringArrays compares equality of two string arrays
+// EqualStringArrays compares equality of two string arrays.
 func EqualStringArrays(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
@@ -28,7 +28,7 @@ func EqualStringArrays(a, b []string) bool {
 	return true
 }
 
-// ContainsInteger returns true if integer is found from array
+// ContainsInteger returns true if integer is found from array.
 func ContainsInteger(array []int, value int) bool {
 	for _, currentValue := range array {
 		if currentValue == value {
@@ -38,14 +38,14 @@ func ContainsInteger(array []int, value int) bool {
 	return false
 }
 
-// ContainsString returns true if string is found from array
+// ContainsString returns true if string is found from array.
 func ContainsString(array []string, word string) bool {
 	return containsF(array, word, func(item, word string) bool {
 		return item == word
 	})
 }
 
-// ContainsIgnoreCase returns true if word is found from array. Case of word and words in array is ignored
+// ContainsIgnoreCase returns true if word is found from array. Case of word and words in array is ignored.
 func ContainsIgnoreCase(array []string, word string) bool {
 	return containsF(array, word, strings.EqualFold)
 }
@@ -68,7 +68,7 @@ func AnyStartsWith(array []string, word string) bool {
 	return false
 }
 
-// GetResultDiff returns array of strings that were desired but missing from results
+// GetResultDiff returns array of strings that were desired but missing from results.
 func GetResultDiff(results []string, desiredResults []string) []string {
 	missingResults := []string{}
 	for _, desiredResult := range desiredResults {
