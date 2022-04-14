@@ -1,0 +1,53 @@
+run:
+  timeout: 5m
+
+linters:
+  enable:
+    - bodyclose
+    - dogsled
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - gocognit
+    - gocritic
+    - gocyclo
+    - godot
+    - gofumpt
+    - goimports
+    - gosec
+    - lll
+    - misspell
+    - nakedret
+    - nestif
+    - nolintlint
+    - prealloc
+    - sqlclosecheck
+    - staticcheck
+    - stylecheck
+    - unconvert
+    - unparam
+
+linters-settings:
+  goimports:
+    local-prefixes: github.devcloud.elisa.fi
+  lll:
+    line-length: 120
+    tab-width: 4
+  nolintlint:
+    # Enable to ensure that nolint directives are all used. Default is true.
+    allow-unused: false
+    # Disable to ensure that nolint directives don't have a leading space. Default is true.
+    allow-leading-space: false
+    # Enable to require nolint directives to mention the specific linter being suppressed. Default is false.
+    require-specific: true
+  nestif:
+    # minimal complexity of if statements to report, 5 by default
+    min-complexity: 7
+  gocognit:
+    # Minimal code complexity to report
+    # Default: 30 (but we recommend 10-20)
+    min-complexity: 32
+  godot:
+    # List of regexps for excluding particular comment lines from check.
+    exclude:
+      - "@Router"

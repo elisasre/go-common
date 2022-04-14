@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// Debug is middleware used for testing purposes
+// Debug is middleware used for testing purposes.
 func Debug() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		fmt.Printf("%v %+v\n", isAPIUser(c), c.Request.Header)

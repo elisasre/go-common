@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	badToken         = "CSRF token missing or incorrect." //nolint:gosec
-	tokenMissing     = "CSRF cookie not set."             //nolint:gosec
+	badTooken        = "CSRF token missing or incorrect."
+	tookenMissing    = "CSRF cookie not set."
 	noReferer        = "Referer checking failed - no Referer."
 	malformedReferer = "Referer checking failed - Referer is malformed."
 	insecureReferer  = "Referer checking failed - Referer is insecure while host is secure."
@@ -28,7 +28,7 @@ func (e ErrorResponse) Error() string {
 	return fmt.Sprintf("%d: %s", e.Code, e.Message)
 }
 
-// ErrorResponse provides HTTP error response
+// ErrorResponse provides HTTP error response.
 type ErrorResponse struct {
 	Code    uint   `json:"code" example:"400"`
 	Message string `json:"message" example:"Bad request"`
@@ -58,7 +58,7 @@ func getCookie(c *gin.Context) string {
 	return ""
 }
 
-// CSRF is middleware for handling CSRF protection in gin
+// CSRF is middleware for handling CSRF protection in gin.
 func CSRF(excludePaths []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// allow machineusers
@@ -127,13 +127,13 @@ func CSRF(excludePaths []string) gin.HandlerFunc {
 
 		requestCSRFToken := getHeader(c)
 		if csrfToken == "" {
-			c.JSON(403, ErrorResponse{Code: 403, Message: tokenMissing})
+			c.JSON(403, ErrorResponse{Code: 403, Message: tookenMissing})
 			c.Abort()
 			return
 		}
 
 		if requestCSRFToken != csrfToken {
-			c.JSON(403, ErrorResponse{Code: 403, Message: badToken})
+			c.JSON(403, ErrorResponse{Code: 403, Message: badTooken})
 			c.Abort()
 			return
 		}
