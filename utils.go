@@ -15,7 +15,7 @@ const (
 
 var characterRunes = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
-// RandomString returns a random string length of argument n
+// RandomString returns a random string length of argument n.
 func RandomString(n int) (string, error) {
 	b := make([]byte, n)
 	for i := range b {
@@ -29,7 +29,7 @@ func RandomString(n int) (string, error) {
 	return string(b), nil
 }
 
-// RandomToken returns random sha256 string
+// RandomToken returns random sha256 string.
 func RandomToken() (string, error) {
 	hash := sha256.New()
 	r, err := RandomString(randomLength)

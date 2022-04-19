@@ -7,7 +7,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-// SleepUntil waits for condition to succees
+// SleepUntil waits for condition to succeeds.
 func SleepUntil(backoff wait.Backoff, condition wait.ConditionFunc) error {
 	var err error
 	for backoff.Steps > 0 {

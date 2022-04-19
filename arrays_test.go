@@ -33,10 +33,22 @@ func TestGetResultDiff(t *testing.T) {
 		inputDesiredResultSlice []string
 		want                    []string
 	}{
-		{inputSlice: []string{"foo", "bar", "baz"}, inputDesiredResultSlice: []string{"foobar"}, want: []string{"foobar"}},
-		{inputSlice: []string{"foo", "bar", "baz"}, inputDesiredResultSlice: []string{"foobar", "foo"}, want: []string{"foobar"}},
-		{inputSlice: []string{"foo", "bar", "baz"}, inputDesiredResultSlice: []string{"Foo"}, want: []string{"Foo"}},
-		{inputSlice: []string{"foo", "bar", "baz"}, inputDesiredResultSlice: []string{"foo", "bar", "baz"}, want: []string{}},
+		{
+			inputSlice:              []string{"foo", "bar", "baz"},
+			inputDesiredResultSlice: []string{"foobar"}, want: []string{"foobar"},
+		},
+		{
+			inputSlice:              []string{"foo", "bar", "baz"},
+			inputDesiredResultSlice: []string{"foobar", "foo"}, want: []string{"foobar"},
+		},
+		{
+			inputSlice:              []string{"foo", "bar", "baz"},
+			inputDesiredResultSlice: []string{"Foo"}, want: []string{"Foo"},
+		},
+		{
+			inputSlice:              []string{"foo", "bar", "baz"},
+			inputDesiredResultSlice: []string{"foo", "bar", "baz"}, want: []string{},
+		},
 	}
 
 	for _, tc := range tests {
