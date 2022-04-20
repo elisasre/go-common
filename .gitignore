@@ -1,7 +1,10 @@
 # golang output binary directory
-bin
-vendor
+bin/*
+vendor/*
 
 # test results
 gotest-coverage.out
 gotest-report.out
+
+# dependency check reports
+dependency-check-*.*
