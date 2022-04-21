@@ -60,6 +60,7 @@ func IsHTTPS(r *http.Request) bool {
 	}
 }
 
+// MinUint ...
 func MinUint(a, b uint) uint {
 	if a < b {
 		return a
@@ -67,6 +68,7 @@ func MinUint(a, b uint) uint {
 	return b
 }
 
+// EnsureDot ...
 func EnsureDot(input string) string {
 	if !strings.HasSuffix(input, ".") {
 		return fmt.Sprintf("%s.", input)
@@ -74,6 +76,7 @@ func EnsureDot(input string) string {
 	return input
 }
 
+// RemoveDot ...
 func RemoveDot(input string) string {
 	if strings.HasSuffix(input, ".") {
 		return input[:len(input)-1]

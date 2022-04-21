@@ -59,6 +59,7 @@ func containsF(array []string, word string, f func(item, word string) bool) bool
 	return false
 }
 
+// AnyStartsWith ...
 func AnyStartsWith(array []string, word string) bool {
 	for _, item := range array {
 		if strings.HasPrefix(item, word) {
