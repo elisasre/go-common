@@ -6,7 +6,7 @@ on:
     - main
 
 jobs:
-  build-master:
+  analyze:
     runs-on:
     - self-hosted
     - kaas
@@ -20,15 +20,25 @@ jobs:
       with:
         go-version: 1.17
 
-    - name: ensure
+    - name: Ensure
       run: |
         make ensure
 
-    - name: test
+    - name: Test
       run: |
         make test
 
-    - name: golangci-lint
+    - name: Lint
       uses: elisa-actions/golangci-lint-action@v2
       with:
         version: v1.45
+
+    - name: Dependency checker
+      run: |
+        make deps-check
+
+    - name: Sonar scanner
+      env:
+        SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
+      run: |
+        make sonar-scanner

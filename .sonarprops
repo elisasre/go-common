@@ -1,0 +1,14 @@
+sonar.github.repository=devops/go-common
+sonar.projectKey=devops:go-common
+sonar.projectName=devops/go-common
+sonar.projectVersion=1.0
+sonar.projectBaseDir=.
+sonar.sourceEncoding=UTF-8
+sonar.sources=.
+sonar.exclusions=*_test.go,**/vendor/**,dependency-check-report.*
+sonar.tests=.
+sonar.test.inclusions=*_test.go
+sonar.test.exclusions=**/vendor/**
+sonar.go.coverage.reportPaths=gotest-coverage.out
+sonar.go.tests.reportPaths=gotest-report.out
+sonar.dependencyCheck.htmlReportPath=dependency-check-report.html
