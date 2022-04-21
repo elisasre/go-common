@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+var supportedtruevalues = []string{"true", "t", "yes", "y", "on"}
+
 // String returns pointer to string.
 func String(s string) *string {
 	return &s
@@ -94,7 +96,7 @@ func BoolValue(v *bool) bool {
 
 // StringToBool returns boolean value from string.
 func StringToBool(value string) bool {
-	return strings.ToLower(value) == "true"
+	return ContainsString(supportedtruevalues, strings.ToLower(value))
 }
 
 // StringEmpty returns boolean value if string is empty.

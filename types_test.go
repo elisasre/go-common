@@ -49,6 +49,34 @@ func TestStringToBool(t *testing.T) {
 			pass:       true,
 		},
 		{
+			teststring: "True",
+			pass:       true,
+		},
+		{
+			teststring: "t",
+			pass:       true,
+		},
+		{
+			teststring: "yEs",
+			pass:       true,
+		},
+		{
+			teststring: "Y",
+			pass:       true,
+		},
+		{
+			teststring: "on",
+			pass:       true,
+		},
+		{
+			teststring: "tr",
+			pass:       false,
+		},
+		{
+			teststring: "nil",
+			pass:       false,
+		},
+		{
 			teststring: "false",
 			pass:       false,
 		},
