@@ -1,6 +1,6 @@
-module github.devcloud.elisa.fi/DevOps/go-common
+module github.devcloud.elisa.fi/sre/go-common
 
-go 1.17
+go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.7.7
