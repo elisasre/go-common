@@ -9,7 +9,7 @@ clean:
 	git clean -Xdf
 
 ensure:
-	go mod tidy -compat=1.17
+	go mod tidy
 	go mod vendor
 
 build:
