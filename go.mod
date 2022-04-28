@@ -2,6 +2,8 @@ module github.devcloud.elisa.fi/sre/go-common
 
 go 1.18
 
+replace golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
+
 require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
