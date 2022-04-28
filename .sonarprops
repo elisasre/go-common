@@ -1,6 +1,6 @@
-sonar.github.repository=devops/go-common
-sonar.projectKey=devops:go-common
-sonar.projectName=devops/go-common
+sonar.github.repository=sre/go-common
+sonar.projectKey=sre:go-common
+sonar.projectName=sre/go-common
 sonar.projectVersion=1.0
 sonar.projectBaseDir=.
 sonar.sourceEncoding=UTF-8
