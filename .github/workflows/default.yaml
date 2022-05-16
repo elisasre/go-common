@@ -29,9 +29,10 @@ jobs:
         make test
 
     - name: Lint
-      uses: elisa-actions/golangci-lint-action@v2
+      uses: elisa-actions/golangci-lint-action@v3
       with:
-        version: v1.45
+        version: v1.46
+        skip-cache: true
 
     - name: Dependency checker
       run: |
