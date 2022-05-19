@@ -3,9 +3,9 @@ package common
 import "strings"
 
 // Unique returns unique array items.
-func Unique(values []string) []string {
-	keys := make(map[string]bool)
-	list := []string{}
+func Unique[T comparable](values []T) []T {
+	keys := make(map[T]bool)
+	list := []T{}
 	for _, value := range values {
 		if _, ok := keys[value]; !ok {
 			keys[value] = true
@@ -15,8 +15,8 @@ func Unique(values []string) []string {
 	return list
 }
 
-// EqualStringArrays compares equality of two string arrays.
-func EqualStringArrays(a, b []string) bool {
+// EqualArrays compares equality of two arrays.
+func EqualArrays[T comparable](a, b []T) bool {
 	if len(a) != len(b) {
 		return false
 	}
@@ -28,8 +28,13 @@ func EqualStringArrays(a, b []string) bool {
 	return true
 }
 
-// ContainsInteger returns true if integer is found from array.
-func ContainsInteger(array []int, value int) bool {
+// EqualStringArrays compares equality of two string arrays.
+func EqualStringArrays(a, b []string) bool {
+	return EqualArrays(a, b)
+}
+
+// Contains returns true if value is found in array.
+func Contains[T comparable](array []T, value T) bool {
 	for _, currentValue := range array {
 		if currentValue == value {
 			return true
@@ -38,11 +43,14 @@ func ContainsInteger(array []int, value int) bool {
 	return false
 }
 
+// ContainsInteger returns true if integer is found from array.
+func ContainsInteger(array []int, value int) bool {
+	return Contains(array, value)
+}
+
 // ContainsString returns true if string is found from array.
 func ContainsString(array []string, word string) bool {
-	return containsF(array, word, func(item, word string) bool {
-		return item == word
-	})
+	return Contains(array, word)
 }
 
 // ContainsIgnoreCase returns true if word is found from array. Case of word and words in array is ignored.
@@ -70,8 +78,8 @@ func AnyStartsWith(array []string, word string) bool {
 }
 
 // GetResultDiff returns array of strings that were desired but missing from results.
-func GetResultDiff(results []string, desiredResults []string) []string {
-	missingResults := []string{}
+func GetResultDiff[T comparable](results []T, desiredResults []T) []T {
+	missingResults := []T{}
 	for _, desiredResult := range desiredResults {
 		found := false
 		for _, result := range results {
