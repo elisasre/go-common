@@ -29,7 +29,7 @@ jobs:
         make test
 
     - name: Lint
-      uses: elisa-actions/golangci-lint-action@v3
+      uses: golangci/golangci-lint-action@v3
       with:
         version: v1.46
         skip-cache: true
