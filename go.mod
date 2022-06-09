@@ -1,4 +1,4 @@
-module github.devcloud.elisa.fi/sre/go-common
+module github.com/elisasre/go-common
 
 go 1.18
 
