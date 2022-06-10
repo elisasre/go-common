@@ -33,13 +33,3 @@ jobs:
       with:
         version: v1.46
         skip-cache: true
-
-    - name: Dependency checker
-      run: |
-        make deps-check
-
-    - name: Sonar scanner
-      env:
-        SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
-      run: |
-        make sonar-scanner

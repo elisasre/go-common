@@ -35,18 +35,3 @@ jobs:
       with:
         version: v1.46
         skip-cache: true
-
-    - name: Dependency checker
-      run: |
-        make deps-check
-
-    - name: Sonar scanner
-      env:
-        SONAR_LOGIN: ${{ secrets.SONAR_LOGIN }}
-        SONAR_OPTS: >-
-          -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
-          -Dsonar.pullrequest.branch=${{ github.event.pull_request.head.ref }}
-          -Dsonar.pullrequest.base=${{ github.event.pull_request.base.ref }}
-          -Dsonar.scm.revision=${{ github.event.pull_request.head.sha }}
-      run: |
-        make sonar-scanner
