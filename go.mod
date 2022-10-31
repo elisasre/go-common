@@ -9,7 +9,7 @@ require (
 	github.com/golang/glog v1.0.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.8.1
-	k8s.io/apimachinery v0.25.2
+	k8s.io/apimachinery v0.25.3
 )
 
 require (
