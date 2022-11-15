@@ -29,7 +29,7 @@ linters:
 
 linters-settings:
   lll:
-    line-length: 120
+    line-length: 140
     tab-width: 4
   nolintlint:
     # Enable to ensure that nolint directives are all used. Default is true.
