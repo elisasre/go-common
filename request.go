@@ -63,7 +63,7 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 		if ContainsInteger(request.OKCode, resp.StatusCode) {
 			err = json.Unmarshal(httpresp.Body, &output)
 			if err != nil {
-				return true, fmt.Errorf("could not marshal as json %v", err)
+				return true, fmt.Errorf("could not marshal as json %w", err)
 			}
 			return true, nil
 		}
