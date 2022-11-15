@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -20,9 +21,15 @@ type HTTPRequest struct {
 	OKCode  []int
 }
 
+// HTTPResponse ...
+type HTTPResponse struct {
+	Body       []byte
+	StatusCode int
+}
+
 // MakeRequest ...
-func MakeRequest(request HTTPRequest, client *http.Client, backoff wait.Backoff) ([]byte, error) {
-	response := []byte{}
+func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, backoff wait.Backoff) (*HTTPResponse, error) {
+	httpresp := &HTTPResponse{}
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
 		if err != nil {
@@ -47,21 +54,23 @@ func MakeRequest(request HTTPRequest, client *http.Client, backoff wait.Backoff)
 			return false, err
 		}
 		defer resp.Body.Close()
-		if ContainsInteger(request.OKCode, resp.StatusCode) {
-			response, err = ioutil.ReadAll(resp.Body)
-			if err != nil {
-				return false, err
-			}
-			return true, nil
-		}
+		httpresp.StatusCode = resp.StatusCode
 		responseBody, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
+		}
+		httpresp.Body = responseBody
+		if ContainsInteger(request.OKCode, resp.StatusCode) {
+			err = json.Unmarshal(httpresp.Body, &output)
+			if err != nil {
+				return true, fmt.Errorf("could not marshal as json %w", err)
+			}
+			return true, nil
 		}
 		err = fmt.Errorf("got http code %v from [%s] %s: %s... retrying",
 			resp.StatusCode, request.Method, request.URL, responseBody)
 		glog.Error(err)
 		return false, err
 	})
-	return response, err
+	return httpresp, err
 }
