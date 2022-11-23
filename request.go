@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"time"
 
 	"github.com/golang/glog"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
 // HTTPRequest ...
@@ -27,8 +27,18 @@ type HTTPResponse struct {
 	StatusCode int
 }
 
+// Backoff contains struct for retrying strategy
+type Backoff struct {
+	// The initial duration.
+	Duration time.Duration
+	// The remaining number of iterations in which the duration
+	// parameter may change. If not positive, the duration is not
+	// changed.
+	MaxRetries int
+}
+
 // MakeRequest ...
-func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, backoff wait.Backoff) (*HTTPResponse, error) {
+func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, backoff Backoff) (*HTTPResponse, error) {
 	httpresp := &HTTPResponse{}
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)

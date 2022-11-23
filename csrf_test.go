@@ -156,3 +156,9 @@ func TestCSRFAllowPaths(t *testing.T) {
 	r.ServeHTTP(w, req)
 	assert.Equal(t, 404, w.Code)
 }
+
+func ExampleCSRF() {
+	r := gin.New()
+	excludePaths := []string{"/oauth2/token"}
+	r.Use(CSRF(excludePaths))
+}
