@@ -6,10 +6,18 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"time"
 
-	"github.com/golang/glog"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+func init() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
+	log.Logger = zerolog.New(os.Stderr)
+	log.Logger = log.With().Logger()
+}
 
 // HTTPRequest ...
 type HTTPRequest struct {
@@ -43,7 +51,7 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
 		if err != nil {
-			glog.Errorf("Request error from [%s] %s: %v", request.Method, request.URL, err)
+			log.Error().Str("method", request.Method).Str("url", request.URL).Str("error", err.Error()).Msg("request error")
 			return false, err
 		}
 		if len(request.Body) > 0 {
@@ -60,7 +68,7 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 
 		resp, err := client.Do(httpreq)
 		if err != nil {
-			glog.Errorf("Do request error from [%s] %s: %v", request.Method, request.URL, err)
+			log.Error().Str("method", request.Method).Str("url", request.URL).Str("error", err.Error()).Msg("do request error")
 			return false, err
 		}
 		defer resp.Body.Close()
@@ -77,9 +85,8 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 			}
 			return true, nil
 		}
-		err = fmt.Errorf("got http code %v from [%s] %s: %s... retrying",
-			resp.StatusCode, request.Method, request.URL, responseBody)
-		glog.Error(err)
+
+		log.Error().Int("statuscode", resp.StatusCode).Str("method", request.Method).Str("url", request.URL).Str("body", string(responseBody)).Msg("retrying")
 		return false, err
 	})
 	return httpresp, err
