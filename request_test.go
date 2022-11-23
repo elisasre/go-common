@@ -10,7 +10,7 @@ func ExampleMakeRequest() {
 	// retry once in second, maximum retries 2 times
 	backoff := Backoff{
 		Duration:   1 * time.Second,
-		MaxRetries: 3,
+		MaxRetries: 2,
 	}
 
 	type Out struct {
