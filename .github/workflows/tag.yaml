@@ -1,0 +1,26 @@
+name: Release
+
+on:
+  release:
+    types:
+    - published
+
+jobs:
+  build-release:
+    runs-on:
+    - self-hosted
+    - kaas
+    timeout-minutes: 5
+
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+
+    - uses: actions/setup-go@v3
+      with:
+        go-version: 1.19
+
+    - name: publish package
+      run: |
+        GOPROXY=proxy.golang.org go list -m github.com/elisasre/go-common@${{ github.event.release.tag_name }}
