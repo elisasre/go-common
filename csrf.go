@@ -14,11 +14,11 @@ const (
 	noReferer        = "Referer checking failed - no Referer."
 	malformedReferer = "Referer checking failed - Referer is malformed."
 	insecureReferer  = "Referer checking failed - Referer is insecure while host is secure."
-	// CsrfTokenKey is the cookie name which contains the CSRF token
+	// CsrfTokenKey is the cookie name which contains the CSRF token.
 	CsrfTokenKey = "csrftoken"
-	// Xcsrf is the header name which contains the CSRF token
+	// Xcsrf is the header name which contains the CSRF token.
 	Xcsrf = "X-CSRF-Token"
-	// Authorization is the header name which contains the token
+	// Authorization is the header name which contains the token.
 	Authorization = "Authorization"
 )
 

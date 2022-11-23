@@ -15,7 +15,7 @@ func Unique[T comparable](values []T) []T {
 	return list
 }
 
-// EqualArrays compares equality of two arrays. Both input variables must be same type
+// EqualArrays compares equality of two arrays. Both input variables must be same type.
 func EqualArrays[T comparable](a, b []T) bool {
 	if len(a) != len(b) {
 		return false
@@ -33,7 +33,7 @@ func EqualStringArrays(a, b []string) bool {
 	return EqualArrays(a, b)
 }
 
-// Contains returns true if value is found in array. Both input variables must be same type
+// Contains returns true if value is found in array. Both input variables must be same type.
 func Contains[T comparable](array []T, value T) bool {
 	for _, currentValue := range array {
 		if currentValue == value {

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"time"
@@ -35,7 +35,7 @@ type HTTPResponse struct {
 	StatusCode int
 }
 
-// Backoff contains struct for retrying strategy
+// Backoff contains struct for retrying strategy.
 type Backoff struct {
 	// The initial duration.
 	Duration time.Duration
@@ -51,11 +51,15 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
 		if err != nil {
-			log.Error().Str("method", request.Method).Str("url", request.URL).Str("error", err.Error()).Msg("request error")
+			log.Error().
+				Str("method", request.Method).
+				Str("url", request.URL).
+				Str("error", err.Error()).
+				Msg("request error")
 			return false, err
 		}
 		if len(request.Body) > 0 {
-			httpreq.Body = ioutil.NopCloser(bytes.NewReader(request.Body))
+			httpreq.Body = io.NopCloser(bytes.NewReader(request.Body))
 		}
 
 		for k, v := range request.Headers {
@@ -68,12 +72,16 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 
 		resp, err := client.Do(httpreq)
 		if err != nil {
-			log.Error().Str("method", request.Method).Str("url", request.URL).Str("error", err.Error()).Msg("do request error")
+			log.Error().
+				Str("method", request.Method).
+				Str("url", request.URL).
+				Str("error", err.Error()).
+				Msg("do request error")
 			return false, err
 		}
 		defer resp.Body.Close()
 		httpresp.StatusCode = resp.StatusCode
-		responseBody, err := ioutil.ReadAll(resp.Body)
+		responseBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -86,7 +94,12 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 			return true, nil
 		}
 
-		log.Error().Int("statuscode", resp.StatusCode).Str("method", request.Method).Str("url", request.URL).Str("body", string(responseBody)).Msg("retrying")
+		log.Error().
+			Int("statuscode", resp.StatusCode).
+			Str("method", request.Method).
+			Str("url", request.URL).
+			Str("body", string(responseBody)).
+			Msg("retrying")
 		return false, err
 	})
 	return httpresp, err

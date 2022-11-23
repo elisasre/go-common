@@ -11,7 +11,7 @@ import (
 	"io"
 )
 
-// Base64decode decodes base64 input to string
+// Base64decode decodes base64 input to string.
 func Base64decode(v string) (string, error) {
 	data, err := base64.StdEncoding.DecodeString(v)
 	if err != nil {
@@ -20,7 +20,7 @@ func Base64decode(v string) (string, error) {
 	return string(data), nil
 }
 
-// Base64encode encode input to base64
+// Base64encode encode input to base64.
 func Base64encode(v []byte) string {
 	return base64.StdEncoding.EncodeToString(v)
 }
@@ -47,7 +47,7 @@ func Encrypt(data []byte, passphrase string) []byte {
 	return ciphertext
 }
 
-// Decrypt the encrypted secret with passphrase
+// Decrypt the encrypted secret with passphrase.
 func Decrypt(data []byte, passphrase string) []byte {
 	key := []byte(createHash(passphrase))
 	block, err := aes.NewCipher(key)
