@@ -4,21 +4,24 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-	"k8s.io/apimachinery/pkg/util/wait"
 )
 
+// ConditionFunc returns true if the condition is satisfied, or an error
+// if the loop should be aborted.
+type ConditionFunc func() (done bool, err error)
+
 // SleepUntil waits for condition to succeeds.
-func SleepUntil(backoff wait.Backoff, condition wait.ConditionFunc) error {
+func SleepUntil(backoff Backoff, condition ConditionFunc) error {
 	var err error
-	for backoff.Steps > 0 {
+	for backoff.MaxRetries > 0 {
 		var ok bool
 		if ok, err = condition(); ok {
 			return err
 		}
-		if backoff.Steps == 1 {
+		if backoff.MaxRetries == 1 {
 			break
 		}
-		backoff.Steps--
+		backoff.MaxRetries--
 		time.Sleep(backoff.Duration)
 
 	}

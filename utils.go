@@ -60,7 +60,7 @@ func IsHTTPS(r *http.Request) bool {
 	}
 }
 
-// MinUint ...
+// MinUint calculates Min from a, b.
 func MinUint(a, b uint) uint {
 	if a < b {
 		return a
@@ -68,7 +68,7 @@ func MinUint(a, b uint) uint {
 	return b
 }
 
-// EnsureDot ...
+// EnsureDot ensures that string has ending dot.
 func EnsureDot(input string) string {
 	if !strings.HasSuffix(input, ".") {
 		return fmt.Sprintf("%s.", input)
@@ -76,7 +76,7 @@ func EnsureDot(input string) string {
 	return input
 }
 
-// RemoveDot ...
+// RemoveDot removes suffix dot from string if it exists.
 func RemoveDot(input string) string {
 	if strings.HasSuffix(input, ".") {
 		return input[:len(input)-1]

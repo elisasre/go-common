@@ -4,12 +4,20 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
+	"os"
+	"time"
 
-	"github.com/golang/glog"
-	"k8s.io/apimachinery/pkg/util/wait"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+func init() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
+	log.Logger = zerolog.New(os.Stderr)
+	log.Logger = log.With().Logger()
+}
 
 // HTTPRequest ...
 type HTTPRequest struct {
@@ -27,17 +35,31 @@ type HTTPResponse struct {
 	StatusCode int
 }
 
+// Backoff contains struct for retrying strategy.
+type Backoff struct {
+	// The initial duration.
+	Duration time.Duration
+	// The remaining number of iterations in which the duration
+	// parameter may change. If not positive, the duration is not
+	// changed.
+	MaxRetries int
+}
+
 // MakeRequest ...
-func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, backoff wait.Backoff) (*HTTPResponse, error) {
+func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, backoff Backoff) (*HTTPResponse, error) {
 	httpresp := &HTTPResponse{}
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
 		if err != nil {
-			glog.Errorf("Request error from [%s] %s: %v", request.Method, request.URL, err)
+			log.Error().
+				Str("method", request.Method).
+				Str("url", request.URL).
+				Str("error", err.Error()).
+				Msg("request error")
 			return false, err
 		}
 		if len(request.Body) > 0 {
-			httpreq.Body = ioutil.NopCloser(bytes.NewReader(request.Body))
+			httpreq.Body = io.NopCloser(bytes.NewReader(request.Body))
 		}
 
 		for k, v := range request.Headers {
@@ -50,12 +72,16 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 
 		resp, err := client.Do(httpreq)
 		if err != nil {
-			glog.Errorf("Do request error from [%s] %s: %v", request.Method, request.URL, err)
+			log.Error().
+				Str("method", request.Method).
+				Str("url", request.URL).
+				Str("error", err.Error()).
+				Msg("do request error")
 			return false, err
 		}
 		defer resp.Body.Close()
 		httpresp.StatusCode = resp.StatusCode
-		responseBody, err := ioutil.ReadAll(resp.Body)
+		responseBody, err := io.ReadAll(resp.Body)
 		if err != nil {
 			return false, err
 		}
@@ -67,9 +93,13 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 			}
 			return true, nil
 		}
-		err = fmt.Errorf("got http code %v from [%s] %s: %s... retrying",
-			resp.StatusCode, request.Method, request.URL, responseBody)
-		glog.Error(err)
+
+		log.Error().
+			Int("statuscode", resp.StatusCode).
+			Str("method", request.Method).
+			Str("url", request.URL).
+			Str("body", string(responseBody)).
+			Msg("retrying")
 		return false, err
 	})
 	return httpresp, err

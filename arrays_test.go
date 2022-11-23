@@ -1,6 +1,7 @@
 package common
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -133,4 +134,48 @@ func TestContainsIgnoreCase(t *testing.T) {
 	for _, tc := range tests {
 		assert.Equal(t, ContainsIgnoreCase(tc.inputSlice, tc.inputString), tc.want)
 	}
+}
+
+func ExampleContainsString() {
+	fmt.Println(ContainsString([]string{"foo", "bar"}, "bar"))
+	fmt.Println(ContainsString([]string{"foo", "bar"}, "BAR"))
+	fmt.Println(ContainsString([]string{"foo", "bar"}, "bar2"))
+	// Output: true
+	// false
+	// false
+}
+
+func ExampleUnique() {
+	fmt.Println(Unique([]string{"1", "1", "2"}))
+	// Output: [1 2]
+}
+
+func ExampleEqualArrays() {
+	fmt.Println(EqualArrays([]string{"1", "2"}, []string{"1", "2"}))
+	fmt.Println(EqualArrays([]int{1, 2, 3}, []int{1, 2, 3}))
+	fmt.Println(EqualArrays([]string{"1", "2", "3"}, []string{"1", "2"}))
+
+	// Output: true
+	// true
+	// false
+}
+
+func ExampleContains() {
+	fmt.Println(Contains([]string{"foo", "bar"}, "bar"))
+	fmt.Println(Contains([]int{1, 2}, 1))
+	fmt.Println(Contains([]string{"foo", "bar"}, "heh"))
+	fmt.Println(Contains([]int{1, 2}, 66))
+
+	// Output: true
+	// true
+	// false
+	// false
+}
+
+func ExampleGetResultDiff() {
+	fmt.Println(GetResultDiff([]string{"foo", "bar"}, []string{"foo"}))
+	fmt.Println(GetResultDiff([]string{"foo", "bar"}, []string{"foo", "heh"}))
+
+	// Output: []
+	// [heh]
 }
