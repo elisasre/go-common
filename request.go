@@ -48,7 +48,13 @@ type Backoff struct {
 }
 
 // MakeRequest ...
-func MakeRequest(ctx context.Context, request HTTPRequest, output interface{}, client *http.Client, backoff Backoff) (*HTTPResponse, error) {
+func MakeRequest(
+	ctx context.Context,
+	request HTTPRequest,
+	output interface{},
+	client *http.Client,
+	backoff Backoff,
+) (*HTTPResponse, error) {
 	httpresp := &HTTPResponse{}
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
