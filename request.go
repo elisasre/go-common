@@ -2,6 +2,7 @@ package common
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -46,7 +47,7 @@ type Backoff struct {
 }
 
 // MakeRequest ...
-func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, backoff Backoff) (*HTTPResponse, error) {
+func MakeRequest(ctx context.Context, request HTTPRequest, output interface{}, client *http.Client, backoff Backoff) (*HTTPResponse, error) {
 	httpresp := &HTTPResponse{}
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
@@ -61,6 +62,7 @@ func MakeRequest(request HTTPRequest, output interface{}, client *http.Client, b
 		if len(request.Body) > 0 {
 			httpreq.Body = io.NopCloser(bytes.NewReader(request.Body))
 		}
+		httpreq = httpreq.WithContext(ctx)
 
 		for k, v := range request.Headers {
 			httpreq.Header.Add(k, v)
