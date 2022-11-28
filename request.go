@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -79,6 +80,9 @@ func MakeRequest(ctx context.Context, request HTTPRequest, output interface{}, c
 				Str("url", request.URL).
 				Str("error", err.Error()).
 				Msg("do request error")
+			if errors.Is(err, context.DeadlineExceeded) {
+				return true, err
+			}
 			return false, err
 		}
 		defer resp.Body.Close()

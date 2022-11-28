@@ -53,5 +53,5 @@ func ExampleMakeRequest() {
 	// {"message":"pong","error":""}
 	// 200
 	// <nil>
-	// retrying timed out: Get "https://ingress-api.csf.elisa.fi/healthz": context deadline exceeded
+	// Get "https://ingress-api.csf.elisa.fi/healthz": context deadline exceeded
 }
