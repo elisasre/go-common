@@ -26,7 +26,7 @@ func SleepUntil(backoff Backoff, condition ConditionFunc) error {
 
 	}
 	if err != nil {
-		return errors.Wrap(err, "retrying timed out")
+		return err
 	}
 	return errors.New("Timed out waiting for the condition")
 }

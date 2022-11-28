@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -47,7 +48,13 @@ type Backoff struct {
 }
 
 // MakeRequest ...
-func MakeRequest(ctx context.Context, request HTTPRequest, output interface{}, client *http.Client, backoff Backoff) (*HTTPResponse, error) {
+func MakeRequest(
+	ctx context.Context,
+	request HTTPRequest,
+	output interface{},
+	client *http.Client,
+	backoff Backoff,
+) (*HTTPResponse, error) {
 	httpresp := &HTTPResponse{}
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
@@ -79,6 +86,9 @@ func MakeRequest(ctx context.Context, request HTTPRequest, output interface{}, c
 				Str("url", request.URL).
 				Str("error", err.Error()).
 				Msg("do request error")
+			if errors.Is(err, context.DeadlineExceeded) {
+				return true, err
+			}
 			return false, err
 		}
 		defer resp.Body.Close()
