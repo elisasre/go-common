@@ -15,11 +15,16 @@ type (
 	ErrFunc func(*gin.Context, error) (shouldReturn bool)
 )
 
+const (
+	ratelimitReset     = "X-Ratelimit-Reset"
+	ratelimitLimit     = "X-Ratelimit-Limit"
+	ratelimitRemaining = "X-Ratelimit-Remaining"
+)
+
 // RedisRateLimiter ...
-func RedisRateLimiter(opts *redis.Options, key KeyFunc, errFunc ErrFunc) gin.HandlerFunc {
+func RedisRateLimiter(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		rdb := redis.NewClient(opts)
 		limiter := redis_rate.NewLimiter(rdb)
 		key, limit, err := key(c)
 		if err != nil {
@@ -31,9 +36,9 @@ func RedisRateLimiter(opts *redis.Options, key KeyFunc, errFunc ErrFunc) gin.Han
 			res, err := limiter.Allow(ctx, key, redis_rate.PerMinute(PtrValue(limit)))
 			if err == nil {
 				reset := time.Now().Add(res.ResetAfter)
-				c.Header("X-Ratelimit-Reset", reset.String())
-				c.Header("X-Ratelimit-Limit", strconv.Itoa(PtrValue(limit)))
-				c.Header("X-Ratelimit-Remaining", strconv.Itoa(res.Remaining))
+				c.Header(ratelimitReset, strconv.Itoa(int(reset.Unix())))
+				c.Header(ratelimitLimit, strconv.Itoa(PtrValue(limit)))
+				c.Header(ratelimitRemaining, strconv.Itoa(res.Remaining))
 				if res.Allowed <= 0 {
 					c.JSON(http.StatusTooManyRequests,
 						ErrorResponse{Code: http.StatusTooManyRequests, Message: "rate limit exceeded"},
