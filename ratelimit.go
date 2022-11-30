@@ -32,7 +32,7 @@ func RedisRateLimiter(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.Handl
 			c.Abort()
 			return
 		}
-		if limit != nil {
+		if limit != nil && rdb != nil {
 			res, err := limiter.Allow(ctx, key, redis_rate.PerMinute(PtrValue(limit)))
 			if err == nil {
 				reset := time.Now().Add(res.ResetAfter)
@@ -53,6 +53,7 @@ func RedisRateLimiter(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.Handl
 				}
 			}
 		}
+
 		c.Next()
 	}
 }
