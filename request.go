@@ -23,12 +23,13 @@ func init() {
 
 // HTTPRequest ...
 type HTTPRequest struct {
-	Method  string
-	URL     string
-	Body    []byte
-	Cookies []*http.Cookie
-	Headers map[string]string
-	OKCode  []int
+	Method      string
+	URL         string
+	Body        []byte
+	Cookies     []*http.Cookie
+	Headers     map[string]string
+	OKCode      []int
+	Unmarshaler func(data []byte, v any) error
 }
 
 // HTTPResponse ...
@@ -56,6 +57,9 @@ func MakeRequest(
 	backoff Backoff,
 ) (*HTTPResponse, error) {
 	httpresp := &HTTPResponse{}
+	if request.Unmarshaler == nil {
+		request.Unmarshaler = json.Unmarshal
+	}
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
 		if err != nil {
@@ -99,9 +103,9 @@ func MakeRequest(
 		}
 		httpresp.Body = responseBody
 		if ContainsInteger(request.OKCode, resp.StatusCode) {
-			err = json.Unmarshal(httpresp.Body, &output)
+			err = request.Unmarshaler(httpresp.Body, &output)
 			if err != nil {
-				return true, fmt.Errorf("could not marshal as json %w", err)
+				return true, fmt.Errorf("could not marshal %w", err)
 			}
 			return true, nil
 		}
