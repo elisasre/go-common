@@ -110,13 +110,19 @@ func MakeRequest(
 			return true, nil
 		}
 
+		msg := "retrying"
+		rtn := false
+		if resp.StatusCode == http.StatusTooManyRequests {
+			msg = "too many requests"
+			rtn = true
+		}
 		log.Error().
 			Int("statuscode", resp.StatusCode).
 			Str("method", request.Method).
 			Str("url", request.URL).
 			Str("body", string(responseBody)).
-			Msg("retrying")
-		return false, err
+			Msg(msg)
+		return rtn, err
 	})
 	return httpresp, err
 }
