@@ -103,9 +103,11 @@ func MakeRequest(
 		}
 		httpresp.Body = responseBody
 		if ContainsInteger(request.OKCode, resp.StatusCode) {
-			err = request.Unmarshaler(httpresp.Body, &output)
-			if err != nil {
-				return true, fmt.Errorf("could not marshal %w", err)
+			if output != nil {
+				err = request.Unmarshaler(httpresp.Body, &output)
+				if err != nil {
+					return true, fmt.Errorf("could not marshal %w", err)
+				}
 			}
 			return true, nil
 		}
