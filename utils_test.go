@@ -65,10 +65,21 @@ func TestRemoveDot(t *testing.T) {
 	}
 }
 
+type Config struct {
+	Index int `yaml:"index"`
+}
+
+func TestLoadAndListenConfig_NonExistingFile(t *testing.T) {
+	err := LoadAndListenConfig("invalid.yaml", &Config{}, nil)
+	assert.ErrorContains(t, err, "no such file or directory")
+}
+
+func TestLoadAndListenConfig_InvalidSyntax(t *testing.T) {
+	err := LoadAndListenConfig("testdata/invalid.yaml", &Config{}, nil)
+	assert.ErrorContains(t, err, "invalid syntax")
+}
+
 func TestLoadAndListenConfig(t *testing.T) {
-	type Config struct {
-		Index int `yaml:"index"`
-	}
 	filePath := "testdata/test.yaml"
 	data, err := yaml.Marshal(&Config{})
 	assert.NoError(t, err)
@@ -76,14 +87,6 @@ func TestLoadAndListenConfig(t *testing.T) {
 	assert.NoError(t, err)
 
 	realConf := &Config{}
-	// should fail because file does not exists
-	err = LoadAndListenConfig("invalid.yaml", realConf, nil)
-	assert.ErrorContains(t, err, "no such file or directory")
-
-	// should fail because file is not valid yaml
-	err = LoadAndListenConfig("testdata/invalid.yaml", realConf, nil)
-	assert.ErrorContains(t, err, "invalid syntax")
-
 	err = LoadAndListenConfig(filePath, realConf, nil)
 	assert.NoError(t, err)
 	assert.Equal(t, realConf.Index, 0)
@@ -100,9 +103,6 @@ func TestLoadAndListenConfig(t *testing.T) {
 }
 
 func TestLoadAndListenConfigOnUpdate(t *testing.T) {
-	type Config struct {
-		Index int `yaml:"index"`
-	}
 	filePath := "testdata/test2.yaml"
 	data, err := yaml.Marshal(&Config{})
 	assert.NoError(t, err)
