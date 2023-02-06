@@ -10,3 +10,4 @@ gotest-report.out
 dependency-check-*.*
 
 testdata/test.yaml
+testdata/test2.yaml
