@@ -88,7 +88,8 @@ func TestLoadAndListenConfig(t *testing.T) {
 	require.NoError(t, err)
 
 	realConf := &Config{}
-	err = LoadAndListenConfig(filePath, realConf, nil)
+	notifyFn, waitForUpdate := updateCallbacks()
+	err = LoadAndListenConfig(filePath, realConf, notifyFn)
 	require.NoError(t, err)
 	assert.Equal(t, realConf.Index, 0)
 
@@ -99,7 +100,7 @@ func TestLoadAndListenConfig(t *testing.T) {
 	err = os.WriteFile(filePath, data, 0o600)
 	require.NoError(t, err)
 
-	time.Sleep(1 * time.Second)
+	waitForUpdate(t)
 	assert.Equal(t, realConf.Index, 1)
 }
 
@@ -113,9 +114,11 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	realConf := &Config{}
 	var updateCalls int
 	var oldValue int
+	notifyFn, waitForUpdate := updateCallbacks()
 	err = LoadAndListenConfig(filePath, realConf, func(oldConf interface{}) {
 		oldValue = oldConf.(Config).Index
 		updateCalls += 1
+		notifyFn(oldConf)
 	})
 	require.NoError(t, err)
 	assert.Equal(t, 0, realConf.Index)
@@ -129,7 +132,7 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	err = os.WriteFile(filePath, data, 0o600)
 	require.NoError(t, err)
 
-	time.Sleep(1 * time.Second)
+	waitForUpdate(t)
 	assert.Equal(t, 1, realConf.Index)
 	assert.Equal(t, 0, oldValue)
 	assert.Equal(t, 1, updateCalls)
@@ -141,8 +144,29 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	err = os.WriteFile(filePath, data, 0o600)
 	require.NoError(t, err)
 
-	time.Sleep(1 * time.Second)
+	waitForUpdate(t)
 	assert.Equal(t, 2, realConf.Index)
 	assert.Equal(t, 1, oldValue)
 	assert.Equal(t, 2, updateCalls)
+}
+
+func updateCallbacks() (func(interface{}), func(testing.TB)) {
+	// Give some buffer for channel in case
+	// viper decides to send multiple events.
+	ch := make(chan struct{}, 10)
+	notifier := func(interface{}) {
+		ch <- struct{}{}
+	}
+
+	waitForUpdate := func(t testing.TB) {
+		const onUpdateTimeout = time.Second * 2
+
+		select {
+		case <-ch:
+		case <-time.After(onUpdateTimeout):
+			t.Fatalf("OnUpdate not triggered with in %s", onUpdateTimeout)
+		}
+	}
+
+	return notifier, waitForUpdate
 }
