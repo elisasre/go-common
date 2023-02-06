@@ -101,10 +101,10 @@ func LoadAndListenConfig(path string, obj interface{}, onUpdate func()) error {
 	v := viper.New()
 	v.SetConfigFile(path)
 	if err := v.ReadInConfig(); err != nil {
-		return fmt.Errorf("unable to read config: %v", err)
+		return fmt.Errorf("unable to read config: %w", err)
 	}
 	if err := v.Unmarshal(&obj); err != nil {
-		return fmt.Errorf("unable to marshal config: %v", err)
+		return fmt.Errorf("unable to marshal config: %w", err)
 	}
 	log.Info().
 		Str("path", v.ConfigFileUsed()).

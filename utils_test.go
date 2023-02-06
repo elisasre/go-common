@@ -1,7 +1,7 @@
 package common
 
 import (
-	"io/ioutil"
+	"os"
 	"testing"
 	"time"
 
@@ -65,8 +65,6 @@ func TestRemoveDot(t *testing.T) {
 	}
 }
 
-//func LoadAndListenConfig(path string, obj interface{}, onUpdate func()) error {
-
 func TestLoadAndListenConfig(t *testing.T) {
 	type Config struct {
 		Index int `yaml:"index"`
@@ -74,7 +72,7 @@ func TestLoadAndListenConfig(t *testing.T) {
 	filePath := "testdata/test.yaml"
 	data, err := yaml.Marshal(&Config{})
 	assert.NoError(t, err)
-	err = ioutil.WriteFile(filePath, data, 0755)
+	err = os.WriteFile(filePath, data, 0o600)
 	assert.NoError(t, err)
 
 	realConf := &Config{}
@@ -94,7 +92,7 @@ func TestLoadAndListenConfig(t *testing.T) {
 		Index: 1,
 	})
 	assert.NoError(t, err)
-	err = ioutil.WriteFile(filePath, data, 0755)
+	err = os.WriteFile(filePath, data, 0o600)
 	assert.NoError(t, err)
 
 	time.Sleep(100 * time.Millisecond)
@@ -108,7 +106,7 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	filePath := "testdata/test.yaml"
 	data, err := yaml.Marshal(&Config{})
 	assert.NoError(t, err)
-	err = ioutil.WriteFile(filePath, data, 0755)
+	err = os.WriteFile(filePath, data, 0o600)
 	assert.NoError(t, err)
 
 	realConf := &Config{}
@@ -124,7 +122,7 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 		Index: 1,
 	})
 	assert.NoError(t, err)
-	err = ioutil.WriteFile(filePath, data, 0755)
+	err = os.WriteFile(filePath, data, 0o600)
 	assert.NoError(t, err)
 
 	time.Sleep(100 * time.Millisecond)

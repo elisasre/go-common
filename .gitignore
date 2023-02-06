@@ -9,4 +9,4 @@ gotest-report.out
 # dependency check reports
 dependency-check-*.*
 
-testdata/test.yam
+testdata/test.yaml
