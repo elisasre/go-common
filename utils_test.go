@@ -1,6 +1,13 @@
 package common
 
-import "testing"
+import (
+	"os"
+	"testing"
+	"time"
+
+	"github.com/stretchr/testify/assert"
+	"gopkg.in/yaml.v2"
+)
 
 func TestMinUint(t *testing.T) {
 	tests := []struct {
@@ -56,4 +63,85 @@ func TestRemoveDot(t *testing.T) {
 				"Expected %v got %v", tc.input, tc.want)
 		}
 	}
+}
+
+func TestLoadAndListenConfig(t *testing.T) {
+	type Config struct {
+		Index int `yaml:"index"`
+	}
+	filePath := "testdata/test.yaml"
+	data, err := yaml.Marshal(&Config{})
+	assert.NoError(t, err)
+	err = os.WriteFile(filePath, data, 0o600)
+	assert.NoError(t, err)
+
+	realConf := &Config{}
+	// should fail because file does not exists
+	err = LoadAndListenConfig("invalid.yaml", realConf, nil)
+	assert.ErrorContains(t, err, "no such file or directory")
+
+	// should fail because file is not valid yaml
+	err = LoadAndListenConfig("testdata/invalid.yaml", realConf, nil)
+	assert.ErrorContains(t, err, "invalid syntax")
+
+	err = LoadAndListenConfig(filePath, realConf, nil)
+	assert.NoError(t, err)
+	assert.Equal(t, realConf.Index, 0)
+
+	data, err = yaml.Marshal(&Config{
+		Index: 1,
+	})
+	assert.NoError(t, err)
+	err = os.WriteFile(filePath, data, 0o600)
+	assert.NoError(t, err)
+
+	time.Sleep(100 * time.Millisecond)
+	assert.Equal(t, realConf.Index, 1)
+}
+
+func TestLoadAndListenConfigOnUpdate(t *testing.T) {
+	type Config struct {
+		Index int `yaml:"index"`
+	}
+	filePath := "testdata/test2.yaml"
+	data, err := yaml.Marshal(&Config{})
+	assert.NoError(t, err)
+	err = os.WriteFile(filePath, data, 0o600)
+	assert.NoError(t, err)
+
+	realConf := &Config{}
+	var updateCalls int
+	var oldValue int
+	err = LoadAndListenConfig(filePath, realConf, func(oldConf interface{}) {
+		oldValue = oldConf.(Config).Index
+		updateCalls += 1
+	})
+	assert.NoError(t, err)
+	assert.Equal(t, 0, realConf.Index)
+	assert.Equal(t, 0, oldValue)
+	assert.Equal(t, 0, updateCalls)
+
+	data, err = yaml.Marshal(&Config{
+		Index: 1,
+	})
+	assert.NoError(t, err)
+	err = os.WriteFile(filePath, data, 0o600)
+	assert.NoError(t, err)
+
+	time.Sleep(100 * time.Millisecond)
+	assert.Equal(t, 1, realConf.Index)
+	assert.Equal(t, 0, oldValue)
+	assert.Equal(t, 1, updateCalls)
+
+	data, err = yaml.Marshal(&Config{
+		Index: 2,
+	})
+	assert.NoError(t, err)
+	err = os.WriteFile(filePath, data, 0o600)
+	assert.NoError(t, err)
+
+	time.Sleep(100 * time.Millisecond)
+	assert.Equal(t, 2, realConf.Index)
+	assert.Equal(t, 1, oldValue)
+	assert.Equal(t, 2, updateCalls)
 }

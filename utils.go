@@ -6,12 +6,25 @@ import (
 	"fmt"
 	"math/big"
 	"net/http"
+	"os"
+	"reflect"
 	"strings"
+
+	"github.com/fsnotify/fsnotify"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
+	"github.com/spf13/viper"
 )
 
 const (
 	randomLength = 32
 )
+
+func init() {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
+	log.Logger = zerolog.New(os.Stderr)
+	log.Logger = log.With().Logger()
+}
 
 var characterRunes = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
@@ -82,4 +95,35 @@ func RemoveDot(input string) string {
 		return input[:len(input)-1]
 	}
 	return input
+}
+
+// LoadAndListenConfig loads config file to struct and listen changes in it.
+func LoadAndListenConfig(path string, obj interface{}, onUpdate func(oldObj interface{})) error {
+	v := viper.New()
+	v.SetConfigFile(path)
+	if err := v.ReadInConfig(); err != nil {
+		return fmt.Errorf("unable to read config: %w", err)
+	}
+	if err := v.Unmarshal(&obj); err != nil {
+		return fmt.Errorf("unable to marshal config: %w", err)
+	}
+	log.Info().
+		Str("path", v.ConfigFileUsed()).
+		Msg("config loaded")
+	v.WatchConfig()
+	v.OnConfigChange(func(e fsnotify.Event) {
+		log.Info().
+			Str("path", e.Name).
+			Msg("config reloaded")
+		oldObj := reflect.Indirect(reflect.ValueOf(obj)).Interface()
+		if err := v.Unmarshal(&obj); err != nil {
+			log.Fatal().
+				Str("path", e.Name).
+				Msgf("unable to marshal config: %v", err)
+		}
+		if onUpdate != nil {
+			onUpdate(oldObj)
+		}
+	})
+	return nil
 }

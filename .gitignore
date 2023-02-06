@@ -8,3 +8,6 @@ gotest-report.out
 
 # dependency check reports
 dependency-check-*.*
+
+testdata/test.yaml
+testdata/test2.yaml
