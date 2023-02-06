@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v2"
 )
 
@@ -82,21 +83,21 @@ func TestLoadAndListenConfig_InvalidSyntax(t *testing.T) {
 func TestLoadAndListenConfig(t *testing.T) {
 	filePath := "testdata/test.yaml"
 	data, err := yaml.Marshal(&Config{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	realConf := &Config{}
 	err = LoadAndListenConfig(filePath, realConf, nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, realConf.Index, 0)
 
 	data, err = yaml.Marshal(&Config{
 		Index: 1,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	time.Sleep(1 * time.Second)
 	assert.Equal(t, realConf.Index, 1)
@@ -105,9 +106,9 @@ func TestLoadAndListenConfig(t *testing.T) {
 func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	filePath := "testdata/test2.yaml"
 	data, err := yaml.Marshal(&Config{})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	realConf := &Config{}
 	var updateCalls int
@@ -116,7 +117,7 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 		oldValue = oldConf.(Config).Index
 		updateCalls += 1
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, 0, realConf.Index)
 	assert.Equal(t, 0, oldValue)
 	assert.Equal(t, 0, updateCalls)
@@ -124,9 +125,9 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	data, err = yaml.Marshal(&Config{
 		Index: 1,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	time.Sleep(1 * time.Second)
 	assert.Equal(t, 1, realConf.Index)
@@ -136,9 +137,9 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	data, err = yaml.Marshal(&Config{
 		Index: 2,
 	})
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	time.Sleep(1 * time.Second)
 	assert.Equal(t, 2, realConf.Index)
