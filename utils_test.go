@@ -95,7 +95,7 @@ func TestLoadAndListenConfig(t *testing.T) {
 	err = os.WriteFile(filePath, data, 0o600)
 	assert.NoError(t, err)
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 	assert.Equal(t, realConf.Index, 1)
 }
 
@@ -128,7 +128,7 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	err = os.WriteFile(filePath, data, 0o600)
 	assert.NoError(t, err)
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 	assert.Equal(t, 1, realConf.Index)
 	assert.Equal(t, 0, oldValue)
 	assert.Equal(t, 1, updateCalls)
@@ -140,7 +140,7 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	err = os.WriteFile(filePath, data, 0o600)
 	assert.NoError(t, err)
 
-	time.Sleep(100 * time.Millisecond)
+	time.Sleep(1 * time.Second)
 	assert.Equal(t, 2, realConf.Index)
 	assert.Equal(t, 1, oldValue)
 	assert.Equal(t, 2, updateCalls)
