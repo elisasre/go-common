@@ -103,7 +103,7 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	type Config struct {
 		Index int `yaml:"index"`
 	}
-	filePath := "testdata/test.yaml"
+	filePath := "testdata/test2.yaml"
 	data, err := yaml.Marshal(&Config{})
 	assert.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
