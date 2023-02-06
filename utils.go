@@ -7,6 +7,7 @@ import (
 	"math/big"
 	"net/http"
 	"os"
+	"reflect"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -97,7 +98,7 @@ func RemoveDot(input string) string {
 }
 
 // LoadAndListenConfig loads config file to struct and listen changes in it.
-func LoadAndListenConfig(path string, obj interface{}, onUpdate func()) error {
+func LoadAndListenConfig(path string, obj interface{}, onUpdate func(oldObj interface{})) error {
 	v := viper.New()
 	v.SetConfigFile(path)
 	if err := v.ReadInConfig(); err != nil {
@@ -114,13 +115,14 @@ func LoadAndListenConfig(path string, obj interface{}, onUpdate func()) error {
 		log.Info().
 			Str("path", e.Name).
 			Msg("config reloaded")
+		oldObj := reflect.Indirect(reflect.ValueOf(obj)).Interface()
 		if err := v.Unmarshal(&obj); err != nil {
 			log.Fatal().
 				Str("path", e.Name).
 				Msgf("unable to marshal config: %v", err)
 		}
 		if onUpdate != nil {
-			onUpdate()
+			onUpdate(oldObj)
 		}
 	})
 	return nil

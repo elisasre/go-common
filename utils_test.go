@@ -111,12 +111,15 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 
 	realConf := &Config{}
 	var updateCalls int
-	err = LoadAndListenConfig(filePath, realConf, func() {
+	var oldValue int
+	err = LoadAndListenConfig(filePath, realConf, func(oldConf interface{}) {
+		oldValue = oldConf.(Config).Index
 		updateCalls += 1
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, realConf.Index, 0)
-	assert.Equal(t, updateCalls, 0)
+	assert.Equal(t, 0, realConf.Index)
+	assert.Equal(t, 0, oldValue)
+	assert.Equal(t, 0, updateCalls)
 
 	data, err = yaml.Marshal(&Config{
 		Index: 1,
@@ -126,6 +129,19 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	assert.NoError(t, err)
 
 	time.Sleep(100 * time.Millisecond)
-	assert.Equal(t, realConf.Index, 1)
-	assert.Equal(t, updateCalls, 1)
+	assert.Equal(t, 1, realConf.Index)
+	assert.Equal(t, 0, oldValue)
+	assert.Equal(t, 1, updateCalls)
+
+	data, err = yaml.Marshal(&Config{
+		Index: 2,
+	})
+	assert.NoError(t, err)
+	err = os.WriteFile(filePath, data, 0o600)
+	assert.NoError(t, err)
+
+	time.Sleep(100 * time.Millisecond)
+	assert.Equal(t, 2, realConf.Index)
+	assert.Equal(t, 1, oldValue)
+	assert.Equal(t, 2, updateCalls)
 }
