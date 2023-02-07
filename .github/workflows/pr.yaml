@@ -35,3 +35,18 @@ jobs:
       with:
         version: v1.50
         skip-cache: true
+
+  automerge:
+    needs: [analyze]
+    permissions:
+      pull-requests: write
+      contents: write
+    runs-on:
+      - self-hosted
+      - kaas
+    timeout-minutes: 15
+    steps:
+      - name: Automerge dependabot PR
+        uses: elisa-actions/github-action-merge-dependabot@v3
+        with:
+          target: minor
