@@ -42,14 +42,6 @@ func isAPIUser(c *gin.Context) bool {
 	return c.Request.Header.Get(Authorization) != ""
 }
 
-func isJWTMachineUser(c *gin.Context) bool {
-	session, err := c.Request.Cookie("session")
-	if err == nil && session.Value != "" {
-		return true
-	}
-	return false
-}
-
 func getCookie(c *gin.Context) string {
 	session, err := c.Request.Cookie(CsrfTokenKey)
 	if err == nil && session.Value != "" {
@@ -61,8 +53,8 @@ func getCookie(c *gin.Context) string {
 // CSRF is middleware for handling CSRF protection in gin.
 func CSRF(excludePaths []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// allow machineusers
-		if isAPIUser(c) || isJWTMachineUser(c) {
+		// allow machineuser
+		if isAPIUser(c) {
 			c.Next()
 			return
 		}
