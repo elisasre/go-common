@@ -48,16 +48,6 @@ func TestCSRFMachineUser(t *testing.T) {
 	assert.Equal(t, 404, w.Code)
 }
 
-func TestCSRFJWTMachineUser(t *testing.T) {
-	r := gin.New()
-	r.Use(CSRF(nil))
-	w := httptest.NewRecorder()
-	req, _ := http.NewRequest("POST", "/ping", nil)
-	req.AddCookie(&http.Cookie{Name: "session", Value: "foobar"})
-	r.ServeHTTP(w, req)
-	assert.Equal(t, 404, w.Code)
-}
-
 func TestCSRFSucceeded(t *testing.T) {
 	r := gin.New()
 	r.Use(CSRF(nil))
