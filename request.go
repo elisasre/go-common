@@ -36,6 +36,7 @@ type HTTPRequest struct {
 type HTTPResponse struct {
 	Body       []byte
 	StatusCode int
+	Headers    http.Header
 }
 
 // Backoff contains struct for retrying strategy.
@@ -102,6 +103,7 @@ func MakeRequest(
 			return false, err
 		}
 		httpresp.Body = responseBody
+		httpresp.Headers = resp.Header
 		if ContainsInteger(request.OKCode, resp.StatusCode) {
 			if output != nil {
 				err = request.Unmarshaler(httpresp.Body, &output)
