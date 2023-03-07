@@ -119,6 +119,7 @@ func MakeRequest(
 		if resp.StatusCode == http.StatusTooManyRequests {
 			msg = "too many requests"
 			rtn = true
+			err = fmt.Errorf("rate limit exceeded")
 		}
 		log.Error().
 			Int("statuscode", resp.StatusCode).
