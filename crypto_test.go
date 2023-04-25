@@ -30,13 +30,15 @@ func ExampleBase64encode() {
 }
 
 func ExampleEncrypt() {
-	encrypted := Encrypt([]byte("supersecret"), "testpassword")
-	fmt.Println(string(Decrypt(encrypted, "testpassword")))
+	encrypted, _ := Encrypt([]byte("supersecret"), "testpassword")
+	data, _ := Decrypt(encrypted, "testpassword")
+	fmt.Println(string(data))
 	// Output: supersecret
 }
 
 func ExampleDecrypt() {
-	encrypted := Encrypt([]byte("supersecret"), "testpassword")
-	fmt.Println(string(Decrypt(encrypted, "testpassword")))
+	encrypted, _ := Encrypt([]byte("supersecret"), "testpassword")
+	data, _ := Decrypt(encrypted, "testpassword")
+	fmt.Println(string(data))
 	// Output: supersecret
 }
