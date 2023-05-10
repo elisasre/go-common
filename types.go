@@ -165,3 +165,19 @@ func (u *User) MakeSub() string {
 	b := sha256.Sum256([]byte(sub))
 	return hex.EncodeToString(b[:])
 }
+
+// ServiceAccountPrefix email domain for service accounts.
+const ServiceAccountPrefix = "@oauth2"
+
+// IsServiceAccount returns boolean is the account service account.
+func (u User) IsServiceAccount() bool {
+	return strings.HasSuffix(StringValue(u.Email), ServiceAccountPrefix)
+}
+
+// TokenMFA returns state does user has MFA used in current JWT.
+func (u User) TokenMFA() bool {
+	if u.Internal == nil {
+		return false
+	}
+	return BoolValue(u.Internal.MFA)
+}
