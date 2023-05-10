@@ -70,8 +70,8 @@ func Decrypt(data []byte, passphrase string) ([]byte, error) {
 	return plaintext, nil
 }
 
-// GenerateNewKeys generates new private and public keys.
-func GenerateNewKeys() (*JWTKey, error) {
+// GenerateNewKeyPair generates new private and public keys.
+func GenerateNewKeyPair() (*JWTKey, error) {
 	rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, fmt.Errorf("error generating RSA private key: %w", err)

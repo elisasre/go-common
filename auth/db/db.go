@@ -53,9 +53,9 @@ func (db *Database) RotateKeys() error {
 	db.keysMu.Lock()
 	defer db.keysMu.Unlock()
 	start := time.Now()
-	keys, err := common.GenerateNewKeys()
+	keys, err := common.GenerateNewKeyPair()
 	if err != nil {
-		return fmt.Errorf("error GenerateNewKeys: %w", err)
+		return fmt.Errorf("error GenerateNewKeyPair: %w", err)
 	}
 
 	newest, err := db.store.AddJWTKey(context.Background(), *keys)

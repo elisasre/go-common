@@ -31,7 +31,7 @@ func (m *Memory) RotateKeys() error {
 	m.keysMu.Lock()
 	defer m.keysMu.Unlock()
 	start := time.Now()
-	keys, err := common.GenerateNewKeys()
+	keys, err := common.GenerateNewKeyPair()
 	if err != nil {
 		return err
 	}
