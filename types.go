@@ -1,8 +1,13 @@
 package common
 
 import (
+	"context"
+	"crypto/rsa"
 	"fmt"
 	"strings"
+	"time"
+
+	"gorm.io/gorm"
 )
 
 var supportedtruevalues = []string{"true", "t", "yes", "y", "on"}
@@ -99,4 +104,29 @@ func StringToBool(value string) bool {
 // StringEmpty returns boolean value if string is empty.
 func StringEmpty(value string) bool {
 	return value == ""
+}
+
+// Model is tuned gorm.model.
+type Model struct {
+	ID        uint      `json:"id" gorm:"primarykey"`
+	CreatedAt time.Time `gorm:"index"`
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `json:"-" gorm:"index"`
+}
+
+// JWTKey is struct for storing auth private keys.
+type JWTKey struct {
+	Model
+	KID               string          `yaml:"kid" json:"kid"`
+	PrivateKey        *rsa.PrivateKey `yaml:"-" json:"-" gorm:"-"`
+	PrivateKeyAsBytes []byte          `yaml:"-" json:"-"`
+	PublicKey         *rsa.PublicKey  `yaml:"-" json:"-" gorm:"-"`
+	PublicKeyAsBytes  []byte          `yaml:"-" json:"-"`
+}
+
+// Datastore will contain interface to store auth keys.
+type Datastore interface {
+	AddJWTKey(context.Context, JWTKey) (*JWTKey, error)
+	ListJWTKeys(context.Context) ([]JWTKey, error)
+	RotateJWTKeys(context.Context, uint) error
 }

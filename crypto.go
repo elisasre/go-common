@@ -5,10 +5,13 @@ import (
 	"crypto/cipher"
 	"crypto/md5" //nolint:gosec // G501: Blocklisted import crypto/md5: weak cryptographic primitive
 	"crypto/rand"
+	"crypto/rsa"
 	"encoding/base64"
 	"encoding/hex"
 	"fmt"
 	"io"
+	"math/big"
+	"time"
 )
 
 // Base64decode decodes base64 input to string.
@@ -65,4 +68,43 @@ func Decrypt(data []byte, passphrase string) ([]byte, error) {
 		return nil, err
 	}
 	return plaintext, nil
+}
+
+// GenerateNewKeyPair generates new private and public keys.
+func GenerateNewKeyPair() (*JWTKey, error) {
+	rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, fmt.Errorf("error generating RSA private key: %w", err)
+	}
+
+	err = rsaKey.Validate()
+	if err != nil {
+		return nil, err
+	}
+
+	serial, err := BuildPKISerial()
+	if err != nil {
+		return nil, err
+	}
+
+	return &JWTKey{
+		KID:        serial.String(),
+		PrivateKey: rsaKey,
+		PublicKey:  &rsaKey.PublicKey,
+	}, nil
+}
+
+// BuildPKISerial generates random big.Int.
+func BuildPKISerial() (*big.Int, error) {
+	randomLimit := new(big.Int).Lsh(big.NewInt(1), 32)
+	randomComponent, err := rand.Int(rand.Reader, randomLimit)
+	if err != nil {
+		return nil, fmt.Errorf("error generating random number: %w", err)
+	}
+
+	serial := big.NewInt(time.Now().UnixNano())
+	serial.Lsh(serial, 32)
+	serial.Or(serial, randomComponent)
+
+	return serial, nil
 }
