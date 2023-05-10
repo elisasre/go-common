@@ -10,6 +10,7 @@ require (
 	github.com/gin-gonic/gin v1.9.0
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redis/redis_rate/v9 v9.1.2
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/pkg/errors v0.9.1
 	github.com/rs/zerolog v1.29.1
 	github.com/spf13/viper v1.15.0

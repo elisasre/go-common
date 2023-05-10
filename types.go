@@ -3,6 +3,8 @@ package common
 import (
 	"context"
 	"crypto/rsa"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	"strings"
 	"time"
@@ -129,4 +131,37 @@ type Datastore interface {
 	AddJWTKey(context.Context, JWTKey) (*JWTKey, error)
 	ListJWTKeys(context.Context) ([]JWTKey, error)
 	RotateJWTKeys(context.Context, uint) error
+}
+
+// Internal contains struct for internal non standard variables.
+type Internal struct {
+	Cluster     *string `json:"cluster,omitempty"`
+	ChangeLimit *int    `json:"limit,omitempty"`
+	MFA         *bool   `json:"mfa"`
+	EmployeeID  string  `json:"employeeid,omitempty"`
+}
+
+// User contains struct for single user.
+type User struct {
+	Groups        []string  `json:"groups,omitempty"`
+	Eid           string    `json:"custom:employeeid,omitempty"`
+	ImportGroups  []string  `json:"cognito:groups,omitempty"`
+	Email         *string   `json:"email,omitempty"`
+	EmailVerified *bool     `json:"email_verified,omitempty"`
+	Name          *string   `json:"name,omitempty"`
+	Internal      *Internal `json:"internal,omitempty"`
+}
+
+// MakeSub returns sub value for user.
+func (u *User) MakeSub() string {
+	if u == nil {
+		return ""
+	}
+	sub := StringValue(u.Email)
+	if u.Internal != nil && u.Internal.EmployeeID != "" {
+		sub = u.Internal.EmployeeID
+	}
+	sub = strings.ToLower(sub)
+	b := sha256.Sum256([]byte(sub))
+	return hex.EncodeToString(b[:])
 }
