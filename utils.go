@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"reflect"
+	"runtime"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -223,6 +224,13 @@ func sentrySpanTracer() gin.HandlerFunc {
 		defer span.Finish()
 		c.Next()
 	}
+}
+
+// MakeSpan makes new sentry span
+func MakeSpan(ctx context.Context, skip int) *sentry.Span {
+	pc, _, _, _ := runtime.Caller(skip) //nolint:dogsled
+	span := sentry.StartSpan(ctx, runtime.FuncForPC(pc).Name())
+	return span
 }
 
 // GET wrapper to include sentrySpanTracer as last middleware.
