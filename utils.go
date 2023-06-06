@@ -1,16 +1,21 @@
 package common
 
 import (
+	"context"
 	"crypto/rand"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"math/big"
+	"net"
 	"net/http"
 	"os"
 	"reflect"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/getsentry/sentry-go"
+	"github.com/gin-gonic/gin"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
@@ -18,6 +23,7 @@ import (
 
 const (
 	randomLength = 32
+	sentryKey    = "sentry"
 )
 
 func init() {
@@ -126,4 +132,128 @@ func LoadAndListenConfig(path string, obj interface{}, onUpdate func(oldObj inte
 		}
 	})
 	return nil
+}
+
+// Recovery middleware for Sentry crash reporting.
+func Recovery() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		ctx := c.Request.Context()
+		_, transaction, hub := MakeSentryTransaction(
+			ctx,
+			fmt.Sprintf("%s %s", c.Request.Method, c.Request.URL.Path),
+			sentry.ContinueFromRequest(c.Request),
+			sentry.WithTransactionSource(sentry.SourceURL),
+		)
+
+		defer transaction.Finish()
+		c.Request = c.Request.WithContext(transaction.Context())
+		hub.Scope().SetRequest(c.Request)
+		c.Set(sentryKey, hub)
+		defer recoverWithSentry(hub, c.Request)
+		c.Next()
+	}
+}
+
+// RecoverWithContext recovers from panic and sends it to Sentry.
+func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
+	if transaction != nil {
+		transaction.Finish()
+	}
+	if err := recover(); err != nil {
+		defer sentry.RecoverWithContext(ctx)
+		panic(err)
+	}
+}
+
+// Check for a broken connection, as this is what Gin does already.
+func isBrokenPipeError(err interface{}) bool {
+	if netErr, ok := err.(*net.OpError); ok {
+		var se *os.SyscallError
+		if errors.As(netErr, &se) {
+			seStr := strings.ToLower(se.Error())
+			if strings.Contains(seStr, "broken pipe") ||
+				strings.Contains(seStr, "connection reset by peer") {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func recoverWithSentry(hub *sentry.Hub, r *http.Request) {
+	if err := recover(); err != nil {
+		if !isBrokenPipeError(err) {
+			_ = hub.RecoverWithContext(
+				context.WithValue(r.Context(), sentry.RequestContextKey, r),
+				err,
+			)
+		}
+		panic(err)
+	}
+}
+
+// MakeSentryTransaction creates Sentry transaction.
+func MakeSentryTransaction(ctx context.Context, name string, opts ...sentry.SpanOption) (context.Context, *sentry.Span, *sentry.Hub) {
+	var hub *sentry.Hub
+	ctx, hub = setHubToContext(ctx)
+	options := []sentry.SpanOption{
+		sentry.WithOpName(name),
+	}
+	options = append(options, opts...)
+	transaction := sentry.StartTransaction(ctx,
+		name,
+		options...,
+	)
+	return transaction.Context(), transaction, hub
+}
+
+func setHubToContext(ctx context.Context) (context.Context, *sentry.Hub) {
+	hub := sentry.GetHubFromContext(ctx)
+	if hub == nil {
+		hub = sentry.CurrentHub().Clone()
+		ctx = sentry.SetHubOnContext(ctx, hub)
+	}
+	return ctx, hub
+}
+
+// sentrySpanTracer middleware for sentry span time reporting.
+func sentrySpanTracer(trimPrefix string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		handler := strings.TrimPrefix(c.HandlerName(), trimPrefix)
+		span := sentry.StartSpan(c.Request.Context(), handler)
+		defer span.Finish()
+		c.Next()
+	}
+}
+
+// GET wrapper to include sentrySpanTracer as last middleware.
+func GET(group *gin.RouterGroup, relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes {
+	return group.Handle(http.MethodGet, relativePath, addSpanTracer(handlers)...)
+}
+
+// PUT wrapper to include sentrySpanTracer as last middleware.
+func PUT(group *gin.RouterGroup, relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes {
+	return group.Handle(http.MethodPut, relativePath, addSpanTracer(handlers)...)
+}
+
+// POST wrapper to include sentrySpanTracer as last middleware.
+func POST(group *gin.RouterGroup, relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes {
+	return group.Handle(http.MethodPost, relativePath, addSpanTracer(handlers)...)
+}
+
+// DELETE wrapper to include sentrySpanTracer as last middleware.
+func DELETE(group *gin.RouterGroup, relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes {
+	return group.Handle(http.MethodDelete, relativePath, addSpanTracer(handlers)...)
+}
+
+// PATCH wrapper to include sentrySpanTracer as last middleware.
+func PATCH(group *gin.RouterGroup, relativePath string, handlers ...gin.HandlerFunc) gin.IRoutes {
+	return group.Handle(http.MethodPatch, relativePath, addSpanTracer(handlers)...)
+}
+
+func addSpanTracer(handlers []gin.HandlerFunc) []gin.HandlerFunc {
+	lastElement := handlers[len(handlers)-1]
+	handlers = handlers[:len(handlers)-1]
+	handlers = append(handlers, sentrySpanTracer(), lastElement)
+	return handlers
 }
