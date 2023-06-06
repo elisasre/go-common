@@ -217,10 +217,9 @@ func setHubToContext(ctx context.Context) (context.Context, *sentry.Hub) {
 }
 
 // sentrySpanTracer middleware for sentry span time reporting.
-func sentrySpanTracer(trimPrefix string) gin.HandlerFunc {
+func sentrySpanTracer() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		handler := strings.TrimPrefix(c.HandlerName(), trimPrefix)
-		span := sentry.StartSpan(c.Request.Context(), handler)
+		span := sentry.StartSpan(c.Request.Context(), c.HandlerName())
 		defer span.Finish()
 		c.Next()
 	}
