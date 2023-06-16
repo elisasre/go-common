@@ -2,7 +2,6 @@ package metrics
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -41,7 +40,16 @@ func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
 	pMux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
 	go func() {
 		listenAddr := fmt.Sprintf(":%d", port)
-		log.Fatal(http.ListenAndServe(listenAddr, pMux))
+
+		server := &http.Server{
+			Addr:              listenAddr,
+			ReadHeaderTimeout: 3 * time.Second,
+		}
+
+		err := server.ListenAndServe()
+		if err != nil {
+			panic(err)
+		}
 	}()
 	return p
 }
