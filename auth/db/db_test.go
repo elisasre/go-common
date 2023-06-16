@@ -15,7 +15,7 @@ type DB struct {
 }
 
 func (store *DB) AddJWTKey(c context.Context, payload common.JWTKey) (*common.JWTKey, error) {
-	id := rand.Intn(1000000)
+	id := rand.Intn(1000000) //nolint:gosec
 	payload.Model.ID = uint(id)
 	payload.Model.CreatedAt = time.Now()
 	payload.Model.UpdatedAt = time.Now()

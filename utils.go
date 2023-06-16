@@ -226,7 +226,7 @@ func sentrySpanTracer() gin.HandlerFunc {
 	}
 }
 
-// MakeSpan makes new sentry span
+// MakeSpan makes new sentry span.
 func MakeSpan(ctx context.Context, skip int) *sentry.Span {
 	pc, _, _, _ := runtime.Caller(skip) //nolint:dogsled
 	tmp := runtime.FuncForPC(pc)
