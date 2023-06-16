@@ -43,6 +43,7 @@ func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
 
 		server := &http.Server{
 			Addr:              listenAddr,
+			Handler:           pMux,
 			ReadHeaderTimeout: 3 * time.Second,
 		}
 
