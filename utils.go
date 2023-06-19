@@ -4,10 +4,8 @@ import (
 	"context"
 	"crypto/rand"
 	"crypto/sha256"
-	"errors"
 	"fmt"
 	"math/big"
-	"net"
 	"net/http"
 	"os"
 	"reflect"
@@ -135,26 +133,6 @@ func LoadAndListenConfig(path string, obj interface{}, onUpdate func(oldObj inte
 	return nil
 }
 
-// Recovery middleware for Sentry crash reporting.
-func Recovery() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		ctx := c.Request.Context()
-		_, transaction, hub := MakeSentryTransaction(
-			ctx,
-			fmt.Sprintf("%s %s", c.Request.Method, c.Request.URL.Path),
-			sentry.ContinueFromRequest(c.Request),
-			sentry.WithTransactionSource(sentry.SourceURL),
-		)
-
-		defer transaction.Finish()
-		c.Request = c.Request.WithContext(transaction.Context())
-		hub.Scope().SetRequest(c.Request)
-		c.Set(sentryKey, hub)
-		defer recoverWithSentry(hub, c.Request)
-		c.Next()
-	}
-}
-
 // RecoverWithContext recovers from panic and sends it to Sentry.
 func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 	if transaction != nil {
@@ -162,33 +140,6 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 	}
 	if err := recover(); err != nil {
 		defer sentry.RecoverWithContext(ctx)
-		panic(err)
-	}
-}
-
-// Check for a broken connection, as this is what Gin does already.
-func isBrokenPipeError(err interface{}) bool {
-	if netErr, ok := err.(*net.OpError); ok {
-		var se *os.SyscallError
-		if errors.As(netErr, &se) {
-			seStr := strings.ToLower(se.Error())
-			if strings.Contains(seStr, "broken pipe") ||
-				strings.Contains(seStr, "connection reset by peer") {
-				return true
-			}
-		}
-	}
-	return false
-}
-
-func recoverWithSentry(hub *sentry.Hub, r *http.Request) {
-	if err := recover(); err != nil {
-		if !isBrokenPipeError(err) {
-			_ = hub.RecoverWithContext(
-				context.WithValue(r.Context(), sentry.RequestContextKey, r),
-				err,
-			)
-		}
 		panic(err)
 	}
 }
