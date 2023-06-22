@@ -1,28 +1,24 @@
-OPERATOR_NAME := go-common
-ifeq ($(USE_JSON_OUTPUT), 1)
-GOTEST_REPORT_FORMAT := -json
+# Download wanted go.mk version automatically if not present.
+BASE_VERSION  := 40520c8
+BASE_MAKE     := go-${BASE_VERSION}.mk
+FETCH_BASE_MAKE	= $(shell gh api -H 'Accept: application/vnd.github.v3.raw' 'repos/elisasre/baseconfig/contents/go.mk?ref=${BASE_VERSION}' > ${BASE_MAKE})
+ifeq ($(wildcard ${BASE_MAKE}),)
+TRIGGER := ${FETCH_BASE_MAKE}
 endif
 
-.PHONY: clean ensure build golint test
+include ${BASE_MAKE}
+
+.PHONY: clean update run cover-info
+
+validate-go-mk:
+	@echo Updating go.mk: ${FETCH_BASE_MAKE}
+	git diff --exit-code -- ${BASE_MAKE}
 
 clean:
 	git clean -Xdf
 
-ensure:
-	go mod tidy
+update:
+	go get -u
 
-build:
-	rm -f bin/$(OPERATOR_NAME)
-	go build -v -o bin/$(OPERATOR_NAME) .
-
-golint: .git/hooks/pre-commit
-	pre-commit run --all-files
-
-test:
-	go test -race -v -covermode atomic -coverprofile=gotest-coverage.out ./... $(GOTEST_REPORT_FORMAT) > gotest-report.out && cat gotest-report.out || (cat gotest-report.out; exit 1)
-	git diff --exit-code go.mod go.sum
-
-
-.git/hooks/pre-commit:
-	@pre-commit -V || (echo "pre-commit missing: https://pre-commit.com/" && exit 1)
-	pre-commit install
+cover-info: go-merge-coverages
+	go tool cover -func ${GO_TOTAL_COV_FILE}

@@ -11,3 +11,6 @@ dependency-check-*.*
 
 testdata/test.yaml
 testdata/test2.yaml
+
+.tools/
+/target/

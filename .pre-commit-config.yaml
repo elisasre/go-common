@@ -1,8 +1,0 @@
-exclude: vendor
-fail_fast: true
-repos:
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.51.2
-    hooks:
-      - id: golangci-lint
-        args: [ --fix ]
