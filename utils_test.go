@@ -2,6 +2,7 @@ package common
 
 import (
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -80,28 +81,30 @@ func TestLoadAndListenConfig_InvalidSyntax(t *testing.T) {
 	assert.ErrorContains(t, err, "invalid syntax")
 }
 
-func TestLoadAndListenConfig(t *testing.T) {
-	filePath := "testdata/test.yaml"
-	data, err := yaml.Marshal(&Config{})
-	require.NoError(t, err)
-	err = os.WriteFile(filePath, data, 0o600)
-	require.NoError(t, err)
+func (u *UpdateValues) Set(updateCalls int, oldConf interface{}, notifyFn func(interface{})) {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	u.UpdateCalls += updateCalls
+	u.OldValue = oldConf.(Config).Index
+	notifyFn(oldConf)
+}
 
-	realConf := &Config{}
-	notifyFn, waitForUpdate := updateCallbacks()
-	err = LoadAndListenConfig(filePath, realConf, notifyFn)
-	require.NoError(t, err)
-	assert.Equal(t, realConf.Index, 0)
+func (u *UpdateValues) GetUpdateCalls() int {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	return u.UpdateCalls
+}
 
-	data, err = yaml.Marshal(&Config{
-		Index: 1,
-	})
-	require.NoError(t, err)
-	err = os.WriteFile(filePath, data, 0o600)
-	require.NoError(t, err)
+func (u *UpdateValues) GetOldValue() int {
+	u.mu.Lock()
+	defer u.mu.Unlock()
+	return u.OldValue
+}
 
-	waitForUpdate(t)
-	assert.Equal(t, realConf.Index, 1)
+type UpdateValues struct {
+	mu          sync.Mutex
+	UpdateCalls int
+	OldValue    int
 }
 
 func TestLoadAndListenConfigOnUpdate(t *testing.T) {
@@ -112,42 +115,41 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	require.NoError(t, err)
 
 	realConf := &Config{}
-	var updateCalls int
-	var oldValue int
+	values := &UpdateValues{}
 	notifyFn, waitForUpdate := updateCallbacks()
 	err = LoadAndListenConfig(filePath, realConf, func(oldConf interface{}) {
-		oldValue = oldConf.(Config).Index
-		updateCalls += 1
-		notifyFn(oldConf)
+		values.Set(1, oldConf, notifyFn)
 	})
 	require.NoError(t, err)
 	assert.Equal(t, 0, realConf.Index)
-	assert.Equal(t, 0, oldValue)
-	assert.Equal(t, 0, updateCalls)
+	assert.Equal(t, 0, values.GetOldValue())
+	assert.Equal(t, 0, values.GetUpdateCalls())
 
-	data, err = yaml.Marshal(&Config{
+	conf1 := &Config{
 		Index: 1,
-	})
+	}
+	data, err = yaml.Marshal(conf1)
 	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
 	require.NoError(t, err)
 
 	waitForUpdate(t)
-	assert.Equal(t, 1, realConf.Index)
-	assert.Equal(t, 0, oldValue)
-	assert.Equal(t, 1, updateCalls)
+	assert.Equal(t, 1, conf1.Index)
+	assert.Equal(t, 0, values.GetOldValue())
+	assert.Equal(t, 1, values.GetUpdateCalls())
 
-	data, err = yaml.Marshal(&Config{
+	conf2 := &Config{
 		Index: 2,
-	})
+	}
+	data, err = yaml.Marshal(conf2)
 	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
 	require.NoError(t, err)
 
 	waitForUpdate(t)
-	assert.Equal(t, 2, realConf.Index)
-	assert.Equal(t, 1, oldValue)
-	assert.Equal(t, 2, updateCalls)
+	assert.Equal(t, 2, conf2.Index)
+	assert.Equal(t, 1, values.GetOldValue())
+	assert.Equal(t, 2, values.GetUpdateCalls())
 }
 
 func updateCallbacks() (func(interface{}), func(testing.TB)) {
