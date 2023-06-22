@@ -72,12 +72,12 @@ type Config struct {
 }
 
 func TestLoadAndListenConfig_NonExistingFile(t *testing.T) {
-	err := LoadAndListenConfig("invalid.yaml", &Config{}, nil)
+	err := LoadAndListenConfig("invalid.yaml", &ConfigLock{}, &Config{}, nil)
 	assert.ErrorContains(t, err, "no such file or directory")
 }
 
 func TestLoadAndListenConfig_InvalidSyntax(t *testing.T) {
-	err := LoadAndListenConfig("testdata/invalid.yaml", &Config{}, nil)
+	err := LoadAndListenConfig("testdata/invalid.yaml", &ConfigLock{}, &Config{}, nil)
 	assert.ErrorContains(t, err, "invalid syntax")
 }
 
@@ -115,39 +115,44 @@ func TestLoadAndListenConfigOnUpdate(t *testing.T) {
 	require.NoError(t, err)
 
 	realConf := &Config{}
+	l := &ConfigLock{}
 	values := &UpdateValues{}
 	notifyFn, waitForUpdate := updateCallbacks()
-	err = LoadAndListenConfig(filePath, realConf, func(oldConf interface{}) {
+	err = LoadAndListenConfig(filePath, l, realConf, func(oldConf interface{}) {
 		values.Set(1, oldConf, notifyFn)
 	})
 	require.NoError(t, err)
+	l.lock.Lock()
 	assert.Equal(t, 0, realConf.Index)
+	l.lock.Unlock()
 	assert.Equal(t, 0, values.GetOldValue())
 	assert.Equal(t, 0, values.GetUpdateCalls())
 
-	conf1 := &Config{
+	data, err = yaml.Marshal(&Config{
 		Index: 1,
-	}
-	data, err = yaml.Marshal(conf1)
+	})
 	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
 	require.NoError(t, err)
 
 	waitForUpdate(t)
-	assert.Equal(t, 1, conf1.Index)
+	l.lock.Lock()
+	assert.Equal(t, 1, realConf.Index)
+	l.lock.Unlock()
 	assert.Equal(t, 0, values.GetOldValue())
 	assert.Equal(t, 1, values.GetUpdateCalls())
 
-	conf2 := &Config{
+	data, err = yaml.Marshal(&Config{
 		Index: 2,
-	}
-	data, err = yaml.Marshal(conf2)
+	})
 	require.NoError(t, err)
 	err = os.WriteFile(filePath, data, 0o600)
 	require.NoError(t, err)
 
 	waitForUpdate(t)
-	assert.Equal(t, 2, conf2.Index)
+	l.lock.Lock()
+	assert.Equal(t, 2, realConf.Index)
+	l.lock.Unlock()
 	assert.Equal(t, 1, values.GetOldValue())
 	assert.Equal(t, 2, values.GetUpdateCalls())
 }
