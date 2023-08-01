@@ -11,6 +11,7 @@ import (
 	"reflect"
 	"runtime"
 	"strings"
+	"sync"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/getsentry/sentry-go"
@@ -102,34 +103,42 @@ func RemoveDot(input string) string {
 	return input
 }
 
+type ConfigLock struct {
+	lock sync.Mutex
+}
+
 // LoadAndListenConfig loads config file to struct and listen changes in it.
-func LoadAndListenConfig(path string, obj interface{}, onUpdate func(oldObj interface{})) error {
+func LoadAndListenConfig(path string, l *ConfigLock, obj interface{}, onUpdate func(oldObj interface{})) error {
 	v := viper.New()
 	v.SetConfigFile(path)
 	if err := v.ReadInConfig(); err != nil {
 		return fmt.Errorf("unable to read config: %w", err)
 	}
+	l.lock.Lock()
 	if err := v.Unmarshal(&obj); err != nil {
 		return fmt.Errorf("unable to marshal config: %w", err)
 	}
+	l.lock.Unlock()
 	log.Info().
 		Str("path", v.ConfigFileUsed()).
 		Msg("config loaded")
-	v.WatchConfig()
 	v.OnConfigChange(func(e fsnotify.Event) {
 		log.Info().
 			Str("path", e.Name).
 			Msg("config reloaded")
 		oldObj := reflect.Indirect(reflect.ValueOf(obj)).Interface()
+		l.lock.Lock()
 		if err := v.Unmarshal(&obj); err != nil {
 			log.Fatal().
 				Str("path", e.Name).
 				Msgf("unable to marshal config: %v", err)
 		}
+		l.lock.Unlock()
 		if onUpdate != nil {
 			onUpdate(oldObj)
 		}
 	})
+	v.WatchConfig()
 	return nil
 }
 
