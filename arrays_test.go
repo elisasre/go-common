@@ -197,7 +197,7 @@ func TestArrayContainsIgnoreCase(t *testing.T) {
 		},
 		{
 			keys:   []string{"asiakas", "bar"},
-			value:  "IN-asiaskasfoo",
+			value:  "IN-asiakasfoo",
 			result: true,
 			name:   "asiakas in value",
 		},

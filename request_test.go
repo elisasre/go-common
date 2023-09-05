@@ -68,11 +68,13 @@ func TestMakeRequestMock(t *testing.T) {
 		MaxRetries: 1,
 	}
 
+	helloWorld := `{"hello":"world"}`
+
 	client := &MockClient{
 		DoFunc: func(req *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: 200,
-				Body:       io.NopCloser(strings.NewReader(`{"hello":"world"}`)),
+				Body:       io.NopCloser(strings.NewReader(helloWorld)),
 			}, nil
 		},
 	}
@@ -90,6 +92,6 @@ func TestMakeRequestMock(t *testing.T) {
 		backoff,
 	)
 	require.NoError(t, err)
-	assert.Equal(t, `{"hello":"world"}`, body.Body)
+	assert.Equal(t, helloWorld, string(body.Body))
 	assert.Equal(t, 200, body.StatusCode)
 }
