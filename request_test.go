@@ -3,8 +3,14 @@ package common
 import (
 	"context"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
+	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func ExampleMakeRequest() {
@@ -54,4 +60,36 @@ func ExampleMakeRequest() {
 	// 200
 	// <nil>
 	// Get "https://ingress-api.csf.elisa.fi/healthz": context deadline exceeded
+}
+
+func TestMakeRequestMock(t *testing.T) {
+	backoff := Backoff{
+		Duration:   100 * time.Millisecond,
+		MaxRetries: 1,
+	}
+
+	client := &MockClient{
+		DoFunc: func(req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(strings.NewReader(`{"hello":"world"}`)),
+			}, nil
+		},
+	}
+
+	ctx := context.Background()
+	body, err := MakeRequest(
+		ctx,
+		HTTPRequest{
+			URL:    "http://foobar",
+			Method: "GET",
+			OKCode: []int{200},
+		},
+		nil,
+		client,
+		backoff,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, `{"hello":"world"}`, body.Body)
+	assert.Equal(t, 200, body.StatusCode)
 }
