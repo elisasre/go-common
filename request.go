@@ -21,6 +21,11 @@ func init() {
 	log.Logger = log.With().Logger()
 }
 
+// HTTPClient allows inserting either *http.Client or mock client.
+type HTTPClient interface {
+	Do(req *http.Request) (*http.Response, error)
+}
+
 // HTTPRequest ...
 type HTTPRequest struct {
 	Method      string
@@ -54,7 +59,7 @@ func MakeRequest(
 	ctx context.Context,
 	request HTTPRequest,
 	output interface{},
-	client *http.Client,
+	client HTTPClient,
 	backoff Backoff,
 ) (*HTTPResponse, error) {
 	httpresp := &HTTPResponse{}
@@ -130,4 +135,14 @@ func MakeRequest(
 		return rtn, err
 	})
 	return httpresp, err
+}
+
+// MockClient is helper client for mock tests.
+type MockClient struct {
+	DoFunc func(req *http.Request) (*http.Response, error)
+}
+
+// Do executes the HTTPClient interface Do function.
+func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
+	return m.DoFunc(req)
 }

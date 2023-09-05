@@ -93,3 +93,13 @@ func GetResultDiff[T comparable](results []T, desiredResults []T) []T {
 	}
 	return missingResults
 }
+
+// ArrayContainsIgnoreCase returns true if value is found from any item in array.
+func ArrayContainsIgnoreCase(keys []string, value string) bool {
+	for _, key := range keys {
+		if strings.Contains(strings.ToLower(value), strings.ToLower(key)) {
+			return true
+		}
+	}
+	return false
+}

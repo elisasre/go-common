@@ -179,3 +179,45 @@ func ExampleGetResultDiff() {
 	// Output: []
 	// [heh]
 }
+
+func TestArrayContainsIgnoreCase(t *testing.T) {
+	type testCase struct {
+		keys   []string
+		value  string
+		result bool
+		name   string
+	}
+
+	testCases := []testCase{
+		{
+			keys:   []string{"foo", "bar"},
+			value:  "foo",
+			result: true,
+			name:   "foo in foo bar",
+		},
+		{
+			keys:   []string{"asiakas", "bar"},
+			value:  "IN-asiakasfoo",
+			result: true,
+			name:   "asiakas in value",
+		},
+		{
+			keys:   []string{"käytös", "bar"},
+			value:  "AR, ei KäYtössä",
+			result: true,
+			name:   "käytös in value",
+		},
+		{
+			keys:   []string{"heh", "bar"},
+			value:  "foo",
+			result: false,
+			name:   "foo not in heh bar",
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.result, ArrayContainsIgnoreCase(tc.keys, tc.value))
+		})
+	}
+}
