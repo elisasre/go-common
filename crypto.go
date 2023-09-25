@@ -37,7 +37,10 @@ func createHash(key string) string {
 // Encrypt the secret input with passphrase
 // source https://www.thepolyglotdeveloper.com/2018/02/encrypt-decrypt-data-golang-application-crypto-packages/
 func Encrypt(data []byte, passphrase string) ([]byte, error) {
-	block, _ := aes.NewCipher([]byte(createHash(passphrase)))
+	block, err := aes.NewCipher([]byte(createHash(passphrase)))
+	if err != nil {
+		return nil, err
+	}
 	gcm, err := cipher.NewGCM(block)
 	if err != nil {
 		return nil, err
