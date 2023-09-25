@@ -1,8 +1,8 @@
 package common
 
 import (
+	"fmt"
 	"os"
-	"sync"
 	"testing"
 	"time"
 
@@ -68,93 +68,86 @@ func TestRemoveDot(t *testing.T) {
 }
 
 type Config struct {
-	Index int `yaml:"index"`
+	Value int `yaml:"value"`
 }
 
 func TestLoadAndListenConfig_NonExistingFile(t *testing.T) {
-	err := LoadAndListenConfig("invalid.yaml", &Config{}, nil)
+	_, err := LoadAndListenConfig("invalid.yaml", &Config{}, nil)
 	assert.ErrorContains(t, err, "no such file or directory")
 }
 
 func TestLoadAndListenConfig_InvalidSyntax(t *testing.T) {
-	err := LoadAndListenConfig("testdata/invalid.yaml", &Config{}, nil)
+	_, err := LoadAndListenConfig("testdata/invalid.yaml", &Config{}, nil)
 	assert.ErrorContains(t, err, "invalid syntax")
 }
 
-func (u *UpdateValues) Set(updateCalls int, oldConf interface{}, notifyFn func(interface{})) {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	u.UpdateCalls += updateCalls
-	u.OldValue = oldConf.(Config).Index
-	notifyFn(oldConf)
-}
-
-func (u *UpdateValues) GetUpdateCalls() int {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	return u.UpdateCalls
-}
-
-func (u *UpdateValues) GetOldValue() int {
-	u.mu.Lock()
-	defer u.mu.Unlock()
-	return u.OldValue
-}
-
-type UpdateValues struct {
-	mu          sync.Mutex
-	UpdateCalls int
-	OldValue    int
-}
-
 func TestLoadAndListenConfigOnUpdate(t *testing.T) {
-	filePath := "testdata/test2.yaml"
-	data, err := yaml.Marshal(&Config{})
+	firstConf := Config{Value: 1}
+	filePath := "testdata/listen_config.yaml"
+	f, err := os.Create(filePath)
 	require.NoError(t, err)
-	err = os.WriteFile(filePath, data, 0o600)
-	require.NoError(t, err)
+	t.Cleanup(func() { assert.NoError(t, os.Remove(filePath)) })
 
-	realConf := &Config{}
-	values := &UpdateValues{}
+	writeConf(t, firstConf, f)
+
+	app := &TestApp{}
 	notifyFn, waitForUpdate := updateCallbacks()
-	err = LoadAndListenConfig(filePath, realConf, func(oldConf interface{}) {
-		values.Set(1, oldConf, notifyFn)
+	c, err := LoadAndListenConfig(filePath, Config{}, func(newConf Config) {
+		app.SetConf(newConf, notifyFn)
 	})
-	require.NoError(t, err)
-	assert.Equal(t, 0, realConf.Index)
-	assert.Equal(t, 0, values.GetOldValue())
-	assert.Equal(t, 0, values.GetUpdateCalls())
 
-	data, err = yaml.Marshal(&Config{
-		Index: 1,
-	})
 	require.NoError(t, err)
-	err = os.WriteFile(filePath, data, 0o600)
-	require.NoError(t, err)
+	assert.Equal(t, firstConf, c)
+	assert.Equal(t, 0, app.GetUpdateCalls())
+
+	secondConf := Config{Value: 10}
+	writeConf(t, secondConf, f)
 
 	waitForUpdate(t)
-	assert.Equal(t, 1, realConf.Index)
-	assert.Equal(t, 0, values.GetOldValue())
-	assert.Equal(t, 1, values.GetUpdateCalls())
+	assert.Equal(t, secondConf, app.GetConf())
+	assert.Equal(t, 1, app.GetUpdateCalls())
 
-	data, err = yaml.Marshal(&Config{
-		Index: 2,
-	})
-	require.NoError(t, err)
-	err = os.WriteFile(filePath, data, 0o600)
-	require.NoError(t, err)
+	thirdConf := Config{Value: 20}
+	writeConf(t, thirdConf, f)
 
 	waitForUpdate(t)
-	assert.Equal(t, 2, realConf.Index)
-	assert.Equal(t, 1, values.GetOldValue())
-	assert.Equal(t, 2, values.GetUpdateCalls())
+	assert.Equal(t, thirdConf, app.GetConf())
+	assert.Equal(t, 2, app.GetUpdateCalls())
 }
 
-func updateCallbacks() (func(interface{}), func(testing.TB)) {
+func writeConf(t *testing.T, c Config, f *os.File) {
+	t.Helper()
+	data, err := yaml.Marshal(&c)
+	require.NoError(t, err)
+	_, err = f.WriteAt(data, 0)
+	require.NoError(t, err)
+}
+
+type TestApp struct {
+	conf        Config
+	updateCalls int
+}
+
+func (u *TestApp) SetConf(c Config, notifyFn func(Config)) {
+	u.updateCalls++
+	fmt.Println(c)
+	u.conf = c
+	notifyFn(c)
+}
+
+func (u *TestApp) GetUpdateCalls() int {
+	return u.updateCalls
+}
+
+func (u *TestApp) GetConf() Config {
+	return u.conf
+}
+
+func updateCallbacks() (func(Config), func(testing.TB)) {
 	// Give some buffer for channel in case
 	// viper decides to send multiple events.
 	ch := make(chan struct{}, 10)
-	notifier := func(interface{}) {
+	notifier := func(Config) {
 		ch <- struct{}{}
 	}
 
