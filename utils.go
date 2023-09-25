@@ -8,7 +8,6 @@ import (
 	"math/big"
 	"net/http"
 	"os"
-	"reflect"
 	"runtime"
 	"strings"
 
@@ -103,34 +102,37 @@ func RemoveDot(input string) string {
 }
 
 // LoadAndListenConfig loads config file to struct and listen changes in it.
-func LoadAndListenConfig(path string, obj interface{}, onUpdate func(oldObj interface{})) error {
+func LoadAndListenConfig[Conf any](path string, c Conf, onUpdate func(c Conf)) (Conf, error) {
 	v := viper.New()
 	v.SetConfigFile(path)
 	if err := v.ReadInConfig(); err != nil {
-		return fmt.Errorf("unable to read config: %w", err)
+		return c, fmt.Errorf("unable to read config: %w", err)
 	}
-	if err := v.Unmarshal(&obj); err != nil {
-		return fmt.Errorf("unable to marshal config: %w", err)
+	if err := v.Unmarshal(&c); err != nil {
+		return c, fmt.Errorf("unable to marshal config: %w", err)
 	}
+
 	log.Info().
 		Str("path", v.ConfigFileUsed()).
 		Msg("config loaded")
 	v.OnConfigChange(func(e fsnotify.Event) {
 		log.Info().
 			Str("path", e.Name).
+			Str("operation", e.Op.String()).
 			Msg("config reloaded")
-		oldObj := reflect.Indirect(reflect.ValueOf(obj)).Interface()
-		if err := v.Unmarshal(&obj); err != nil {
+		cc := c
+		if err := v.Unmarshal(&cc); err != nil {
 			log.Fatal().
 				Str("path", e.Name).
 				Msgf("unable to marshal config: %v", err)
 		}
 		if onUpdate != nil {
-			onUpdate(oldObj)
+			onUpdate(cc)
 		}
 	})
 	v.WatchConfig()
-	return nil
+
+	return c, nil
 }
 
 // RecoverWithContext recovers from panic and sends it to Sentry.
