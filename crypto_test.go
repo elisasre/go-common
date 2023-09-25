@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBase64decode(t *testing.T) {
@@ -27,6 +28,30 @@ func ExampleBase64decode() {
 func ExampleBase64encode() {
 	fmt.Println(Base64encode([]byte("SUCCESS")))
 	// Output: U1VDQ0VTUw==
+}
+
+func TestEncryptDecrypt(t *testing.T) {
+	const (
+		input  = "supersecret"
+		passwd = "testpassword"
+	)
+
+	encrypted, err := Encrypt([]byte(input), passwd)
+	require.NoError(t, err)
+	data, err := Decrypt(encrypted, passwd)
+	require.NoError(t, err)
+	require.Equal(t, input, string(data))
+}
+
+func FuzzEncryptDecrypt(f *testing.F) {
+	f.Add([]byte("some data"), "passwd")
+	f.Fuzz(func(t *testing.T, input []byte, passwd string) {
+		encrypted, err := Encrypt(input, passwd)
+		require.NoError(t, err)
+		data, err := Decrypt(encrypted, passwd)
+		require.NoError(t, err)
+		require.Equal(t, input, data)
+	})
 }
 
 func ExampleEncrypt() {
