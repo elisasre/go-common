@@ -102,6 +102,15 @@ func RemoveDot(input string) string {
 }
 
 // LoadAndListenConfig loads config file to struct and listen changes in it.
+// User of this function should make sure to protect application state by mutex
+// if changing configuration on thr flight might cause date race or other problems
+// in application using this functionality.
+//
+// NOTES:
+// When application is run by orchestrator like k8s applying configuration changes by starting
+// new instance should be preferred if possible. That way we avoid reimplementing state management
+// inside application which is already done by k8s. However for applications with big internal caches
+// or otherwise stateful implementations this functionality can offer huge performance benefits.
 func LoadAndListenConfig[Conf any](path string, c Conf, onUpdate func(c Conf)) (Conf, error) {
 	v := viper.New()
 	v.SetConfigFile(path)
