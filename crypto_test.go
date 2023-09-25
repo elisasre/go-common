@@ -45,6 +45,7 @@ func TestEncryptDecrypt(t *testing.T) {
 
 func FuzzEncryptDecrypt(f *testing.F) {
 	f.Add([]byte("some data"), "passwd")
+
 	f.Fuzz(func(t *testing.T, input []byte, passwd string) {
 		encrypted, err := Encrypt(input, passwd)
 		require.NoError(t, err)
