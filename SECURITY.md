@@ -1,0 +1,1 @@
+Please contact us in https://elisa.fi/en/vulnerabilities/
