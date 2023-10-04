@@ -17,16 +17,7 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Retrieve Go version
-      run: |
-        echo "GO_VERSION=$(make go-version)" >> $GITHUB_OUTPUT
-      id: version
-
-    - uses: actions/setup-go@v4
-      with:
-        cache: false
-        check-latest: false
-        go-version: ${{ steps.version.outputs.GO_VERSION }}
+    - uses: elisa-actions/setup-go-and-mage@v1
 
     - name: publish package
       run: |

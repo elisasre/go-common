@@ -21,32 +21,15 @@ jobs:
       with:
         fetch-depth: 1
 
-    - name: Retrieve Go version
-      run: echo "GO_VERSION=$(make go-version)" >> $GITHUB_OUTPUT
-      id: version
-
-    - uses: actions/setup-go@v4
-      with:
-        cache: false
-        check-latest: false
-        go-version: ${{ steps.version.outputs.GO_VERSION }}
-
-    - name: Configure Personal Access Token
-      run: git config --global url."https://dops-sre:${{ secrets.DOPS_SRE_PAT }}@github.com/".insteadOf "https://github.com/"
-
-    - name: Validate go.mk
-      env:
-        GH_TOKEN: ${{ secrets.DOPS_SRE_PAT }}
-      run: make validate-go-mk
+    - uses: elisa-actions/setup-go-and-mage@v1
 
     - name: Verify dependencies
       run: |
-        make go-tidy
+        go mod tidy
         git diff --exit-code -- go.mod go.sum || (echo "Deps are not up to date: run 'go mod tidy' before commit" && exit 1)
 
-    - name: Test
-      run: |
-        GOMAXPROCS=4 make go-unit-test
+    - name: Run unit tests
+      run: mage unitTest
 
     - name: Upload test coverage to codecov
       uses: elisa-actions/codecov-action@v4-elisa
@@ -56,7 +39,7 @@ jobs:
     - name: Lint
       env:
         GOLANGCI_LINT_FLAGS: --out-format=github-actions
-      run: make go-lint
+      run: mage lint
 
   automerge:
     needs: [analyze]
