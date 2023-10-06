@@ -2,7 +2,7 @@ module github.com/elisasre/go-common
 
 go 1.21
 
-toolchain go1.21.1
+toolchain go1.21.2
 
 replace golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220427172511-eb4f295cb31f
 
