@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/elisasre/go-common"
-	"github.com/golang-jwt/jwt"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // Token struct.
@@ -45,7 +45,7 @@ func New(user *common.User) *Token {
 // UserJWTClaims contains struct for making and parsing jwt tokens.
 type UserJWTClaims struct {
 	*common.User
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 	Nonce string `json:"nonce,omitempty"`
 }
 
@@ -80,12 +80,12 @@ func (t *Token) SignExpires(key common.JWTKey, claim SignClaims) (string, error)
 
 	claims := UserJWTClaims{
 		t.User,
-		jwt.StandardClaims{
+		jwt.RegisteredClaims{
 			Subject:   sub,
-			Audience:  claim.Aud,
-			ExpiresAt: claim.Exp,
+			Audience:  jwt.ClaimStrings{claim.Aud},
+			ExpiresAt: jwt.NewNumericDate(time.Unix(claim.Exp, 0)),
 			Issuer:    claim.Issuer,
-			IssuedAt:  claim.Iat,
+			IssuedAt:  jwt.NewNumericDate(time.Unix(claim.Iat, 0)),
 		},
 		claim.Nonce,
 	}
@@ -119,7 +119,7 @@ func findKidFromArray(keys []common.JWTKey, kid interface{}) (common.JWTKey, err
 }
 
 // Parse will validate jwt token and return token.
-func Parse(raw string, keys []common.JWTKey) (*UserJWTClaims, error) {
+func Parse(raw string, keys []common.JWTKey, options ...jwt.ParserOption) (*UserJWTClaims, error) {
 	parsed, err := jwt.ParseWithClaims(raw, &UserJWTClaims{}, func(t *jwt.Token) (interface{}, error) {
 		if t.Method.Alg() != SignAlgo {
 			return nil, jwt.ErrSignatureInvalid
@@ -132,11 +132,11 @@ func Parse(raw string, keys []common.JWTKey) (*UserJWTClaims, error) {
 			return key.PublicKey, nil
 		}
 		return nil, fmt.Errorf("could not find kid from headers")
-	})
+	}, options...)
 	if err != nil {
 		return nil, err
 	} else if !parsed.Valid {
-		return nil, jwt.ValidationError{}
+		return nil, fmt.Errorf("jwt token was not valid")
 	}
 
 	claims, ok := parsed.Claims.(*UserJWTClaims)
