@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/elisasre/go-common"
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/require"
 )
 
@@ -127,7 +128,7 @@ func TestInvalidKid(t *testing.T) {
 	})
 	require.NoError(t, err)
 	_, err = Parse(token, []common.JWTKey{*key2})
-	require.Equal(t, fmt.Sprintf("could not find kid '%s'", key.KID), err.Error())
+	require.Contains(t, err.Error(), fmt.Sprintf("could not find kid '%s'", key.KID))
 }
 
 func TestExpired(t *testing.T) {
@@ -143,5 +144,23 @@ func TestExpired(t *testing.T) {
 	})
 	require.NoError(t, err)
 	_, err = Parse(token, []common.JWTKey{*key})
-	require.True(t, strings.HasPrefix(err.Error(), "token is expired by"))
+	require.Contains(t, err.Error(), "token is expired")
+}
+
+func TestIssuer(t *testing.T) {
+	key, err := common.GenerateNewKeyPair()
+	require.NoError(t, err)
+
+	testUser := New(&common.User{})
+	token, err := testUser.SignExpires(*key, SignClaims{
+		Aud:    "internal",
+		Exp:    time.Now().Add(time.Hour).Unix(),
+		Issuer: "http://localhost",
+		Scopes: AllScopes,
+	})
+	require.NoError(t, err)
+	_, err = Parse(token, []common.JWTKey{*key}, jwt.WithIssuer("http://foobar"))
+	require.True(t, strings.Contains(err.Error(), "token has invalid issuer"))
+	_, err = Parse(token, []common.JWTKey{*key}, jwt.WithIssuer("http://localhost"))
+	require.NoError(t, err)
 }
