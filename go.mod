@@ -10,7 +10,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.30.5
 	github.com/elisasre/mageutil v0.0.0-20230928105018-218eaec46530
 	github.com/fsnotify/fsnotify v1.6.0
-	github.com/getsentry/sentry-go v0.24.1
+	github.com/getsentry/sentry-go v0.25.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis/v8 v8.11.5
 	github.com/go-redis/redis_rate/v9 v9.1.2
