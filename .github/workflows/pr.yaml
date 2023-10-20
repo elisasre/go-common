@@ -34,6 +34,7 @@ jobs:
     - name: Upload test coverage to codecov
       uses: elisa-actions/codecov-action@07e2b138e8bfdb66b00d93f61e483f7eefd3a3fc
       with:
+        use_oidc: true
         url: https://codecov.csf.elisa.fi
 
     - name: Lint
