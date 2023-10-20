@@ -36,7 +36,6 @@ jobs:
       with:
         use_oidc: true
         url: https://codecov.csf.elisa.fi
-        version: v0.6.3
 
     - name: Lint
       env:
