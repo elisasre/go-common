@@ -32,7 +32,7 @@ jobs:
       run: mage unitTest
 
     - name: Upload test coverage to codecov
-      uses: elisa-actions/codecov-action@v4-elisa
+      uses: elisa-actions/codecov-action@07e2b138e8bfdb66b00d93f61e483f7eefd3a3fc
       with:
         url: https://codecov.csf.elisa.fi
 
