@@ -9,9 +9,7 @@ on:
 
 jobs:
   analyze:
-    runs-on:
-    - self-hosted
-    - kaas
+    runs-on: elisa-normal
     timeout-minutes: 15
     permissions:
       id-token: write
@@ -46,9 +44,7 @@ jobs:
     permissions:
       pull-requests: write
       contents: write
-    runs-on:
-      - self-hosted
-      - kaas
+    runs-on: elisa-normal
     timeout-minutes: 15
     steps:
       - name: Automerge dependabot PR
