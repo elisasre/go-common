@@ -155,11 +155,11 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 	}
 }
 
-
 // SentryErr sends error to Sentry.
 func SentryErr(ctx context.Context, err error) {
 	_, hub := setHubToContext(ctx)
 	hub.CaptureException(err)
+	log.Error().Msg(err.Error())
 }
 
 // MakeSentryTransaction creates Sentry transaction.
