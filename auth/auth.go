@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/elisasre/go-common"
@@ -14,17 +15,17 @@ import (
 type AuthInterface interface {
 	GetKeys() []common.JWTKey
 	GetCurrentKey() common.JWTKey
-	RotateKeys() error
-	RefreshKeys(bool) ([]common.JWTKey, error)
+	RotateKeys(context.Context) error
+	RefreshKeys(context.Context, bool) ([]common.JWTKey, error)
 }
 
-func AuthProvider(mode string, store common.Datastore) (AuthInterface, error) {
+func AuthProvider(ctx context.Context, mode string, store common.Datastore) (AuthInterface, error) {
 	log.Info().Str("mode", mode).Msg("Using AuthProvider")
 	switch mode {
 	case "memory":
-		return memory.NewMemory()
+		return memory.NewMemory(ctx)
 	case "database":
-		return database.NewDatabase(store)
+		return database.NewDatabase(ctx, store)
 	default:
 		return nil, fmt.Errorf("unknown auth mode '%s'", mode)
 	}

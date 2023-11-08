@@ -1,22 +1,24 @@
 package memory
 
 import (
+	"context"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 )
 
 func TestRotateKeys(t *testing.T) {
-	mem, err := NewMemory()
+	ctx := context.Background()
+	mem, err := NewMemory(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(mem.keys))
-	err = mem.RotateKeys()
+	err = mem.RotateKeys(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 2, len(mem.keys))
-	err = mem.RotateKeys()
+	err = mem.RotateKeys(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 3, len(mem.keys))
-	err = mem.RotateKeys()
+	err = mem.RotateKeys(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 3, len(mem.keys))
 
@@ -26,7 +28,7 @@ func TestRotateKeys(t *testing.T) {
 	}
 	// rotate all keys
 	for i := 0; i < 5; i++ {
-		err = mem.RotateKeys()
+		err = mem.RotateKeys(ctx)
 		require.NoError(t, err)
 	}
 
@@ -38,12 +40,13 @@ func TestRotateKeys(t *testing.T) {
 }
 
 func TestGetAndRefresh(t *testing.T) {
-	mem, err := NewMemory()
+	ctx := context.Background()
+	mem, err := NewMemory(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(mem.keys))
 	require.Equal(t, mem.keys[0], mem.GetCurrentKey())
 	require.Equal(t, mem.keys, mem.GetKeys())
-	data, err := mem.RefreshKeys(true)
+	data, err := mem.RefreshKeys(ctx, true)
 	require.NoError(t, err)
 	require.Equal(t, mem.keys, data)
 }

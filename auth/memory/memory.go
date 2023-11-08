@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -17,9 +18,9 @@ type Memory struct {
 
 // NewMemory init new memory interface.
 // Memory is used mainly for testing do NOT use in production.
-func NewMemory() (*Memory, error) {
+func NewMemory(ctx context.Context) (*Memory, error) {
 	m := &Memory{}
-	err := m.RotateKeys()
+	err := m.RotateKeys(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -27,7 +28,7 @@ func NewMemory() (*Memory, error) {
 }
 
 // RotateKeys rotates the jwt secrets.
-func (m *Memory) RotateKeys() error {
+func (m *Memory) RotateKeys(ctx context.Context) error {
 	m.keysMu.Lock()
 	defer m.keysMu.Unlock()
 	start := time.Now()
@@ -69,6 +70,6 @@ func (m *Memory) GetCurrentKey() common.JWTKey {
 }
 
 // RefreshKeys refresh the keys from database.
-func (m *Memory) RefreshKeys(reload bool) ([]common.JWTKey, error) {
+func (m *Memory) RefreshKeys(ctx context.Context, reload bool) ([]common.JWTKey, error) {
 	return m.keys, nil
 }
