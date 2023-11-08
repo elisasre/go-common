@@ -18,9 +18,9 @@ type Memory struct {
 
 // NewMemory init new memory interface.
 // Memory is used mainly for testing do NOT use in production.
-func NewMemory() (*Memory, error) {
+func NewMemory(ctx context.Context) (*Memory, error) {
 	m := &Memory{}
-	err := m.RotateKeys()
+	err := m.RotateKeys(ctx)
 	if err != nil {
 		return nil, err
 	}

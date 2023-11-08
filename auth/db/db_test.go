@@ -46,23 +46,24 @@ func (store *DB) RotateJWTKeys(c context.Context, idx uint) error {
 }
 
 func TestRotateKeys(t *testing.T) {
+	ctx := context.Background()
 	store := &DB{}
-	db, err := NewDatabase(store)
+	db, err := NewDatabase(ctx, store)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(db.keys))
 
-	db2, err := NewDatabase(store)
+	db2, err := NewDatabase(ctx, store)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(db2.keys))
 	require.Equal(t, db.keys, db2.keys)
 
-	err = db.RotateKeys()
+	err = db.RotateKeys(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 2, len(db.keys))
-	err = db.RotateKeys()
+	err = db.RotateKeys(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 3, len(db.keys))
-	err = db.RotateKeys()
+	err = db.RotateKeys(ctx)
 	require.NoError(t, err)
 	require.Equal(t, 3, len(db.keys))
 
@@ -72,7 +73,7 @@ func TestRotateKeys(t *testing.T) {
 	}
 	// rotate all keys
 	for i := 0; i < 5; i++ {
-		err = db.RotateKeys()
+		err = db.RotateKeys(ctx)
 		require.NoError(t, err)
 	}
 
@@ -84,13 +85,14 @@ func TestRotateKeys(t *testing.T) {
 }
 
 func TestGetAndRefresh(t *testing.T) {
+	ctx := context.Background()
 	store := &DB{}
-	db, err := NewDatabase(store)
+	db, err := NewDatabase(ctx, store)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(db.keys))
 	require.Equal(t, db.keys[0], db.GetCurrentKey())
 	require.Equal(t, db.keys, db.GetKeys())
-	data, err := db.RefreshKeys(true)
+	data, err := db.RefreshKeys(ctx, true)
 	require.NoError(t, err)
 	require.Equal(t, db.keys, data)
 }

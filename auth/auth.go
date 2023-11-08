@@ -23,7 +23,7 @@ func AuthProvider(ctx context.Context, mode string, store common.Datastore) (Aut
 	log.Info().Str("mode", mode).Msg("Using AuthProvider")
 	switch mode {
 	case "memory":
-		return memory.NewMemory()
+		return memory.NewMemory(ctx)
 	case "database":
 		return database.NewDatabase(ctx, store)
 	default:
