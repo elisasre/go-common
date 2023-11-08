@@ -13,7 +13,6 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"go.opentelemetry.io/otel/propagation"
 )
 
 func init() {
@@ -67,17 +66,8 @@ func MakeRequest(
 	if request.Unmarshaler == nil {
 		request.Unmarshaler = json.Unmarshal
 	}
-	propgator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
-	carrier := propagation.MapCarrier{}
-	propgator.Inject(ctx, carrier)
-	if request.Headers == nil && len(carrier) > 0 {
-		request.Headers = make(map[string]string)
-	}
-	for k, v := range carrier {
-		request.Headers[k] = v
-	}
 	err := SleepUntil(backoff, func() (bool, error) {
-		httpreq, err := http.NewRequest(request.Method, request.URL, nil)
+		httpreq, err := http.NewRequestWithContext(ctx, request.Method, request.URL, nil)
 		if err != nil {
 			log.Error().
 				Str("method", request.Method).
@@ -89,7 +79,6 @@ func MakeRequest(
 		if len(request.Body) > 0 {
 			httpreq.Body = io.NopCloser(bytes.NewReader(request.Body))
 		}
-		httpreq = httpreq.WithContext(ctx)
 
 		for k, v := range request.Headers {
 			httpreq.Header.Add(k, v)
