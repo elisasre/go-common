@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"context"
 	"sync"
 	"time"
 
@@ -27,7 +28,7 @@ func NewMemory() (*Memory, error) {
 }
 
 // RotateKeys rotates the jwt secrets.
-func (m *Memory) RotateKeys() error {
+func (m *Memory) RotateKeys(ctx context.Context) error {
 	m.keysMu.Lock()
 	defer m.keysMu.Unlock()
 	start := time.Now()
@@ -69,6 +70,6 @@ func (m *Memory) GetCurrentKey() common.JWTKey {
 }
 
 // RefreshKeys refresh the keys from database.
-func (m *Memory) RefreshKeys(reload bool) ([]common.JWTKey, error) {
+func (m *Memory) RefreshKeys(ctx context.Context, reload bool) ([]common.JWTKey, error) {
 	return m.keys, nil
 }
