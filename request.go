@@ -70,6 +70,9 @@ func MakeRequest(
 	propgator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
 	carrier := propagation.MapCarrier{}
 	propgator.Inject(ctx, carrier)
+	if request.Headers == nil && len(carrier) > 0 {
+		request.Headers = make(map[string]string)
+	}
 	for k, v := range carrier {
 		request.Headers[k] = v
 	}
