@@ -68,6 +68,10 @@ func MakeRequest(
 		request.Unmarshaler = json.Unmarshal
 	}
 
+	if request.Headers == nil {
+		request.Headers = make(map[string]string)
+	}
+
 	mapCarrier := make(map[string]string)
 	propgator := propagation.NewCompositeTextMapPropagator(propagation.TraceContext{}, propagation.Baggage{})
 	propgator.Inject(ctx, propagation.MapCarrier(mapCarrier))
