@@ -13,7 +13,7 @@ require (
 	github.com/getsentry/sentry-go v0.25.0
 	github.com/gin-gonic/gin v1.9.1
 	github.com/go-redis/redis_rate/v10 v10.0.1
-	github.com/golang-jwt/jwt/v5 v5.0.0
+	github.com/golang-jwt/jwt/v5 v5.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/prometheus/client_golang v1.17.0
 	github.com/redis/go-redis/v9 v9.3.0
