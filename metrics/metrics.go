@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"unicode/utf8"
 
 	"github.com/gin-gonic/gin"
 	"github.com/prometheus/client_golang/prometheus"
@@ -16,10 +17,10 @@ type Prometheus struct {
 	reqCnt                  *prometheus.CounterVec
 	reqDur                  *prometheus.HistogramVec
 	ReqCntURLLabelMappingFn func(c *gin.Context) string
+	reg                     *prometheus.Registry
 }
 
-func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
-	pMux := http.NewServeMux()
+func initRegistry(cs ...prometheus.Collector) *Prometheus {
 	reg := prometheus.NewPedanticRegistry()
 	reg.MustRegister(
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
@@ -31,28 +32,38 @@ func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
 		ReqCntURLLabelMappingFn: func(c *gin.Context) string {
 			return c.Request.URL.Path
 		},
+		reg: reg,
 	}
 	reg.MustRegister(p.reqCnt)
 	reg.MustRegister(p.reqDur)
 	for _, c := range cs {
 		reg.MustRegister(c)
 	}
-	pMux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
+	return p
+}
+
+func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
+	pMux := http.NewServeMux()
+	p := initRegistry(cs...)
+	pMux.Handle("/metrics", promhttp.HandlerFor(p.reg, promhttp.HandlerOpts{}))
 	go func() {
 		listenAddr := fmt.Sprintf(":%d", port)
 
-		server := &http.Server{
+		srv := &http.Server{
 			Addr:              listenAddr,
 			Handler:           pMux,
 			ReadHeaderTimeout: 3 * time.Second,
 		}
-
-		err := server.ListenAndServe()
+		err := srv.ListenAndServe()
 		if err != nil {
 			panic(err)
 		}
 	}()
 	return p
+}
+
+func (p *Prometheus) GetRegistry() *prometheus.Registry {
+	return p.reg
 }
 
 func (p *Prometheus) AddURLMappingFn(fn func(c *gin.Context) string) {
@@ -68,7 +79,9 @@ func (p *Prometheus) HandlerFunc() gin.HandlerFunc {
 
 		url := p.ReqCntURLLabelMappingFn(c)
 
-		p.reqDur.WithLabelValues(status, c.Request.Method, url).Observe(elapsed)
-		p.reqCnt.WithLabelValues(status, c.Request.Method, c.HandlerName(), c.Request.Host, url).Inc()
+		if utf8.ValidString(url) {
+			p.reqDur.WithLabelValues(status, c.Request.Method, url).Observe(elapsed)
+			p.reqCnt.WithLabelValues(status, c.Request.Method, c.HandlerName(), c.Request.Host, url).Inc()
+		}
 	}
 }
