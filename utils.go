@@ -17,7 +17,6 @@ import (
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 const (
@@ -238,11 +237,4 @@ func addSpanTracer(handlers []gin.HandlerFunc) []gin.HandlerFunc {
 	handlers = handlers[:len(handlers)-1]
 	handlers = append(handlers, sentrySpanTracer(), lastElement)
 	return handlers
-}
-
-// OtelHTTPClient returns opentelemetry http client.
-func OtelHTTPClient() *http.Client {
-	return &http.Client{
-		Transport: otelhttp.NewTransport(http.DefaultTransport),
-	}
 }
