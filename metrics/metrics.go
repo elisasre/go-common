@@ -17,9 +17,10 @@ type Prometheus struct {
 	reqCnt                  *prometheus.CounterVec
 	reqDur                  *prometheus.HistogramVec
 	ReqCntURLLabelMappingFn func(c *gin.Context) string
+	reg                     *prometheus.Registry
 }
 
-func initRegistry(cs ...prometheus.Collector) (*Prometheus, *prometheus.Registry) {
+func initRegistry(cs ...prometheus.Collector) *Prometheus {
 	reg := prometheus.NewPedanticRegistry()
 	reg.MustRegister(
 		collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
@@ -31,19 +32,20 @@ func initRegistry(cs ...prometheus.Collector) (*Prometheus, *prometheus.Registry
 		ReqCntURLLabelMappingFn: func(c *gin.Context) string {
 			return c.Request.URL.Path
 		},
+		reg: reg,
 	}
 	reg.MustRegister(p.reqCnt)
 	reg.MustRegister(p.reqDur)
 	for _, c := range cs {
 		reg.MustRegister(c)
 	}
-	return p, reg
+	return p
 }
 
-func NewPrometheus(port int, cs ...prometheus.Collector) (*Prometheus, *prometheus.Registry) {
+func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
 	pMux := http.NewServeMux()
-	p, reg := initRegistry(cs...)
-	pMux.Handle("/metrics", promhttp.HandlerFor(reg, promhttp.HandlerOpts{}))
+	p := initRegistry(cs...)
+	pMux.Handle("/metrics", promhttp.HandlerFor(p.reg, promhttp.HandlerOpts{}))
 	go func() {
 		listenAddr := fmt.Sprintf(":%d", port)
 
@@ -57,7 +59,11 @@ func NewPrometheus(port int, cs ...prometheus.Collector) (*Prometheus, *promethe
 			panic(err)
 		}
 	}()
-	return p, reg
+	return p
+}
+
+func (p *Prometheus) GetRegistry() *prometheus.Registry {
+	return p.reg
 }
 
 func (p *Prometheus) AddURLMappingFn(fn func(c *gin.Context) string) {

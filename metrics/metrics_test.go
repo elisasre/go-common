@@ -14,8 +14,8 @@ import (
 func TestPrometheus(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	p, reg := NewPrometheus(65001)
-
+	p := NewPrometheus(65001)
+	reg := p.GetRegistry()
 	r.Use(p.HandlerFunc())
 	r.GET("/ping", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
