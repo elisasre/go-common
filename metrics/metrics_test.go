@@ -57,7 +57,7 @@ func TestPrometheus(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			for i := 0; i < tc.count; i++ {
 				w := httptest.NewRecorder()
-				req := httptest.NewRequest("GET", string(tc.url[:]), nil)
+				req := httptest.NewRequest("GET", string(tc.url), nil)
 				r.ServeHTTP(w, req)
 				assert.Equal(t, tc.code, w.Code)
 			}
