@@ -15,9 +15,17 @@ func TestPrometheus(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
 	p := NewPrometheus(65001)
+	p.AddSkipMetricsURLFn(func(c *gin.Context) bool {
+		return c.Request.URL.Path == "/skip"
+	})
 	reg := p.GetRegistry()
 	r.Use(p.HandlerFunc())
 	r.GET("/ping", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "pong",
+		})
+	})
+	r.GET("/skip", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"message": "pong",
 		})
@@ -43,6 +51,13 @@ func TestPrometheus(t *testing.T) {
 			url:   []byte("/notfound"),
 			code:  http.StatusNotFound,
 			count: 2,
+		},
+		{
+			name:        "request to /skip path",
+			url:         []byte("/skip"),
+			code:        http.StatusOK,
+			count:       4,
+			ignoreCount: true,
 		},
 		{
 			name:        "request to non utf8 path",
