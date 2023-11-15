@@ -17,6 +17,7 @@ type Prometheus struct {
 	reqCnt                  *prometheus.CounterVec
 	reqDur                  *prometheus.HistogramVec
 	ReqCntURLLabelMappingFn func(c *gin.Context) string
+	SkipMetricsURLFn        func(c *gin.Context) bool
 	reg                     *prometheus.Registry
 }
 
@@ -31,6 +32,9 @@ func initRegistry(cs ...prometheus.Collector) *Prometheus {
 		reqDur: reqDur,
 		ReqCntURLLabelMappingFn: func(c *gin.Context) string {
 			return c.Request.URL.Path
+		},
+		SkipMetricsURLFn: func(c *gin.Context) bool {
+			return false
 		},
 		reg: reg,
 	}
@@ -70,6 +74,10 @@ func (p *Prometheus) AddURLMappingFn(fn func(c *gin.Context) string) {
 	p.ReqCntURLLabelMappingFn = fn
 }
 
+func (p *Prometheus) AddSkipMetricsURLFn(fn func(c *gin.Context) bool) {
+	p.SkipMetricsURLFn = fn
+}
+
 func (p *Prometheus) HandlerFunc() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
@@ -79,7 +87,7 @@ func (p *Prometheus) HandlerFunc() gin.HandlerFunc {
 
 		url := p.ReqCntURLLabelMappingFn(c)
 
-		if utf8.ValidString(url) {
+		if utf8.ValidString(url) && !p.SkipMetricsURLFn(c) {
 			p.reqDur.WithLabelValues(status, c.Request.Method, url).Observe(elapsed)
 			p.reqCnt.WithLabelValues(status, c.Request.Method, c.HandlerName(), c.Request.Host, url).Inc()
 		}
