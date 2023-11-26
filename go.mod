@@ -8,7 +8,7 @@ replace golang.org/x/crypto => golang.org/x/crypto v0.0.0-20220427172511-eb4f295
 
 require (
 	github.com/alicebob/miniredis/v2 v2.31.0
-	github.com/aws/aws-sdk-go-v2 v1.23.0
+	github.com/aws/aws-sdk-go-v2 v1.23.1
 	github.com/aws/aws-sdk-go-v2/config v1.18.44
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.3.3
 	github.com/elisasre/mageutil v1.3.0
