@@ -3,9 +3,9 @@ name: Pull Request
 on:
   pull_request:
     types:
-    - opened
-    - synchronize
-    - reopened
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   analyze:
@@ -15,25 +15,25 @@ jobs:
       id-token: write
       contents: read
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 1
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
 
-    - uses: elisa-actions/setup-go-and-mage@v1
+      - uses: elisa-actions/setup-go-and-mage@v1
 
-    - name: Verify dependencies
-      run: mage go:tidyAndVerify
+      - name: Verify dependencies
+        run: mage go:tidyAndVerify
 
-    - name: Run unit tests
-      run: mage go:unitTest
+      - name: Run unit tests
+        run: mage go:unitTest
 
-    - name: Upload test coverage to codecov
-      uses: elisa-actions/codecov-action@v4-elisa
-      with:
-        url: https://codecov.csf.elisa.fi
+      - name: Upload test coverage to codecov
+        uses: elisa-actions/codecov-action@v4-elisa
+        with:
+          url: https://codecov.csf.elisa.fi
 
-    - name: Lint
-      run: mage go:lint
+      - name: Lint
+        run: mage go:lint
 
   automerge:
     needs: [analyze]
