@@ -32,28 +32,29 @@ func RedisRateLimiter(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.Handl
 			c.Abort()
 			return
 		}
-		if limit != nil && rdb != nil {
-			res, err := limiter.Allow(ctx, key, redis_rate.PerMinute(PtrValue(limit)))
-			if err == nil {
-				reset := time.Now().Add(res.ResetAfter)
-				c.Header(ratelimitReset, strconv.Itoa(int(reset.Unix())))
-				c.Header(ratelimitLimit, strconv.Itoa(PtrValue(limit)))
-				c.Header(ratelimitRemaining, strconv.Itoa(res.Remaining))
-				if res.Allowed <= 0 {
-					c.JSON(http.StatusTooManyRequests,
-						ErrorResponse{Code: http.StatusTooManyRequests, Message: "rate limit exceeded"},
-					)
-					c.Abort()
-					return
-				}
-			} else {
-				shouldReturn := errFunc(c, err)
-				if shouldReturn {
-					return
-				}
+		if limit == nil || rdb == nil {
+			c.Next()
+			return
+		}
+		res, err := limiter.Allow(ctx, key, redis_rate.PerMinute(PtrValue(limit)))
+		if err == nil {
+			reset := time.Now().Add(res.ResetAfter)
+			c.Header(ratelimitReset, strconv.Itoa(int(reset.Unix())))
+			c.Header(ratelimitLimit, strconv.Itoa(PtrValue(limit)))
+			c.Header(ratelimitRemaining, strconv.Itoa(res.Remaining))
+			if res.Allowed <= 0 {
+				c.JSON(http.StatusTooManyRequests,
+					ErrorResponse{Code: http.StatusTooManyRequests, Message: "rate limit exceeded"},
+				)
+				c.Abort()
+				return
+			}
+		} else {
+			shouldReturn := errFunc(c, err)
+			if shouldReturn {
+				return
 			}
 		}
-
 		c.Next()
 	}
 }
