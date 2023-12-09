@@ -3,22 +3,10 @@
 package main
 
 import (
-	"context"
-
-	"github.com/elisasre/mageutil"
+	//mage:import
+	_ "github.com/elisasre/mageutil/git/target"
+	//mage:import
+	_ "github.com/elisasre/mageutil/golangcilint/target"
+	//mage:import
+	_ "github.com/elisasre/mageutil/golang/target"
 )
-
-// UnitTest whole repo
-func UnitTest(ctx context.Context) error {
-	return mageutil.UnitTest(ctx)
-}
-
-// Lint all go files.
-func Lint(ctx context.Context) error {
-	return mageutil.LintAll(ctx)
-}
-
-// Clean removes all files ignored by git
-func Clean(ctx context.Context) error {
-	return mageutil.Clean(ctx)
-}

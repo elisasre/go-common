@@ -22,12 +22,10 @@ jobs:
     - uses: elisa-actions/setup-go-and-mage@v1
 
     - name: Verify dependencies
-      run: |
-        go mod tidy
-        git diff --exit-code -- go.mod go.sum || (echo "Deps are not up to date: run 'go mod tidy' before commit" && exit 1)
+      run: mage go:tidyAndVerify
 
     - name: Run unit tests
-      run: mage unitTest
+      run: mage go:unitTest
 
     - name: Upload test coverage to codecov
       uses: elisa-actions/codecov-action@v4-elisa
@@ -35,9 +33,7 @@ jobs:
         url: https://codecov.csf.elisa.fi
 
     - name: Lint
-      env:
-        GOLANGCI_LINT_FLAGS: --out-format=github-actions
-      run: mage lint
+      run: mage go:lint
 
   automerge:
     needs: [analyze]
