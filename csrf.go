@@ -20,6 +20,8 @@ const (
 	Xcsrf = "X-CSRF-Token"
 	// Authorization is the header name which contains the token.
 	Authorization = "Authorization"
+
+	https = "https"
 )
 
 var ignoreMethods = []string{"GET", "HEAD", "OPTIONS", "TRACE"}
@@ -103,7 +105,7 @@ func CSRF(excludePaths []string) gin.HandlerFunc {
 				return
 			}
 
-			if parsedURL.Scheme != "https" {
+			if parsedURL.Scheme != https {
 				c.JSON(403, ErrorResponse{Code: 403, Message: insecureReferer})
 				c.Abort()
 				return

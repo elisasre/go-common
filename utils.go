@@ -64,13 +64,13 @@ func RandomToken() (string, error) {
 // routed through a reverse proxy with SSL termination.
 func IsHTTPS(r *http.Request) bool {
 	switch {
-	case r.URL.Scheme == "https":
+	case r.URL.Scheme == https:
 		return true
 	case r.TLS != nil:
 		return true
-	case strings.HasPrefix(r.Proto, "HTTPS"):
+	case strings.HasPrefix(strings.ToLower(r.Proto), https):
 		return true
-	case r.Header.Get("X-Forwarded-Proto") == "https":
+	case r.Header.Get("X-Forwarded-Proto") == https:
 		return true
 	default:
 		return false
