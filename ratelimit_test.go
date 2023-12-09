@@ -11,6 +11,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const testUser = "test-user"
+
 func setupRouter(mw gin.HandlerFunc) *gin.Engine {
 	r := gin.New()
 	r.GET("/healthz", mw, func(c *gin.Context) {
@@ -28,7 +30,7 @@ func TestRedisRateLimiterAlways(t *testing.T) {
 	})
 	alwaysRateLimiter := RedisRateLimiter(redisClient,
 		func(c *gin.Context) (key string, limit *int, err error) {
-			return "test-user", Int(2), nil
+			return testUser, Int(2), nil
 		},
 		func(c *gin.Context, err error) bool {
 			if err != nil {
@@ -110,7 +112,7 @@ func TestRedisRateLimiterForce(t *testing.T) {
 
 	forceRateLimiter := RedisRateLimiter(redisClient,
 		func(c *gin.Context) (key string, limit *int, err error) {
-			return "test-user", Int(2), nil
+			return testUser, Int(2), nil
 		},
 		func(c *gin.Context, err error) bool {
 			if err != nil {
@@ -148,7 +150,7 @@ func TestRedisRateLimiterForce(t *testing.T) {
 func TestRedisRateLimiterNil(t *testing.T) {
 	nilLimiter := RedisRateLimiter(nil,
 		func(c *gin.Context) (key string, limit *int, err error) {
-			return "test-user", Int(2), nil
+			return testUser, Int(2), nil
 		},
 		func(c *gin.Context, err error) bool {
 			if err != nil {
