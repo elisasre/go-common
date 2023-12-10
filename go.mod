@@ -6,9 +6,9 @@ toolchain go1.21.5
 
 require (
 	github.com/alicebob/miniredis/v2 v2.31.0
-	github.com/aws/aws-sdk-go-v2 v1.23.5
+	github.com/aws/aws-sdk-go-v2 v1.24.0
 	github.com/aws/aws-sdk-go-v2/config v1.25.11
-	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.3.8
+	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.3.9
 	github.com/elisasre/mageutil v1.4.4
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getsentry/sentry-go v0.25.0
@@ -63,7 +63,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.18.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.26.2 // indirect
-	github.com/aws/smithy-go v1.18.1 // indirect
+	github.com/aws/smithy-go v1.19.0 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bkielbasa/cyclop v1.2.1 // indirect
 	github.com/blizzy78/varnamelen v0.8.0 // indirect
