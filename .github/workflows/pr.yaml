@@ -31,6 +31,8 @@ jobs:
         uses: elisa-actions/codecov-action@v4-elisa
         with:
           url: https://codecov.csf.elisa.fi
+          flags: unit
+          files: ./target/tests/cover/unit/cover.txt
 
       - name: Lint
         run: mage go:lint
