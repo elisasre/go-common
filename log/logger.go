@@ -6,34 +6,78 @@ import (
 	"log/slog"
 	"os"
 	"strings"
-	"time"
 )
 
-const DefaultRefreshInterval = time.Second * 5
-
 // NewDefaultEnvLogger creates new slog.Logger using sane default configuration and sets it as a default logger.
-// Environment variables can be used to configure loggers format and level. Changing log level at runtime is also supported.
+// Environment variables can be used to configure loggers format and level. Options can be provided to overwrite defaults.
 //
 // Name:			Value:
 // LOG_LEVEL		DEBUG|INFO|WARN|ERROR
 // LOG_FORMAT		JSON|TEXT
 //
 // Note: LOG_FORMAT can't be changed at runtime.
-func NewDefaultEnvLogger() *slog.Logger {
-	lvl := &slog.LevelVar{}
-	lvl.Set(ParseLogLevelFromEnv())
-	go RefreshLogLevel(lvl, time.NewTicker(DefaultRefreshInterval))
-
-	handlerFn := ParseFormatEnv()
-	opts := &slog.HandlerOptions{
-		AddSource: true,
-		Level:     lvl,
+func NewDefaultEnvLogger(opts ...Opt) *slog.Logger {
+	b := &builder{opts: &slog.HandlerOptions{}}
+	defaults := []Opt{
+		WithHandlerFn(ParseFormatEnv()),
+		WithLeveler(ParseLogLevelFromEnv()),
+		WithOutput(os.Stdout),
+		WithSource(true),
+		WithReplacer(nil),
 	}
 
-	logger := slog.New(handlerFn(os.Stdout, opts))
+	opts = append(defaults, opts...)
+	for _, opt := range opts {
+		opt(b)
+	}
+
+	logger := slog.New(b.handlerFn(b.output, b.opts))
 	slog.SetDefault(logger)
 
 	return logger
+}
+
+type builder struct {
+	handlerFn HandlerFn
+	opts      *slog.HandlerOptions
+	output    io.Writer
+}
+
+type Opt func(*builder)
+
+// WithLeveler sets slog.HandlerOptions.Level.
+func WithLeveler(l slog.Leveler) Opt {
+	return func(b *builder) {
+		b.opts.Level = l
+	}
+}
+
+// WithSource sets slog.HandlerOptions.AddSource.
+func WithSource(enabled bool) Opt {
+	return func(b *builder) {
+		b.opts.AddSource = enabled
+	}
+}
+
+// WithReplacer sets slog.HandlerOptions.ReplaceAttr.
+func WithReplacer(fn func([]string, slog.Attr) slog.Attr) Opt {
+	return func(b *builder) {
+		b.opts.ReplaceAttr = fn
+	}
+}
+
+// WithHandlerFn can be used to provide slog.Handler lazily.
+func WithHandlerFn(h HandlerFn) Opt {
+	return func(b *builder) {
+		b.handlerFn = h
+	}
+}
+
+// WithOutput sets logger's output.
+func WithOutput(w io.Writer) Opt {
+	return func(b *builder) {
+		b.output = w
+	}
 }
 
 // HandlerFn is a shim type for slog's NewHandler functions.
@@ -87,11 +131,4 @@ func ParseLogLevel(level string) slog.Level {
 // ParseLogLevelFromEnv turns LOG_LEVEL env variable into slog.Level using logic from ParseLogLevel.
 func ParseLogLevelFromEnv() slog.Level {
 	return ParseLogLevel(os.Getenv("LOG_LEVEL"))
-}
-
-// RefreshLogLevel updates l's value from env with given interval until ticker is stopped.
-func RefreshLogLevel(l *slog.LevelVar, t *time.Ticker) {
-	for range t.C {
-		l.Set(ParseLogLevelFromEnv())
-	}
 }

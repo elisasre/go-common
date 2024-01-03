@@ -3,15 +3,14 @@ package log_test
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"fmt"
 	"log/slog"
 	"testing"
-	"time"
 
 	"github.com/elisasre/go-common/log"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestParseLogLevel(t *testing.T) {
@@ -83,39 +82,18 @@ func TestParseFormat(t *testing.T) {
 
 func TestRefreshLogLevel(t *testing.T) {
 	l := &slog.LevelVar{}
-	tick := time.NewTicker(time.Millisecond)
-	done := make(chan struct{})
-	go func() {
-		defer close(done)
-		log.RefreshLogLevel(l, tick)
-	}()
+	buf := &bytes.Buffer{}
+	logger := log.NewDefaultEnvLogger(log.WithLeveler(l), log.WithOutput(buf))
 
-	t.Setenv("LOG_LEVEL", "INFO")
-	time.Sleep(time.Millisecond * 10)
-	require.Equal(t, "INFO", l.Level().String())
-
-	t.Setenv("LOG_LEVEL", "DEBUG")
-	time.Sleep(time.Millisecond * 10)
-	require.Equal(t, "DEBUG", l.Level().String())
-
-	tick.Stop()
-	time.Sleep(time.Millisecond * 10)
-
-	t.Setenv("LOG_LEVEL", "INFO")
-	time.Sleep(time.Millisecond * 10)
-	require.Equal(t, "DEBUG", l.Level().String())
-}
-
-func TestNewDefaultLogger(t *testing.T) {
-	logger := log.NewDefaultEnvLogger()
-	require.Equal(t, logger, slog.Default())
-
+	l.Set(log.ParseLogLevel("INFO"))
+	logger.Debug("foo")
+	assert.Empty(t, buf.Bytes())
 	debugEnabled := logger.Handler().Enabled(context.Background(), slog.LevelDebug)
-	require.False(t, debugEnabled)
+	assert.False(t, debugEnabled)
 
-	t.Setenv("LOG_LEVEL", "debug")
-	time.Sleep(time.Second * 6)
-
+	l.Set(log.ParseLogLevel("DEBUG"))
+	logger.Debug("foo")
+	assert.Contains(t, buf.String(), "foo")
 	debugEnabled = logger.Handler().Enabled(context.Background(), slog.LevelDebug)
-	require.True(t, debugEnabled)
+	assert.True(t, debugEnabled)
 }
