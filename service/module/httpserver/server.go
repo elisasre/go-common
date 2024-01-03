@@ -1,4 +1,4 @@
-// package httpserver provides http server as module.
+// Package httpserver provides http server as module.
 package httpserver
 
 import (

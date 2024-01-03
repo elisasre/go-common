@@ -1,4 +1,4 @@
-// package pprof provides pprof handler options for httpserver module.
+// Package pprof provides pprof handler options for httpserver module.
 package pprof
 
 import (
