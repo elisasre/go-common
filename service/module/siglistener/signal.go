@@ -1,3 +1,4 @@
+// package siglistener provides signal listening as a module.
 package siglistener
 
 import (
