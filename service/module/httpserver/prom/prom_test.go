@@ -1,4 +1,4 @@
-package pprof_test
+package prom_test
 
 import (
 	"io"
@@ -6,23 +6,36 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elisasre/go-common/metrics"
 	"github.com/elisasre/go-common/service/module/httpserver"
-	"github.com/elisasre/go-common/service/module/httpserver/pprof"
+	"github.com/elisasre/go-common/service/module/httpserver/prom"
 	"github.com/hashicorp/go-multierror"
+	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+func TestInitError(t *testing.T) {
+	c := collectors.NewGoCollector()
+	srv := httpserver.New(
+		httpserver.WithServer(&http.Server{ReadHeaderTimeout: time.Second}),
+		httpserver.WithAddr("127.0.0.1:0"),
+		prom.WithMetrics(metrics.New(c)),
+	)
+
+	require.Error(t, srv.Init())
+}
 
 func TestServer(t *testing.T) {
 	srv := httpserver.New(
 		httpserver.WithServer(&http.Server{ReadHeaderTimeout: time.Second}),
 		httpserver.WithAddr("127.0.0.1:0"),
-		pprof.WithProfiling(),
+		prom.WithMetrics(metrics.New()),
 	)
 
 	require.NotEmpty(t, srv.Name())
 	require.NoError(t, srv.Init())
-	url := srv.URL() + "/debug/pprof/heap"
+	url := srv.URL() + "/metrics"
 	wg := &multierror.Group{}
 	wg.Go(srv.Run)
 
