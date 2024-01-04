@@ -60,6 +60,36 @@ func TestServer(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func TestServerShutdownTimeout(t *testing.T) {
+	block := make(chan struct{})
+	srv := httpserver.New(
+		httpserver.WithAddr("127.0.0.1:0"),
+		httpserver.WithShutdownTimeout(time.Second),
+		httpserver.WithHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			<-block
+		})),
+	)
+	err := srv.Init()
+	require.NoError(t, err)
+	url := srv.URL()
+
+	wg := &multierror.Group{}
+	wg.Go(srv.Run)
+
+	go func() {
+		resp, err := http.Get(url) //nolint:gosec,bodyclose
+		assert.NoError(t, err)
+		io.Copy(io.Discard, resp.Body) //nolint: errcheck
+	}()
+
+	time.Sleep(time.Millisecond * 10)
+	err = srv.Stop()
+	assert.ErrorContains(t, err, "context deadline exceeded")
+
+	err = wg.Wait().ErrorOrNil()
+	assert.NoError(t, err)
+}
+
 func assertGet(t testing.TB, url, body string) {
 	resp, err := http.Get(url) //nolint:gosec
 	if !assert.NoError(t, err) {

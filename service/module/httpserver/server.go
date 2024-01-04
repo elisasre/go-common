@@ -13,9 +13,10 @@ import (
 type Opt func(s *Server) error
 
 type Server struct {
-	srv  *http.Server
-	ln   net.Listener
-	opts []Opt
+	srv             *http.Server
+	ln              net.Listener
+	shutdownTimeout time.Duration
+	opts            []Opt
 }
 
 // New creates Server module with given options.
@@ -29,6 +30,7 @@ func New(opts ...Opt) *Server {
 // Options are applied in same order as they were provided.
 func (s *Server) Init() error {
 	s.srv = &http.Server{ReadHeaderTimeout: time.Second * 10}
+	s.shutdownTimeout = time.Minute
 	for _, opt := range s.opts {
 		if err := opt(s); err != nil {
 			return fmt.Errorf("httpserver.Server Option error: %w", err)
@@ -63,7 +65,9 @@ func (s *Server) Run() error {
 
 // Stop calls shutdown for server.
 func (s *Server) Stop() error {
-	return s.srv.Shutdown(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), s.shutdownTimeout)
+	defer cancel()
+	return s.srv.Shutdown(ctx)
 }
 
 func (s *Server) Name() string {
@@ -90,6 +94,14 @@ func WithAddr(addr string) Opt {
 func WithHandler(h http.Handler) Opt {
 	return func(s *Server) error {
 		s.srv.Handler = h
+		return nil
+	}
+}
+
+// WithShutdownTimeout sets timeout for graceful shutdown.
+func WithShutdownTimeout(d time.Duration) Opt {
+	return func(s *Server) error {
+		s.shutdownTimeout = d
 		return nil
 	}
 }

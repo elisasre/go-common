@@ -55,7 +55,7 @@ func Run(svc Service) error {
 		return err
 	}
 
-	slog.Error("service stopped successfully")
+	slog.Info("service stopped successfully")
 	return nil
 }
 
