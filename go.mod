@@ -6,9 +6,9 @@ toolchain go1.21.5
 
 require (
 	github.com/alicebob/miniredis/v2 v2.31.0
-	github.com/aws/aws-sdk-go-v2 v1.24.0
+	github.com/aws/aws-sdk-go-v2 v1.24.1
 	github.com/aws/aws-sdk-go-v2/config v1.26.2
-	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.3.9
+	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.3.10
 	github.com/elisasre/mageutil v1.4.5
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getsentry/sentry-go v0.25.0
