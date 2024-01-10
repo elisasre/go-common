@@ -19,10 +19,10 @@ import (
 func NewDefaultEnvLogger(opts ...Opt) *slog.Logger {
 	b := &builder{opts: &slog.HandlerOptions{}}
 	defaults := []Opt{
-		WithHandlerFn(ParseFormatEnv()),
+		WithHandlerFn(ParseFormatFromEnv()),
 		WithLeveler(ParseLogLevelFromEnv()),
 		WithOutput(os.Stdout),
-		WithSource(true),
+		WithSource(ParseSourceFromEnv()),
 		WithReplacer(nil),
 	}
 
@@ -106,8 +106,8 @@ func ParseFormat(format string) HandlerFn {
 	}
 }
 
-// ParseFormatEnv turns LOG_FORMAT env variable into slog.Handler function using ParseLogFormat.
-func ParseFormatEnv() HandlerFn {
+// ParseFormatFromEnv turns LOG_FORMAT env variable into slog.Handler function using ParseLogFormat.
+func ParseFormatFromEnv() HandlerFn {
 	return ParseFormat(os.Getenv("LOG_FORMAT"))
 }
 
@@ -131,4 +131,19 @@ func ParseLogLevel(level string) slog.Level {
 // ParseLogLevelFromEnv turns LOG_LEVEL env variable into slog.Level using logic from ParseLogLevel.
 func ParseLogLevelFromEnv() slog.Level {
 	return ParseLogLevel(os.Getenv("LOG_LEVEL"))
+}
+
+func ParseSource(source string) bool {
+	switch strings.ToUpper(source) {
+	case "TRUE", "1":
+		return true
+	case "FALSE", "0":
+		return false
+	default:
+		return true
+	}
+}
+
+func ParseSourceFromEnv() bool {
+	return ParseSource((os.Getenv("LOG_SOURCE")))
 }
