@@ -80,6 +80,39 @@ func TestParseFormat(t *testing.T) {
 	}
 }
 
+func TestParseSource(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{
+			input:    "",
+			expected: true,
+		},
+		{
+			input:    "TRUE",
+			expected: true,
+		},
+		{
+			input:    "FALSE",
+			expected: false,
+		},
+		{
+			input:    "1",
+			expected: true,
+		},
+		{
+			input:    "0",
+			expected: false,
+		},
+	}
+
+	for _, tt := range tests {
+		source := log.ParseSource(tt.input)
+		assert.Equal(t, tt.expected, source)
+	}
+}
+
 func TestRefreshLogLevel(t *testing.T) {
 	l := &slog.LevelVar{}
 	buf := &bytes.Buffer{}
