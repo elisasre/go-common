@@ -75,6 +75,36 @@ func TestAddEnvVars(t *testing.T) {
 }
 
 func TestNameToEnv(t *testing.T) {
-	output := clienv.NameToEnv("", "some-OTHER-name")
-	assert.Equal(t, "SOME_OTHER_NAME", output)
+	tcs := []struct {
+		name     string
+		prefix   string
+		flagName string
+		expected string
+	}{
+		{
+			name:     "env var without prefix",
+			prefix:   "",
+			flagName: "flag-no-prefix",
+			expected: "FLAG_NO_PREFIX",
+		},
+		{
+			name:     "env var with prefix",
+			prefix:   "prefix",
+			flagName: "flag-with-prefix",
+			expected: "PREFIX_FLAG_WITH_PREFIX",
+		},
+		{
+			name:     "lowercase prefix gets converted to uppercase",
+			prefix:   "prefix",
+			flagName: "other-flag-with-prefix",
+			expected: "PREFIX_OTHER_FLAG_WITH_PREFIX",
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			output := clienv.NameToEnv(tc.prefix, tc.flagName)
+			assert.Equal(t, tc.expected, output)
+		})
+	}
 }

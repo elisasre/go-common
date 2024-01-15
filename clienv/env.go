@@ -66,5 +66,5 @@ func NameToEnv(prefix, name string) string {
 	if prefix == "" {
 		return envName
 	}
-	return prefix + "_" + envName
+	return strings.ToUpper(prefix) + "_" + envName
 }
