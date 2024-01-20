@@ -25,7 +25,6 @@ func NewDefaultEnvLogger(opts ...Opt) *slog.Logger {
 		WithOutput(os.Stdout),
 		WithSource(ParseSourceFromEnv()),
 		WithShortSource(true),
-		WithReplacer(nil),
 	}
 
 	opts = append(defaults, opts...)
@@ -67,8 +66,8 @@ func WithShortSource(short bool) Opt {
 		if short {
 			b.opts.ReplaceAttr = func(s []string, a slog.Attr) slog.Attr {
 				if a.Key == slog.SourceKey {
-					source, _ := a.Value.Any().(*slog.Source)
-					if source != nil {
+					source, ok := a.Value.Any().(*slog.Source)
+					if ok && source != nil {
 						source.File = filepath.Base(source.File)
 					}
 				}
