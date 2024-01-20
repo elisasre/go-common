@@ -5,6 +5,7 @@ import (
 	"io"
 	"log/slog"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -23,6 +24,7 @@ func NewDefaultEnvLogger(opts ...Opt) *slog.Logger {
 		WithLeveler(ParseLogLevelFromEnv()),
 		WithOutput(os.Stdout),
 		WithSource(ParseSourceFromEnv()),
+		WithShortSource(true),
 		WithReplacer(nil),
 	}
 
@@ -56,6 +58,23 @@ func WithLeveler(l slog.Leveler) Opt {
 func WithSource(enabled bool) Opt {
 	return func(b *builder) {
 		b.opts.AddSource = enabled
+	}
+}
+
+// WithShortSource sets slog.ReplaceAttr source file as short format.
+func WithShortSource(short bool) Opt {
+	return func(b *builder) {
+		if short {
+			b.opts.ReplaceAttr = func(s []string, a slog.Attr) slog.Attr {
+				if a.Key == slog.SourceKey {
+					source, _ := a.Value.Any().(*slog.Source)
+					if source != nil {
+						source.File = filepath.Base(source.File)
+					}
+				}
+				return a
+			}
+		}
 	}
 }
 
