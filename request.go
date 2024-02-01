@@ -7,19 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
-	"os"
 	"time"
-
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
-
-func init() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
-	log.Logger = zerolog.New(os.Stderr)
-	log.Logger = log.With().Logger()
-}
 
 // HTTPClient allows inserting either *http.Client or mock client.
 type HTTPClient interface {
@@ -70,11 +61,11 @@ func MakeRequest(
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequestWithContext(ctx, request.Method, request.URL, nil)
 		if err != nil {
-			log.Error().
-				Str("method", request.Method).
-				Str("url", request.URL).
-				Str("error", err.Error()).
-				Msg("request error")
+			slog.Error("creating http request failed",
+				slog.String("method", request.Method),
+				slog.String("url", request.URL),
+				slog.String("error", err.Error()),
+			)
 			return false, err
 		}
 		if len(request.Body) > 0 {
@@ -91,11 +82,11 @@ func MakeRequest(
 
 		resp, err := client.Do(httpreq)
 		if err != nil {
-			log.Error().
-				Str("method", request.Method).
-				Str("url", request.URL).
-				Str("error", err.Error()).
-				Msg("do request error")
+			slog.Error("http request failed",
+				slog.String("method", request.Method),
+				slog.String("url", request.URL),
+				slog.String("error", err.Error()),
+			)
 			if errors.Is(err, context.DeadlineExceeded) {
 				return true, err
 			}
@@ -126,12 +117,12 @@ func MakeRequest(
 			rtn = true
 			err = fmt.Errorf("rate limit exceeded")
 		}
-		log.Error().
-			Int("statuscode", resp.StatusCode).
-			Str("method", request.Method).
-			Str("url", request.URL).
-			Str("body", string(responseBody)).
-			Msg(msg)
+		slog.Error(msg,
+			slog.Int("status_code", resp.StatusCode),
+			slog.String("method", request.Method),
+			slog.String("url", request.URL),
+			slog.String("body", string(responseBody)),
+		)
 		return rtn, err
 	})
 	return httpresp, err

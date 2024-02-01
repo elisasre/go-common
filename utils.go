@@ -5,18 +5,16 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"fmt"
+	"log/slog"
 	"math/big"
 	"net"
 	"net/http"
-	"os"
 	"runtime"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/getsentry/sentry-go"
 	"github.com/gin-gonic/gin"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/viper"
 )
 
@@ -24,12 +22,6 @@ const (
 	randomLength = 32
 	sentryKey    = "sentry"
 )
-
-func init() {
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnixMs
-	log.Logger = zerolog.New(os.Stderr)
-	log.Logger = log.With().Logger()
-}
 
 var characterRunes = []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 
@@ -122,19 +114,20 @@ func LoadAndListenConfig[Conf any](path string, c Conf, onUpdate func(c Conf)) (
 		return c, fmt.Errorf("unable to marshal config: %w", err)
 	}
 
-	log.Info().
-		Str("path", v.ConfigFileUsed()).
-		Msg("config loaded")
+	slog.Info("config loaded",
+		slog.String("path", v.ConfigFileUsed()),
+	)
 	v.OnConfigChange(func(e fsnotify.Event) {
-		log.Info().
-			Str("path", e.Name).
-			Str("operation", e.Op.String()).
-			Msg("config reloaded")
+		slog.Info("config reloaded",
+			slog.String("path", e.Name),
+			slog.String("operation", e.Op.String()),
+		)
 		cc := c
 		if err := v.Unmarshal(&cc); err != nil {
-			log.Fatal().
-				Str("path", e.Name).
-				Msgf("unable to marshal config: %v", err)
+			slog.Error("unable to marshal config",
+				slog.String("path", e.Name),
+				slog.String("error", err.Error()),
+			)
 		}
 		if onUpdate != nil {
 			onUpdate(cc)
@@ -160,7 +153,7 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 func SentryErr(ctx context.Context, err error) {
 	_, hub := setHubToContext(ctx)
 	hub.CaptureException(err)
-	log.Error().Msg(err.Error())
+	slog.Error(err.Error())
 }
 
 // MakeSentryTransaction creates Sentry transaction.

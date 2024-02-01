@@ -3,12 +3,11 @@ package auth
 import (
 	"context"
 	"fmt"
+	"log/slog"
 
 	"github.com/elisasre/go-common"
 	database "github.com/elisasre/go-common/auth/db"
 	"github.com/elisasre/go-common/auth/memory"
-
-	"github.com/rs/zerolog/log"
 )
 
 // AuthInterface will contain interface to interact with different auth providers.
@@ -20,7 +19,8 @@ type AuthInterface interface {
 }
 
 func AuthProvider(ctx context.Context, mode string, store common.Datastore) (AuthInterface, error) {
-	log.Info().Str("mode", mode).Msg("Using AuthProvider")
+	slog.Info("Using AuthProvider",
+		slog.String("mode", mode))
 	switch mode {
 	case "memory":
 		return memory.NewMemory(ctx)
