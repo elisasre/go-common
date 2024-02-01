@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -16,7 +16,7 @@ func main() {
 	srv := &http.Server{
 		Addr: ":8080",
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Println("Request received")
+			slog.Info("Request received")
 			resp, err := http.Get("http://127.0.0.1:9999")
 			if err != nil {
 				http.Error(w, err.Error(), 500)
@@ -32,17 +32,19 @@ func main() {
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 		<-quit
 
-		log.Println("Closing server")
+		slog.Info("Closing server")
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := srv.Shutdown(ctx); err != nil {
-			log.Fatal(err)
+			slog.Error(err.Error())
+			os.Exit(1)
 		}
 	}()
 
-	log.Println("Starting server")
+	slog.Info("Starting server")
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatal(err)
+		slog.Error(err.Error())
+		os.Exit(1)
 	}
-	log.Println("Server closed successfully")
+	slog.Info("Server closed successfully")
 }
