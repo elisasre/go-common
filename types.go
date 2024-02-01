@@ -146,6 +146,7 @@ type User struct {
 	Groups        []string  `json:"groups,omitempty"`
 	Eid           string    `json:"custom:employeeid,omitempty"`
 	Department    string    `json:"custom:department,omitempty"`
+	JobTitle      string    `json:"custom:jobtitle,omitempty"`
 	ImportGroups  []string  `json:"cognito:groups,omitempty"`
 	Email         *string   `json:"email,omitempty"`
 	EmailVerified *bool     `json:"email_verified,omitempty"`
