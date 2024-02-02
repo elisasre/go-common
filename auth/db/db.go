@@ -3,12 +3,11 @@ package database
 import (
 	"context"
 	"fmt"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/elisasre/go-common"
-
-	"github.com/rs/zerolog/log"
 )
 
 // Database is an implementation of Interface for database auth.
@@ -31,7 +30,9 @@ func NewDatabase(ctx context.Context, store common.Datastore) (*Database, error)
 		db.keysMu.Lock()
 		defer db.keysMu.Unlock()
 		db.keys = keys
-		log.Info().Strs("keys", getKIDs(db.keys)).Msg("JWT keys loaded from database")
+		slog.Info("JWT keys loaded from database",
+			slog.Any("keys", getKIDs(db.keys)),
+		)
 		return db, nil
 	}
 	if err := db.RotateKeys(ctx); err != nil {
@@ -73,10 +74,10 @@ func (db *Database) RotateKeys(ctx context.Context) error {
 		return err
 	}
 	db.keys = newKeys
-	log.Info().
-		Strs("keys", getKIDs(db.keys)).
-		Str("duration", time.Since(start).String()).
-		Msg("JWT RotateKeys called")
+	slog.Info("JWT RotateKeys called",
+		slog.Any("keys", getKIDs(db.keys)),
+		slog.Duration("duration", time.Since(start)),
+	)
 	return nil
 }
 
@@ -87,9 +88,9 @@ func (db *Database) refreshKeys(ctx context.Context, reload bool) ([]common.JWTK
 	}
 	if reload {
 		db.keys = keys
-		log.Info().
-			Strs("keys", getKIDs(db.keys)).
-			Msg("JWT RefreshKeys called")
+		slog.Info("JWT RefreshKeys called",
+			slog.Any("keys", getKIDs(db.keys)),
+		)
 	}
 	return keys, nil
 }

@@ -2,12 +2,11 @@ package memory
 
 import (
 	"context"
+	"log/slog"
 	"sync"
 	"time"
 
 	"github.com/elisasre/go-common"
-
-	"github.com/rs/zerolog/log"
 )
 
 // Memory is an implementation of Interface for memory auth.
@@ -47,9 +46,9 @@ func (m *Memory) RotateKeys(ctx context.Context) error {
 	if len(m.keys) > 3 {
 		m.keys = m.keys[0:3]
 	}
-	log.Info().
-		Str("duration", time.Since(start).String()).
-		Msg("rotate keys")
+	slog.Info("rotate keys",
+		slog.Duration("duration", time.Since(start)),
+	)
 	return nil
 }
 
