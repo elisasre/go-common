@@ -27,7 +27,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.27.0
 	github.com/urfave/cli/v2 v2.27.1
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/driver/postgres v1.5.4
+	gorm.io/driver/postgres v1.5.5
 	gorm.io/gorm v1.25.6
 )
 
