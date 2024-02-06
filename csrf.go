@@ -32,8 +32,9 @@ func (e ErrorResponse) Error() string {
 
 // ErrorResponse provides HTTP error response.
 type ErrorResponse struct {
-	Code    uint   `json:"code" example:"400"`
-	Message string `json:"message" example:"Bad request"`
+	Code      uint   `json:"code" example:"400"`
+	Message   string `json:"message" example:"Bad request"`
+	ErrorType string `json:"error_type,omitempty" example:"invalid_scope"`
 }
 
 func getHeader(c *gin.Context) string {
