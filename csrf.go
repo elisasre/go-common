@@ -34,7 +34,7 @@ func (e ErrorResponse) Error() string {
 type ErrorResponse struct {
 	Code      uint   `json:"code" example:"400"`
 	Message   string `json:"message" example:"Bad request"`
-	ErrorCode string `json:"error_code,omitempty" example:"bad_request"`
+	ErrorType string `json:"error_type,omitempty" example:"invalid_scope"`
 }
 
 func getHeader(c *gin.Context) string {
