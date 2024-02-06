@@ -104,15 +104,12 @@ func OptCoverDir(coverDir string) Opt {
 //
 // Before using this pattern be sure to read how TestMain should be used!
 func OptTestMain(m *testing.M) Opt {
-	return func(itr *IntegrationTestRunner) error {
-		itr.testRunner = func() error {
-			if code := m.Run(); code != 0 {
-				return errors.New("tests have failed")
-			}
-			return nil
+	return OptFuncRunner(func() error {
+		if code := m.Run(); code != 0 {
+			return errors.New("tests have failed")
 		}
 		return nil
-	}
+	})
 }
 
 // OptTestFunc allows wrapping testing.T into IntegrationTestRunner.
@@ -142,6 +139,39 @@ func OptTestFunc(t *testing.T, fn func(*testing.T)) Opt {
 			fn(t)
 			return nil
 		}
+		return nil
+	}
+}
+
+// OptFuncRunner allows wrapping any function as testRunner function.
+// This can be useful injecting code between ready and test code.
+// Example TestMain:
+//
+//	func TestMain(m *testing.M) {
+//		itr := it.NewIntegrationTestRunner(
+//			it.OptBase("../"),
+//			it.OptTarget("./cmd/app"),
+//			it.OptCompose("docker-compose.yaml"),
+//			it.OptWaitHTTPReady("http://127.0.0.1:8080", time.Second*10),
+//			it.OptFuncRunner(func() error {
+//				if err := initStuff(); err != nil {
+//					return err
+//				}
+//				if code := m.Run(); code != 0 {
+//					return errors.New("tests have failed")
+//				}
+//				return nil
+//			}),
+//		)
+//		if err := itr.InitAndRun(); err != nil {
+//			log.Fatal(err)
+//		}
+//	}
+//
+// Before using this pattern be sure to read how TestMain should be used!
+func OptFuncRunner(fn func() error) Opt {
+	return func(itr *IntegrationTestRunner) error {
+		itr.testRunner = fn
 		return nil
 	}
 }
