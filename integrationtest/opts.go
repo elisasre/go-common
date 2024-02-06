@@ -146,6 +146,25 @@ func OptTestFunc(t *testing.T, fn func(*testing.T)) Opt {
 	}
 }
 
+// OptPreHandler adds handler as pre condition for tests to run.
+func OptPreHandler(h PreHandler) Opt {
+	return func(itr *IntegrationTestRunner) error {
+		itr.preHandlers = append(itr.preHandlers, h)
+		return nil
+	}
+}
+
+// OptPreHandlerFn wraps functions as PreHandler and set's it as a pre condition for tests to run.
+func OptPreHandlerFn(run, stop func() error) Opt {
+	if run == nil {
+		run = func() error { return nil }
+	}
+	if stop == nil {
+		stop = func() error { return nil }
+	}
+	return OptPreHandler(&PreHandlerFn{RunFn: run, StopFn: stop})
+}
+
 // OptCompose adds docker compose stack as pre condition for tests to run.
 func OptCompose(composeFile string, opts ...ComposeOpt) Opt {
 	return func(itr *IntegrationTestRunner) error {
