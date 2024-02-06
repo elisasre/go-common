@@ -60,9 +60,9 @@ func NamesToEnv(prefix string, names []string) []string {
 	return envVars
 }
 
-// NameToEnv converts names like foo-bar to FOO_BAR.
+// NameToEnv converts names like asd.foo-bar to ASD_FOO_BAR.
 func NameToEnv(prefix, name string) string {
-	envName := strings.ToUpper(strings.ReplaceAll(name, "-", "_"))
+	envName := strings.ToUpper(strings.ReplaceAll(strings.ReplaceAll(name, "-", "_"), ".", "_"))
 	if prefix == "" {
 		return envName
 	}

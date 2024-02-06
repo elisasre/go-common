@@ -99,6 +99,12 @@ func TestNameToEnv(t *testing.T) {
 			flagName: "other-flag-with-prefix",
 			expected: "PREFIX_OTHER_FLAG_WITH_PREFIX",
 		},
+		{
+			name:     "dot syntax",
+			prefix:   "",
+			flagName: "foo.bar-bar",
+			expected: "FOO_BAR_BAR",
+		},
 	}
 
 	for _, tc := range tcs {
