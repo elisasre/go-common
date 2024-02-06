@@ -126,7 +126,16 @@ func (itr *IntegrationTestRunner) cleanup() error {
 	return result
 }
 
+// PreHandler is used for setting up pre conditions for test.
+// Run() allows to perform setup before tests and Stop() the cleanup after the tests.
 type PreHandler interface {
 	Run() error
 	Stop() error
 }
+
+type PreHandlerFn struct {
+	RunFn, StopFn func() error
+}
+
+func (h *PreHandlerFn) Run() error  { return h.RunFn() }
+func (h *PreHandlerFn) Stop() error { return h.StopFn() }

@@ -34,6 +34,7 @@ func TestApp(t *testing.T) {
 		),
 		it.OptWaitHTTPReady("http://127.0.0.1:8080", time.Second*10),
 		it.OptTestFunc(t, testHealthy),
+		it.OptPreHandlerFn(nil, nil),
 	)
 	if err := itr.InitAndRun(); err != nil {
 		log.Fatal(err)
