@@ -153,7 +153,7 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 func SentryErr(ctx context.Context, err error) {
 	_, hub := setHubToContext(ctx)
 	hub.CaptureException(err)
-	slog.Error(err.Error())
+	slog.Error(err.Error()) //nolint: sloglint
 }
 
 // MakeSentryTransaction creates Sentry transaction.
