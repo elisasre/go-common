@@ -110,19 +110,21 @@ func MakeRequest(
 			return true, nil
 		}
 
-		msg := "retrying"
-		rtn := false
-		if resp.StatusCode == http.StatusTooManyRequests {
-			msg = "too many requests"
-			rtn = true
-			err = fmt.Errorf("rate limit exceeded")
-		}
-		slog.Error(msg,
+		l := slog.With(
 			slog.Int("status_code", resp.StatusCode),
 			slog.String("method", request.Method),
 			slog.String("url", request.URL),
 			slog.String("body", string(responseBody)),
 		)
+
+		rtn := false
+		if resp.StatusCode == http.StatusTooManyRequests {
+			rtn = true
+			err = fmt.Errorf("rate limit exceeded")
+			l.Error("too many requests")
+		}
+
+		l.Error("retrying")
 		return rtn, err
 	})
 	return httpresp, err
