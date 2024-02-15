@@ -17,7 +17,7 @@ type Leader struct {
 	podName    string
 	leaderName string
 	namespace  string
-	ctx        context.Context
+	ctx        context.Context //nolint:containedctx
 	cancel     context.CancelFunc
 	fn         func(context.Context)
 	opts       []Opt
