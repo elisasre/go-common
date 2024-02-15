@@ -35,6 +35,7 @@ func (m *Memory) RotateKeys(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	keys.CreatedAt = time.Now()
 	// private key is needed only in newest which are used to generate new tokens
 	for i := range m.keys {
 		m.keys[i].PrivateKey = nil
