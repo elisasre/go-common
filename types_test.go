@@ -95,3 +95,49 @@ func TestStringEmpty(t *testing.T) {
 	assert.True(t, StringEmpty(""))
 	assert.False(t, StringEmpty("NONEMPTY"))
 }
+
+func TestMakeSub(t *testing.T) {
+	type testCase struct {
+		name string
+		User *User
+		Sub  string
+	}
+
+	testcases := []testCase{
+		{
+			name: "empty",
+			User: nil,
+			Sub:  "",
+		},
+		{
+			name: "human user with email",
+			User: &User{
+				Email: String("foo@bar.com"),
+			},
+			Sub: "email:foo@bar.com",
+		},
+		{
+			name: "machine user with email",
+			User: &User{
+				Email: String("my-machine-user@oauth2"),
+			},
+			Sub: "m2m:my-machine-user",
+		},
+		{
+			name: "human user with email internal claim",
+			User: &User{
+				Email: String("my-machine-user@oauth2"),
+				Internal: &Internal{
+					EmployeeID: "X123456",
+				},
+			},
+			Sub: "eid:x123456",
+		},
+	}
+
+	for _, tc := range testcases {
+		t.Run(tc.name, func(t *testing.T) {
+			assert.Equal(t, tc.Sub, tc.User.MakeSub())
+		})
+	}
+}

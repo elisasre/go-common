@@ -3,8 +3,6 @@ package common
 import (
 	"context"
 	"crypto/rsa"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
 	"strings"
 	"time"
@@ -159,13 +157,17 @@ func (u *User) MakeSub() string {
 	if u == nil {
 		return ""
 	}
-	sub := StringValue(u.Email)
-	if u.Internal != nil && u.Internal.EmployeeID != "" {
-		sub = u.Internal.EmployeeID
+	prefix := "email"
+	email := StringValue(u.Email)
+	if u.IsServiceAccount() {
+		prefix = "m2m"
+		email = strings.ReplaceAll(email, ServiceAccountPrefix, "")
 	}
-	sub = strings.ToLower(sub)
-	b := sha256.Sum256([]byte(sub))
-	return hex.EncodeToString(b[:])
+	sub := fmt.Sprintf("%s:%s", prefix, email)
+	if u.Internal != nil && u.Internal.EmployeeID != "" {
+		sub = fmt.Sprintf("eid:%s", u.Internal.EmployeeID)
+	}
+	return strings.ToLower(sub)
 }
 
 // ServiceAccountPrefix email domain for service accounts.
