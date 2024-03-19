@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime/debug"
 
 	"github.com/hashicorp/go-multierror"
 )
@@ -126,11 +127,13 @@ func (r *runner) run() error {
 	return wg.Wait().ErrorOrNil()
 }
 
-var ErrPanic = errors.New("panic captured")
+var ErrPanic = errors.New("recovered from panic")
 
 func catchPanic(fn func() error) (err error) {
 	defer func() {
 		if rErr := recover(); rErr != nil {
+			// Print stack trace to log without logger to preserver proper multiline formatting.
+			fmt.Println(string(debug.Stack()))
 			err = fmt.Errorf("%w: %s", ErrPanic, rErr)
 		}
 	}()
