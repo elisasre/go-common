@@ -4,6 +4,8 @@ go 1.22
 
 toolchain go1.22.1
 
+replace gorm.io/gorm => gorm.io/gorm v1.25.6
+
 require (
 	github.com/alicebob/miniredis/v2 v2.32.1
 	github.com/aws/aws-sdk-go-v2 v1.25.3
@@ -27,8 +29,8 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.29.1
 	github.com/urfave/cli/v2 v2.27.1
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/driver/postgres v1.5.7
-	gorm.io/gorm v1.25.7
+	gorm.io/driver/postgres v1.5.6
+	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
 	k8s.io/apimachinery v0.29.3
 	k8s.io/client-go v0.29.3
 )
