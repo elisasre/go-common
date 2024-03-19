@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2/altsrc"
 )
 
 // AddEnvVars creates EnvVars slice for each flag in app.
@@ -47,6 +48,30 @@ func AddEnvVar(flag cli.Flag, prefix string) {
 	case *cli.UintSliceFlag:
 		f.EnvVars = envNames
 	case *cli.Uint64SliceFlag:
+		f.EnvVars = envNames
+	case *altsrc.BoolFlag:
+		f.EnvVars = envNames
+	case *altsrc.DurationFlag:
+		f.EnvVars = envNames
+	case *altsrc.Float64Flag:
+		f.EnvVars = envNames
+	case *altsrc.IntFlag:
+		f.EnvVars = envNames
+	case *altsrc.Int64Flag:
+		f.EnvVars = envNames
+	case *altsrc.IntSliceFlag:
+		f.EnvVars = envNames
+	case *altsrc.Int64SliceFlag:
+		f.EnvVars = envNames
+	case *altsrc.PathFlag:
+		f.EnvVars = envNames
+	case *altsrc.StringFlag:
+		f.EnvVars = envNames
+	case *altsrc.StringSliceFlag:
+		f.EnvVars = envNames
+	case *altsrc.UintFlag:
+		f.EnvVars = envNames
+	case *altsrc.Uint64Flag:
 		f.EnvVars = envNames
 	}
 }
