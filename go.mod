@@ -4,8 +4,6 @@ go 1.22
 
 toolchain go1.22.1
 
-replace gorm.io/gorm => gorm.io/gorm v1.25.6
-
 require (
 	github.com/alicebob/miniredis/v2 v2.32.1
 	github.com/aws/aws-sdk-go-v2 v1.25.3
@@ -29,8 +27,8 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.29.1
 	github.com/urfave/cli/v2 v2.27.1
 	gopkg.in/yaml.v2 v2.4.0
-	gorm.io/driver/postgres v1.5.6
-	gorm.io/gorm v1.25.7-0.20240204074919-46816ad31dde
+	gorm.io/driver/postgres v1.5.7
+	gorm.io/gorm v1.25.8
 	k8s.io/apimachinery v0.29.3
 	k8s.io/client-go v0.29.3
 )
@@ -186,8 +184,8 @@ require (
 	github.com/in-toto/in-toto-golang v0.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/jackc/pgx/v5 v5.5.4 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
+	github.com/jackc/pgx/v5 v5.5.5 // indirect
 	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	github.com/jgautheron/goconst v1.7.0 // indirect
 	github.com/jingyugao/rowserrcheck v1.1.1 // indirect
