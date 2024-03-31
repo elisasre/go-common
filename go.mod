@@ -28,7 +28,7 @@ require (
 	github.com/urfave/cli/v2 v2.27.1
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.5.7
-	gorm.io/gorm v1.25.8
+	gorm.io/gorm v1.25.9
 	k8s.io/apimachinery v0.29.3
 	k8s.io/client-go v0.29.3
 )
