@@ -20,18 +20,32 @@ type BinHandler struct {
 	runArgs   []string
 	runEnv    []string
 	coverDir  string
+	opts      []BinOpt
 }
 
 func NewBinHandler(opts ...BinOpt) *BinHandler {
-	bh := &BinHandler{
+	return &BinHandler{
 		base: ".",
+		opts: opts,
+	}
+}
+
+// Init applies all options to bin handler.
+func (bh *BinHandler) Init() error {
+	for _, opt := range bh.opts {
+		if err := opt(bh); err != nil {
+			return err
+		}
 	}
 
-	for _, opt := range opts {
-		opt(bh)
+	// If no base path was provided let's apply proper checks for default path.
+	if bh.base == "." {
+		if err := BinOptBase(bh.base)(bh); err != nil {
+			return err
+		}
 	}
 
-	return bh
+	return nil
 }
 
 func (bh *BinHandler) Build() error {
