@@ -22,6 +22,18 @@ type BinHandler struct {
 	coverDir  string
 }
 
+func NewBinHandler(opts ...BinOpt) *BinHandler {
+	bh := &BinHandler{
+		base: ".",
+	}
+
+	for _, opt := range opts {
+		opt(bh)
+	}
+
+	return bh
+}
+
 func (bh *BinHandler) Build() error {
 	if bh.bin == "" {
 		parts := strings.Split(strings.TrimSuffix(bh.target, "/"), "/")
