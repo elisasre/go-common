@@ -33,49 +33,49 @@ func OptBase(base string) Opt {
 // OptTarget sets path to compilation target.
 func OptTarget(target string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptTarget(itr.binHandler)()
+		return BinOptTarget(target)(&itr.binHandler)
 	}
 }
 
 // OptOutput sets output for compilation target.
 func OptOutput(output string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptOutput(itr.binHandler)(output)
+		return BinOptOutput(output)(&itr.binHandler)
 	}
 }
 
 // OptRunArgs adds args to run arguments for test binary.
 func OptRunArgs(args ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptRunArgs(itr.binHandler)(args...)
+		return BinOptRunArgs(args...)(&itr.binHandler)
 	}
 }
 
 // OptBuildArgs adds args to build arguments for test binary.
 func OptBuildArgs(args ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptBuildArgs(itr.binHandler)(args...)
+		return BinOptBuildArgs(args...)(&itr.binHandler)
 	}
 }
 
 // OptRunEnv adds env to test binary's run env.
 func OptRunEnv(env ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptRunEnv(itr.binHandler)(env...)
+		return BinOptRunEnv(env...)(&itr.binHandler)
 	}
 }
 
 // OptBuildEnv adds env to test binary's build env.
 func OptBuildEnv(env ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptBuildEnv(itr.binHandler)(env...)
+		return BinOptBuildEnv(env...)(&itr.binHandler)
 	}
 }
 
 // OptCoverDir sets coverage directory for test binary.
 func OptCoverDir(coverDir string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptCoverDir(itr.binHandler)(coverDir)
+		return BinOptCoverDir(coverDir)(&itr.binHandler)
 	}
 }
 
