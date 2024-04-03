@@ -77,7 +77,7 @@ func TestServerShutdownTimeout(t *testing.T) {
 	wg.Go(srv.Run)
 
 	go func() {
-		resp, err := http.Get(url) //nolint:gosec,bodyclose
+		resp, err := http.Get(url) //nolint:gosec
 		assert.NoError(t, err)
 		io.Copy(io.Discard, resp.Body) //nolint: errcheck
 	}()
