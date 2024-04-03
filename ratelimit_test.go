@@ -21,7 +21,6 @@ func setupRouter(mw gin.HandlerFunc) *gin.Engine {
 	return r
 }
 
-//nolint:bodyclose
 func TestRedisRateLimiterAlways(t *testing.T) {
 	s, err := miniredis.Run()
 	require.Equal(t, err, nil)
@@ -67,7 +66,6 @@ func TestRedisRateLimiterAlways(t *testing.T) {
 	require.Equal(t, "0", w3.Result().Header.Get(ratelimitRemaining))
 }
 
-//nolint:bodyclose
 func TestRedisRateLimiterSkip(t *testing.T) {
 	s, err := miniredis.Run()
 	require.Equal(t, err, nil)
@@ -102,7 +100,6 @@ func TestRedisRateLimiterSkip(t *testing.T) {
 	}
 }
 
-//nolint:bodyclose
 func TestRedisRateLimiterForce(t *testing.T) {
 	s, err := miniredis.Run()
 	require.Equal(t, err, nil)
@@ -146,7 +143,6 @@ func TestRedisRateLimiterForce(t *testing.T) {
 	require.Equal(t, "", w2.Result().Header.Get(ratelimitRemaining))
 }
 
-//nolint:bodyclose
 func TestRedisRateLimiterNil(t *testing.T) {
 	nilLimiter := RedisRateLimiter(nil,
 		func(c *gin.Context) (key string, limit *int, err error) {
