@@ -2,7 +2,7 @@ module github.com/elisasre/go-common
 
 go 1.22
 
-toolchain go1.22.1
+toolchain go1.22.2
 
 require (
 	github.com/alicebob/miniredis/v2 v2.32.1
