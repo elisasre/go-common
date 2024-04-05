@@ -3,6 +3,7 @@ package common
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -76,6 +77,7 @@ func getClient(ctx context.Context) *http.Client {
 	return nil
 }
 
+// TODO: missing support for plain/form post body, missing support for client id and secret in basic auth header
 func retrieveToken(ctx context.Context, clientID, clientSecret, tokenURL string, v url.Values) (*oauth2.Token, error) {
 	client := http.DefaultClient
 	if c := getClient(ctx); c != nil {
@@ -117,6 +119,9 @@ func retrieveToken(ctx context.Context, clientID, clientSecret, tokenURL string,
 
 	if token != nil && token.RefreshToken == "" {
 		token.RefreshToken = v.Get("refresh_token")
+	}
+	if token.AccessToken == "" {
+		return nil, errors.New("oauth2: server response missing access_token")
 	}
 	return token, err
 }
