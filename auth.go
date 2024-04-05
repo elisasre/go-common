@@ -35,13 +35,13 @@ func newTokenSource(ctx context.Context, conf *clientcredentials.Config, secret 
 }
 
 type fileTokenSource struct {
-	ctx        context.Context
+	ctx        context.Context //nolint:containedctx
 	conf       *clientcredentials.Config
 	secretFile string
 }
 
 // Token refreshes the token by using a new client credentials request.
-// tokens received this way do not include a refresh token
+// tokens received this way do not include a refresh token.
 func (c *fileTokenSource) Token() (*oauth2.Token, error) {
 	v := url.Values{
 		"grant_type": {"client_credentials"},
@@ -60,7 +60,7 @@ func (c *fileTokenSource) Token() (*oauth2.Token, error) {
 
 	content, err := os.ReadFile(c.secretFile)
 	if err != nil {
-		return nil, fmt.Errorf("oauth2: cannot read token file %q: %v", c.secretFile, err)
+		return nil, fmt.Errorf("oauth2: cannot read token file %q: %w", c.secretFile, err)
 	}
 
 	tk, err := retrieveToken(c.ctx, c.conf.ClientID, string(content), c.conf.TokenURL, v)
@@ -77,13 +77,13 @@ func getClient(ctx context.Context) *http.Client {
 	return nil
 }
 
-// TODO: missing support for plain/form post body, missing support for client id and secret in basic auth header
 func retrieveToken(ctx context.Context, clientID, clientSecret, tokenURL string, v url.Values) (*oauth2.Token, error) {
 	client := http.DefaultClient
 	if c := getClient(ctx); c != nil {
 		client = c
 	}
 
+	// TODO: missing support for plain/form post body, missing support for client id and secret in basic auth header
 	v.Set("client_id", clientID)
 	v.Set("client_secret", clientSecret)
 	encoded := v.Encode()
@@ -140,7 +140,7 @@ func (e *tokenJSON) expiry() (t time.Time) {
 	return
 }
 
-// BasicAuth returns a base64 encoded string of the user and password
+// BasicAuth returns a base64 encoded string of the user and password.
 func BasicAuth(user, password string) string {
 	auth := fmt.Sprintf("%s:%s", user, password)
 	return base64.StdEncoding.EncodeToString([]byte(auth))
