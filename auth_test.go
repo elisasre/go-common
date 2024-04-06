@@ -7,6 +7,7 @@ import (
 	"net/http/httptest"
 	"net/url"
 	"testing"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
@@ -70,12 +71,15 @@ func TestNewClientToken(t *testing.T) {
 	ctx := context.Background()
 	c := NewClient(ctx, creds, "secret", "./testdata/token")
 
-	req, err := http.NewRequest("GET", fmt.Sprintf("%s?foo=bar", srv.URL), nil)
-	require.NoError(t, err)
+	for i := 0; i < 3; i++ {
+		req, err := http.NewRequest("GET", fmt.Sprintf("%s?foo=bar", srv.URL), nil)
+		require.NoError(t, err)
 
-	resp, err := c.Do(req)
-	require.NoError(t, err)
-	require.Equal(t, http.StatusOK, resp.StatusCode)
+		resp, err := c.Do(req)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusOK, resp.StatusCode)
+		time.Sleep(1 * time.Second)
+	}
 }
 
 type tokenRequest struct {
@@ -122,7 +126,7 @@ func mockSrv(secret string) *httptest.Server {
 		c.JSON(http.StatusOK, gin.H{
 			"access_token": "token",
 			"token_type":   "Bearer",
-			"expires_in":   3600,
+			"expires_in":   1,
 		})
 	})
 	return httptest.NewServer(r)
