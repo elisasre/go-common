@@ -26,7 +26,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/compose v0.29.1
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.29.1
 	github.com/urfave/cli/v2 v2.27.1
-	golang.org/x/oauth2 v0.17.0
+	golang.org/x/oauth2 v0.19.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.9
@@ -359,7 +359,6 @@ require (
 	golang.org/x/text v0.14.0 // indirect
 	golang.org/x/time v0.5.0 // indirect
 	golang.org/x/tools v0.19.0 // indirect
-	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto v0.0.0-20240205150955-31a09d347014 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20240205150955-31a09d347014 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240205150955-31a09d347014 // indirect
