@@ -18,10 +18,7 @@ import (
 func Base64decode(v string) (string, error) {
 	data, err := base64.StdEncoding.DecodeString(v)
 	if err != nil {
-		data, err = base64.RawStdEncoding.DecodeString(v)
-		if err != nil {
-			return "", fmt.Errorf("base64 decode failed: %w", err)
-		}
+		return "", fmt.Errorf("base64 decode failed: %w", err)
 	}
 	return string(data), nil
 }
