@@ -22,8 +22,8 @@ require (
 	github.com/redis/go-redis/v9 v9.5.1
 	github.com/spf13/viper v1.18.2
 	github.com/stretchr/testify v1.9.0
-	github.com/testcontainers/testcontainers-go v0.29.1
-	github.com/testcontainers/testcontainers-go/modules/compose v0.29.1
+	github.com/testcontainers/testcontainers-go v0.30.0
+	github.com/testcontainers/testcontainers-go/modules/compose v0.30.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.29.1
 	github.com/urfave/cli/v2 v2.27.1
 	golang.org/x/oauth2 v0.19.0
@@ -90,7 +90,7 @@ require (
 	github.com/chavacava/garif v0.1.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/ckaznocha/intrange v0.1.0 // indirect
-	github.com/compose-spec/compose-go/v2 v2.0.0-rc.7 // indirect
+	github.com/compose-spec/compose-go/v2 v2.0.0-rc.8.0.20240228111658-a0507e98fe60 // indirect
 	github.com/containerd/console v1.0.4 // indirect
 	github.com/containerd/containerd v1.7.12 // indirect
 	github.com/containerd/continuity v0.4.2 // indirect
@@ -105,8 +105,8 @@ require (
 	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/distribution/reference v0.5.0 // indirect
 	github.com/docker/buildx v0.12.0-rc2.0.20231219140829-617f538cb315 // indirect
-	github.com/docker/cli v25.0.3+incompatible // indirect
-	github.com/docker/compose/v2 v2.24.6 // indirect
+	github.com/docker/cli v25.0.4-0.20240305161310-2bf4225ad269+incompatible // indirect
+	github.com/docker/compose/v2 v2.24.7 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
 	github.com/docker/docker v25.0.5+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.8.0 // indirect
@@ -329,8 +329,8 @@ require (
 	go-simpler.org/sloglint v0.5.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.48.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.45.0 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.48.0 // indirect
-	go.opentelemetry.io/otel v1.23.1 // indirect
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
+	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.42.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.42.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetrichttp v0.42.0 // indirect
@@ -338,10 +338,10 @@ require (
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracegrpc v1.19.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp v1.19.0 // indirect
 	go.opentelemetry.io/otel/exporters/prometheus v0.42.0 // indirect
-	go.opentelemetry.io/otel/metric v1.23.1 // indirect
-	go.opentelemetry.io/otel/sdk v1.23.1 // indirect
+	go.opentelemetry.io/otel/metric v1.24.0 // indirect
+	go.opentelemetry.io/otel/sdk v1.24.0 // indirect
 	go.opentelemetry.io/otel/sdk/metric v1.19.0 // indirect
-	go.opentelemetry.io/otel/trace v1.23.1 // indirect
+	go.opentelemetry.io/otel/trace v1.24.0 // indirect
 	go.opentelemetry.io/proto/otlp v1.0.0 // indirect
 	go.uber.org/automaxprocs v1.5.3 // indirect
 	go.uber.org/mock v0.4.0 // indirect
