@@ -11,7 +11,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/require"
-	"golang.org/x/oauth2/clientcredentials"
 )
 
 func ExampleBasicAuth() {
@@ -32,17 +31,18 @@ func TestNewClient(t *testing.T) {
 		srv.Close()
 	})
 
-	creds := &clientcredentials.Config{
-		ClientID: "clientid",
-		TokenURL: fmt.Sprintf("%s/oauth2/token", srv.URL),
-		Scopes:   []string{"openid", "email", "groups"},
-		EndpointParams: url.Values{
-			"groups": []string{"test"},
-		},
-	}
-
 	ctx := context.Background()
-	c := NewClient(ctx, creds, secret, "")
+	c := NewClient(ctx, &ClientConfiguration{
+		OAuth2: OAuth2{
+			ClientID: "clientid",
+			TokenURL: fmt.Sprintf("%s/oauth2/token", srv.URL),
+			Scopes:   []string{"openid", "email", "groups"},
+			EndpointParams: url.Values{
+				"groups": []string{"test"},
+			},
+			ClientSecret: secret,
+		},
+	})
 
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s?foo=bar", srv.URL), nil)
 	require.NoError(t, err)
@@ -59,18 +59,18 @@ func TestNewClientToken(t *testing.T) {
 		srv.Close()
 	})
 
-	creds := &clientcredentials.Config{
-		ClientID: "clientid",
-		TokenURL: fmt.Sprintf("%s/oauth2/token", srv.URL),
-		Scopes:   []string{"openid", "email", "groups"},
-		EndpointParams: url.Values{
-			"groups": []string{"test"},
-		},
-	}
-
 	ctx := context.Background()
-	c := NewClient(ctx, creds, "secret", "./testdata/token")
-
+	c := NewClient(ctx, &ClientConfiguration{
+		OAuth2: OAuth2{
+			ClientID: "clientid",
+			TokenURL: fmt.Sprintf("%s/oauth2/token", srv.URL),
+			Scopes:   []string{"openid", "email", "groups"},
+			EndpointParams: url.Values{
+				"groups": []string{"test"},
+			},
+			ClientSecretFile: "./testdata/token",
+		},
+	})
 	for i := 0; i < 3; i++ {
 		req, err := http.NewRequest("GET", fmt.Sprintf("%s?foo=bar", srv.URL), nil)
 		require.NoError(t, err)
