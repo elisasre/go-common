@@ -28,7 +28,7 @@ type ClientConfiguration struct {
 }
 
 func NewClient(ctx context.Context, conf *ClientConfiguration) *http.Client {
-	rt := newOauth2RoundTripper(conf, http.DefaultTransport)
+	rt := newOauth2RoundTripper(conf)
 	return &http.Client{Transport: rt}
 }
 
@@ -40,7 +40,7 @@ type oauth2RoundTripper struct {
 	client *http.Client
 }
 
-func newOauth2RoundTripper(config *ClientConfiguration, next http.RoundTripper) http.RoundTripper {
+func newOauth2RoundTripper(config *ClientConfiguration) http.RoundTripper {
 	return &oauth2RoundTripper{
 		config: config,
 	}
@@ -62,8 +62,7 @@ func (r *oauth2RoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 		changed = secret != r.secret
 		r.mtx.RUnlock()
 	} else {
-		// Either an inline secret or nothing (use an empty string) was provided.
-		secret = string(r.config.ClientSecret)
+		secret = r.config.ClientSecret
 	}
 
 	if changed || r.rt == nil {
@@ -75,9 +74,7 @@ func (r *oauth2RoundTripper) RoundTrip(req *http.Request) (*http.Response, error
 			EndpointParams: r.config.EndpointParams,
 		}
 
-		var t http.RoundTripper
-
-		client := &http.Client{Transport: t}
+		client := &http.Client{}
 		ctx := context.WithValue(context.Background(), oauth2.HTTPClient, client)
 		tokenSource := config.TokenSource(ctx)
 
