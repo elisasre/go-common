@@ -26,7 +26,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/compose v0.30.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.30.0
 	github.com/urfave/cli/v2 v2.27.2
-	golang.org/x/oauth2 v0.19.0
+	golang.org/x/oauth2 v0.20.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.5.7
 	gorm.io/gorm v1.25.10
