@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"runtime"
+	"runtime/debug"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
@@ -145,6 +146,7 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 	}
 	if err := recover(); err != nil {
 		defer sentry.RecoverWithContext(ctx)
+		fmt.Println(string(debug.Stack()))
 		panic(err)
 	}
 }
