@@ -8,7 +8,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.32.1
 	github.com/aws/aws-sdk-go-v2 v1.27.0
 	github.com/aws/aws-sdk-go-v2/config v1.27.15
-	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.4.5
+	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.4.7
 	github.com/elisasre/mageutil v1.5.8
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getsentry/sentry-go v0.27.0
