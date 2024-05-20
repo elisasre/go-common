@@ -5,10 +5,12 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"fmt"
+	"io"
 	"log/slog"
 	"math/big"
 	"net"
 	"net/http"
+	"os"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -139,6 +141,8 @@ func LoadAndListenConfig[Conf any](path string, c Conf, onUpdate func(c Conf)) (
 	return c, nil
 }
 
+var output io.Writer = os.Stdout
+
 // RecoverWithContext recovers from panic and sends it to Sentry.
 func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 	if transaction != nil {
@@ -146,7 +150,7 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 	}
 	if err := recover(); err != nil {
 		defer sentry.RecoverWithContext(ctx)
-		fmt.Println(string(debug.Stack()))
+		fmt.Fprintf(output, "panic: %s\n%s\n", err, string(debug.Stack()))
 		panic(err)
 	}
 }
