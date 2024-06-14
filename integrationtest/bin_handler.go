@@ -80,7 +80,7 @@ func (bh *BinHandler) Build() error {
 	return bh.buildCmd.Run()
 }
 
-func (bh *BinHandler) Start() error {
+func (bh *BinHandler) initRunCommand() error {
 	err := os.MkdirAll(path.Join(bh.base, bh.coverDir), 0o755)
 	if err != nil {
 		return err
@@ -95,11 +95,21 @@ func (bh *BinHandler) Start() error {
 
 	fmt.Println("PWD:", bh.runCmd.Dir)
 	fmt.Println("CMD:", bh.runCmd.String())
-	if err := bh.runCmd.Start(); err != nil {
+	return nil
+}
+
+func (bh *BinHandler) Start() error {
+	if err := bh.initRunCommand(); err != nil {
 		return err
 	}
+	return bh.runCmd.Start()
+}
 
-	return nil
+func (bh *BinHandler) Run() error {
+	if err := bh.initRunCommand(); err != nil {
+		return err
+	}
+	return bh.runCmd.Run()
 }
 
 func (bh *BinHandler) Stop() error {
