@@ -1,0 +1,19 @@
+# golang output binary directory
+bin/*
+vendor/*
+
+# test results
+gotest-coverage.out
+gotest-report.out
+
+# dependency check reports
+dependency-check-*.*
+
+testdata/test.yaml
+testdata/test2.yaml
+
+.tools/
+/target/
+
+# editors
+.idea
