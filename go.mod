@@ -24,7 +24,7 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.32.0
 	github.com/testcontainers/testcontainers-go/modules/compose v0.32.0
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.31.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.32.0
 	github.com/urfave/cli/v2 v2.27.2
 	golang.org/x/oauth2 v0.21.0
 	gopkg.in/yaml.v2 v2.4.0
