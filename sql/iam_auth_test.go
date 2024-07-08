@@ -29,8 +29,8 @@ func TestIAMAuth(t *testing.T) {
 	dbTestUserNewPassword := "hunter2"
 	dbName := "postgres"
 
-	postgresContainer, err := postgrestc.RunContainer(ctx,
-		testcontainers.WithImage("postgres:16"),
+	postgresContainer, err := postgrestc.Run(ctx,
+		"postgres:16",
 		postgrestc.WithDatabase(dbName),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
