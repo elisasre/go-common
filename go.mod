@@ -30,7 +30,7 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.5.9
 	gorm.io/gorm v1.25.11
-	k8s.io/apimachinery v0.30.2
+	k8s.io/apimachinery v0.30.3
 	k8s.io/client-go v0.30.2
 )
 
