@@ -10,6 +10,7 @@ import (
 	"strings"
 	"sync"
 
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/clientcredentials"
 )
@@ -29,7 +30,7 @@ type ClientConfiguration struct {
 
 func NewClient(ctx context.Context, conf *ClientConfiguration) *http.Client {
 	rt := newOauth2RoundTripper(conf)
-	return &http.Client{Transport: rt}
+	return &http.Client{Transport: otelhttp.NewTransport(rt)}
 }
 
 type oauth2RoundTripper struct {
