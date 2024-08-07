@@ -26,6 +26,7 @@ require (
 	github.com/testcontainers/testcontainers-go/modules/compose v0.32.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.32.0
 	github.com/urfave/cli/v2 v2.27.2
+	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0
 	golang.org/x/oauth2 v0.21.0
 	gopkg.in/yaml.v2 v2.4.0
 	gorm.io/driver/postgres v1.5.9
@@ -336,7 +337,6 @@ require (
 	go-simpler.org/sloglint v0.5.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc v0.49.0 // indirect
 	go.opentelemetry.io/contrib/instrumentation/net/http/httptrace/otelhttptrace v0.46.1 // indirect
-	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0 // indirect
 	go.opentelemetry.io/otel v1.24.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric v0.42.0 // indirect
 	go.opentelemetry.io/otel/exporters/otlp/otlpmetric/otlpmetricgrpc v0.42.0 // indirect
