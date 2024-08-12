@@ -14,19 +14,21 @@ import (
 )
 
 const (
+	// TokenCookieKey is the cookie name which contains the CSRF token.
+	TokenCookieKey = "csrftoken"
+	// TokenHeaderKey is the header name which contains the CSRF token.
+	TokenHeaderKey = "X-CSRF-Token"
+	// Authorization is the header name which contains the token.
+	Authorization = "Authorization"
+)
+
+const (
+	insecureReferer  = "Referer checking failed - Referer is insecure while host is secure."
 	badTooken        = "CSRF token missing or incorrect."
 	tookenMissing    = "CSRF cookie not set."
 	noReferer        = "Referer checking failed - no Referer."
 	malformedReferer = "Referer checking failed - Referer is malformed."
-	insecureReferer  = "Referer checking failed - Referer is insecure while host is secure."
-	// CsrfTokenKey is the cookie name which slices.Contains the CSRF token.
-	CsrfTokenKey = "csrftoken"
-	// Xcsrf is the header name which slices.Contains the CSRF token.
-	Xcsrf = "X-CSRF-Token"
-	// Authorization is the header name which slices.Contains the token.
-	Authorization = "Authorization"
-
-	https = "https"
+	protoHTTPS       = "https"
 )
 
 var ignoreMethods = []string{"GET", "HEAD", "OPTIONS", "TRACE"}
@@ -42,8 +44,8 @@ type ErrorResponse struct {
 	ErrorType string `json:"error_type,omitempty" example:"invalid_scope"`
 }
 
-// CSRF is middleware for handling CSRF protection in gin.
-func CSRF(excludePaths []string) gin.HandlerFunc {
+// New creates new CSRF middleware for gin.
+func New(excludePaths []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// allow machineuser
 		if isAPIUser(c) {
@@ -64,7 +66,7 @@ func CSRF(excludePaths []string) gin.HandlerFunc {
 					return
 				}
 				http.SetCookie(c.Writer, &http.Cookie{
-					Name:     CsrfTokenKey,
+					Name:     TokenCookieKey,
 					Value:    val,
 					Path:     "/",
 					Domain:   c.Request.URL.Host,
@@ -95,7 +97,7 @@ func CSRF(excludePaths []string) gin.HandlerFunc {
 				return
 			}
 
-			if parsedURL.Scheme != https {
+			if parsedURL.Scheme != protoHTTPS {
 				c.JSON(403, ErrorResponse{Code: 403, Message: insecureReferer})
 				c.Abort()
 				return
@@ -127,13 +129,10 @@ func CSRF(excludePaths []string) gin.HandlerFunc {
 	}
 }
 
-const (
-	randomLength = 32
-	sentryKey    = "sentry"
-)
-
 // RandomToken returns random sha256 string.
 func RandomToken() (string, error) {
+	const randomLength = 32
+
 	hash := sha256.New()
 	r, err := randomString(randomLength)
 	if err != nil {
@@ -161,13 +160,13 @@ func randomString(n int) (string, error) {
 
 func isHTTPS(r *http.Request) bool {
 	switch {
-	case r.URL.Scheme == https:
+	case r.URL.Scheme == protoHTTPS:
 		return true
 	case r.TLS != nil:
 		return true
-	case strings.HasPrefix(strings.ToLower(r.Proto), https):
+	case strings.HasPrefix(strings.ToLower(r.Proto), protoHTTPS):
 		return true
-	case r.Header.Get("X-Forwarded-Proto") == https:
+	case r.Header.Get("X-Forwarded-Proto") == protoHTTPS:
 		return true
 	default:
 		return false
@@ -175,7 +174,7 @@ func isHTTPS(r *http.Request) bool {
 }
 
 func getHeader(c *gin.Context) string {
-	return c.Request.Header.Get(Xcsrf)
+	return c.Request.Header.Get(TokenHeaderKey)
 }
 
 func isAPIUser(c *gin.Context) bool {
@@ -183,7 +182,7 @@ func isAPIUser(c *gin.Context) bool {
 }
 
 func getCookie(c *gin.Context) string {
-	session, err := c.Request.Cookie(CsrfTokenKey)
+	session, err := c.Request.Cookie(TokenCookieKey)
 	if err == nil && session.Value != "" {
 		return session.Value
 	}
