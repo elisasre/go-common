@@ -48,24 +48,24 @@ func TestRedisRateLimiterAlways(t *testing.T) {
 	req, err := http.NewRequest("GET", "/healthz", nil)
 	require.Equal(t, err, nil)
 	router.ServeHTTP(w, req)
-	require.Equal(t, 200, w.Code)
-	require.Equal(t, "ok", w.Body.String())
-	require.Equal(t, "2", w.Result().Header.Get(ratelimit.HeaderLimit))
-	require.Equal(t, "1", w.Result().Header.Get(ratelimit.HeaderRemaining))
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "ok", w.Body.String())
+	assert.Equal(t, "2", w.Result().Header.Get(ratelimit.HeaderLimit))
+	assert.Equal(t, "1", w.Result().Header.Get(ratelimit.HeaderRemaining))
 
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
-	require.Equal(t, 200, w2.Code)
-	require.Equal(t, "ok", w2.Body.String())
-	require.Equal(t, "2", w2.Result().Header.Get(ratelimit.HeaderLimit))
-	require.Equal(t, "0", w2.Result().Header.Get(ratelimit.HeaderRemaining))
+	assert.Equal(t, 200, w2.Code)
+	assert.Equal(t, "ok", w2.Body.String())
+	assert.Equal(t, "2", w2.Result().Header.Get(ratelimit.HeaderLimit))
+	assert.Equal(t, "0", w2.Result().Header.Get(ratelimit.HeaderRemaining))
 
 	w3 := httptest.NewRecorder()
 	router.ServeHTTP(w3, req)
-	require.Equal(t, 429, w3.Code)
-	require.Equal(t, `{"code":429,"message":"rate limit exceeded"}`, w3.Body.String())
-	require.Equal(t, "2", w3.Result().Header.Get(ratelimit.HeaderLimit))
-	require.Equal(t, "0", w3.Result().Header.Get(ratelimit.HeaderRemaining))
+	assert.Equal(t, 429, w3.Code)
+	assert.Equal(t, `{"code":429,"message":"rate limit exceeded"}`, w3.Body.String())
+	assert.Equal(t, "2", w3.Result().Header.Get(ratelimit.HeaderLimit))
+	assert.Equal(t, "0", w3.Result().Header.Get(ratelimit.HeaderRemaining))
 }
 
 func TestRedisRateLimiterSkip(t *testing.T) {
@@ -94,11 +94,10 @@ func TestRedisRateLimiterSkip(t *testing.T) {
 		req, err := http.NewRequest("GET", "/healthz", nil)
 		require.Equal(t, err, nil)
 		router.ServeHTTP(w, req)
-		require.Equal(t, 200, w.Code)
-		require.Equal(t, "ok", w.Body.String())
-
-		require.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderLimit))
-		require.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderRemaining))
+		assert.Equal(t, 200, w.Code)
+		assert.Equal(t, "ok", w.Body.String())
+		assert.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderLimit))
+		assert.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderRemaining))
 	}
 }
 
@@ -130,19 +129,19 @@ func TestRedisRateLimiterForce(t *testing.T) {
 	req, err := http.NewRequest("GET", "/healthz", nil)
 	require.Equal(t, err, nil)
 	router.ServeHTTP(w, req)
-	require.Equal(t, 200, w.Code)
-	require.Equal(t, "ok", w.Body.String())
-	require.Equal(t, "2", w.Result().Header.Get(ratelimit.HeaderLimit))
-	require.Equal(t, "1", w.Result().Header.Get(ratelimit.HeaderRemaining))
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "ok", w.Body.String())
+	assert.Equal(t, "2", w.Result().Header.Get(ratelimit.HeaderLimit))
+	assert.Equal(t, "1", w.Result().Header.Get(ratelimit.HeaderRemaining))
 
 	s.SetError("server is unavailable")
 
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
-	require.Equal(t, 400, w2.Code)
-	require.Equal(t, `{"code":400,"message":"server is unavailable"}`, w2.Body.String())
-	require.Equal(t, "", w2.Result().Header.Get(ratelimit.HeaderLimit))
-	require.Equal(t, "", w2.Result().Header.Get(ratelimit.HeaderRemaining))
+	assert.Equal(t, 400, w2.Code)
+	assert.Equal(t, `{"code":400,"message":"server is unavailable"}`, w2.Body.String())
+	assert.Equal(t, "", w2.Result().Header.Get(ratelimit.HeaderLimit))
+	assert.Equal(t, "", w2.Result().Header.Get(ratelimit.HeaderRemaining))
 }
 
 func TestRedisRateLimiterNil(t *testing.T) {
