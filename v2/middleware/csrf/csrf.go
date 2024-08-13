@@ -25,7 +25,7 @@ const (
 const (
 	insecureReferer  = "Referer checking failed - Referer is insecure while host is secure."
 	badTooken        = "CSRF token missing or incorrect."
-	tookenMissing    = "CSRF cookie not set."
+	tokenMissing     = "CSRF cookie not set."
 	noReferer        = "Referer checking failed - no Referer."
 	malformedReferer = "Referer checking failed - Referer is malformed."
 	protoHTTPS       = "https"
@@ -113,7 +113,7 @@ func New(excludePaths []string) gin.HandlerFunc {
 
 		requestCSRFToken := getHeader(c)
 		if csrfToken == "" {
-			c.JSON(403, ErrorResponse{Code: 403, Message: tookenMissing})
+			c.JSON(403, ErrorResponse{Code: 403, Message: tokenMissing})
 			c.Abort()
 			return
 		}
