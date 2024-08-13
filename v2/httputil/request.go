@@ -40,10 +40,8 @@ type Response struct {
 type Backoff struct {
 	// The initial duration.
 	Duration time.Duration
-	// The remaining number of iterations in which the duration
-	// parameter may change. If not positive, the duration is not
-	// changed.
-	MaxRetries int
+	// Maximum number of tries.
+	MaxTries int
 }
 
 // MakeRequest is hihg level wrapper for http.Do with added functionality like retries and automatic response parsing.
@@ -135,15 +133,15 @@ type ConditionFunc func() (done bool, err error)
 // SleepUntil waits for condition to succeeds.
 func SleepUntil(backoff Backoff, condition ConditionFunc) error {
 	var err error
-	for backoff.MaxRetries > 0 {
+	for backoff.MaxTries > 0 {
 		var ok bool
 		if ok, err = condition(); ok {
 			return err
 		}
-		if backoff.MaxRetries == 1 {
+		if backoff.MaxTries == 1 {
 			break
 		}
-		backoff.MaxRetries--
+		backoff.MaxTries--
 		time.Sleep(backoff.Duration)
 
 	}

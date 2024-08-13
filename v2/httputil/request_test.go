@@ -1,4 +1,4 @@
-package httputil
+package httputil_test
 
 import (
 	"context"
@@ -9,15 +9,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/elisasre/go-common/v2/httputil"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func ExampleMakeRequest() {
 	// retry once in second, maximum retries 2 times
-	backoff := Backoff{
-		Duration:   1 * time.Second,
-		MaxRetries: 2,
+	backoff := httputil.Backoff{
+		Duration: 1 * time.Second,
+		MaxTries: 2,
 	}
 
 	type Out struct {
@@ -26,9 +27,9 @@ func ExampleMakeRequest() {
 	out := Out{}
 	client := &http.Client{}
 	ctx := context.Background()
-	body, err := MakeRequest(
+	body, err := httputil.MakeRequest(
 		ctx,
-		Request{
+		httputil.Request{
 			URL:    "https://ingress-api.csf.elisa.fi/healthz",
 			Method: "GET",
 			OKCode: []int{200},
@@ -42,9 +43,9 @@ func ExampleMakeRequest() {
 
 	ctx, cancel := context.WithTimeout(ctx, 1*time.Millisecond)
 	defer cancel()
-	_, err = MakeRequest(
+	_, err = httputil.MakeRequest(
 		ctx,
-		Request{
+		httputil.Request{
 			URL:    "https://ingress-api.csf.elisa.fi/healthz",
 			Method: "GET",
 			OKCode: []int{200},
@@ -63,9 +64,9 @@ func ExampleMakeRequest() {
 }
 
 func TestMakeRequestMock(t *testing.T) {
-	backoff := Backoff{
-		Duration:   100 * time.Millisecond,
-		MaxRetries: 1,
+	backoff := httputil.Backoff{
+		Duration: 100 * time.Millisecond,
+		MaxTries: 1,
 	}
 
 	helloWorld := `{"hello":"world"}`
@@ -80,9 +81,9 @@ func TestMakeRequestMock(t *testing.T) {
 	}
 
 	ctx := context.Background()
-	body, err := MakeRequest(
+	body, err := httputil.MakeRequest(
 		ctx,
-		Request{
+		httputil.Request{
 			URL:    "http://foobar",
 			Method: "GET",
 			OKCode: []int{200},
