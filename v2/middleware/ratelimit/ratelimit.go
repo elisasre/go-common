@@ -17,9 +17,9 @@ type (
 )
 
 const (
-	RatelimitReset     = "X-Ratelimit-Reset"
-	RatelimitLimit     = "X-Ratelimit-Limit"
-	RatelimitRemaining = "X-Ratelimit-Remaining"
+	HeaderReset     = "X-Ratelimit-Reset"
+	HeaderLimit     = "X-Ratelimit-Limit"
+	HeaderRemaining = "X-Ratelimit-Remaining"
 )
 
 func (e ErrorResponse) Error() string {
@@ -33,40 +33,40 @@ type ErrorResponse struct {
 	ErrorType string `json:"error_type,omitempty" example:"invalid_scope"`
 }
 
-// RedisRateLimiter ...
-func RedisRateLimiter(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.HandlerFunc {
+// New creates a distributed rate limiter middleware using redis for state management.
+func New(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.HandlerFunc {
+	limiter := redis_rate.NewLimiter(rdb)
 	return func(c *gin.Context) {
 		ctx := c.Request.Context()
-		limiter := redis_rate.NewLimiter(rdb)
 		key, limit, err := key(c)
 		if err != nil {
 			c.JSON(400, ErrorResponse{Code: 400, Message: err.Error()})
 			c.Abort()
 			return
 		}
+
 		if limit == nil || rdb == nil {
 			c.Next()
 			return
 		}
+
 		res, err := limiter.Allow(ctx, key, redis_rate.PerMinute(*limit))
-		if err == nil {
-			reset := time.Now().Add(res.ResetAfter)
-			c.Header(RatelimitReset, strconv.Itoa(int(reset.Unix())))
-			c.Header(RatelimitLimit, strconv.Itoa(*limit))
-			c.Header(RatelimitRemaining, strconv.Itoa(res.Remaining))
-			if res.Allowed <= 0 {
-				c.JSON(http.StatusTooManyRequests,
-					ErrorResponse{Code: http.StatusTooManyRequests, Message: "rate limit exceeded"},
-				)
-				c.Abort()
+		if err != nil {
+			if shouldReturn := errFunc(c, err); shouldReturn {
 				return
 			}
 		} else {
-			shouldReturn := errFunc(c, err)
-			if shouldReturn {
+			reset := time.Now().Add(res.ResetAfter)
+			c.Header(HeaderReset, strconv.Itoa(int(reset.Unix())))
+			c.Header(HeaderLimit, strconv.Itoa(*limit))
+			c.Header(HeaderRemaining, strconv.Itoa(res.Remaining))
+			if res.Allowed <= 0 {
+				c.JSON(http.StatusTooManyRequests, ErrorResponse{Code: http.StatusTooManyRequests, Message: "rate limit exceeded"})
+				c.Abort()
 				return
 			}
 		}
+
 		c.Next()
 	}
 }

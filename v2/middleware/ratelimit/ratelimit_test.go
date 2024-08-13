@@ -9,6 +9,7 @@ import (
 	"github.com/elisasre/go-common/v2/middleware/ratelimit"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +29,7 @@ func TestRedisRateLimiterAlways(t *testing.T) {
 	redisClient := redis.NewClient(&redis.Options{
 		Addr: s.Addr(),
 	})
-	alwaysRateLimiter := ratelimit.RedisRateLimiter(redisClient,
+	alwaysRateLimiter := ratelimit.New(redisClient,
 		func(c *gin.Context) (key string, limit *int, err error) {
 			return testUser, intPtr(2), nil
 		},
@@ -49,22 +50,22 @@ func TestRedisRateLimiterAlways(t *testing.T) {
 	router.ServeHTTP(w, req)
 	require.Equal(t, 200, w.Code)
 	require.Equal(t, "ok", w.Body.String())
-	require.Equal(t, "2", w.Result().Header.Get(ratelimit.RatelimitLimit))
-	require.Equal(t, "1", w.Result().Header.Get(ratelimit.RatelimitRemaining))
+	require.Equal(t, "2", w.Result().Header.Get(ratelimit.HeaderLimit))
+	require.Equal(t, "1", w.Result().Header.Get(ratelimit.HeaderRemaining))
 
 	w2 := httptest.NewRecorder()
 	router.ServeHTTP(w2, req)
 	require.Equal(t, 200, w2.Code)
 	require.Equal(t, "ok", w2.Body.String())
-	require.Equal(t, "2", w2.Result().Header.Get(ratelimit.RatelimitLimit))
-	require.Equal(t, "0", w2.Result().Header.Get(ratelimit.RatelimitRemaining))
+	require.Equal(t, "2", w2.Result().Header.Get(ratelimit.HeaderLimit))
+	require.Equal(t, "0", w2.Result().Header.Get(ratelimit.HeaderRemaining))
 
 	w3 := httptest.NewRecorder()
 	router.ServeHTTP(w3, req)
 	require.Equal(t, 429, w3.Code)
 	require.Equal(t, `{"code":429,"message":"rate limit exceeded"}`, w3.Body.String())
-	require.Equal(t, "2", w3.Result().Header.Get(ratelimit.RatelimitLimit))
-	require.Equal(t, "0", w3.Result().Header.Get(ratelimit.RatelimitRemaining))
+	require.Equal(t, "2", w3.Result().Header.Get(ratelimit.HeaderLimit))
+	require.Equal(t, "0", w3.Result().Header.Get(ratelimit.HeaderRemaining))
 }
 
 func TestRedisRateLimiterSkip(t *testing.T) {
@@ -74,7 +75,7 @@ func TestRedisRateLimiterSkip(t *testing.T) {
 		Addr: s.Addr(),
 	})
 
-	skipRateLimiter := ratelimit.RedisRateLimiter(redisClient,
+	skipRateLimiter := ratelimit.New(redisClient,
 		func(c *gin.Context) (key string, limit *int, err error) {
 			return "", nil, nil
 		},
@@ -96,8 +97,8 @@ func TestRedisRateLimiterSkip(t *testing.T) {
 		require.Equal(t, 200, w.Code)
 		require.Equal(t, "ok", w.Body.String())
 
-		require.Equal(t, "", w.Result().Header.Get(ratelimit.RatelimitLimit))
-		require.Equal(t, "", w.Result().Header.Get(ratelimit.RatelimitRemaining))
+		require.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderLimit))
+		require.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderRemaining))
 	}
 }
 
@@ -108,7 +109,7 @@ func TestRedisRateLimiterForce(t *testing.T) {
 		Addr: s.Addr(),
 	})
 
-	forceRateLimiter := ratelimit.RedisRateLimiter(redisClient,
+	forceRateLimiter := ratelimit.New(redisClient,
 		func(c *gin.Context) (key string, limit *int, err error) {
 			return testUser, intPtr(2), nil
 		},
@@ -131,8 +132,8 @@ func TestRedisRateLimiterForce(t *testing.T) {
 	router.ServeHTTP(w, req)
 	require.Equal(t, 200, w.Code)
 	require.Equal(t, "ok", w.Body.String())
-	require.Equal(t, "2", w.Result().Header.Get(ratelimit.RatelimitLimit))
-	require.Equal(t, "1", w.Result().Header.Get(ratelimit.RatelimitRemaining))
+	require.Equal(t, "2", w.Result().Header.Get(ratelimit.HeaderLimit))
+	require.Equal(t, "1", w.Result().Header.Get(ratelimit.HeaderRemaining))
 
 	s.SetError("server is unavailable")
 
@@ -140,12 +141,12 @@ func TestRedisRateLimiterForce(t *testing.T) {
 	router.ServeHTTP(w2, req)
 	require.Equal(t, 400, w2.Code)
 	require.Equal(t, `{"code":400,"message":"server is unavailable"}`, w2.Body.String())
-	require.Equal(t, "", w2.Result().Header.Get(ratelimit.RatelimitLimit))
-	require.Equal(t, "", w2.Result().Header.Get(ratelimit.RatelimitRemaining))
+	require.Equal(t, "", w2.Result().Header.Get(ratelimit.HeaderLimit))
+	require.Equal(t, "", w2.Result().Header.Get(ratelimit.HeaderRemaining))
 }
 
 func TestRedisRateLimiterNil(t *testing.T) {
-	nilLimiter := ratelimit.RedisRateLimiter(nil,
+	nilLimiter := ratelimit.New(nil,
 		func(c *gin.Context) (key string, limit *int, err error) {
 			return testUser, intPtr(2), nil
 		},
@@ -166,10 +167,10 @@ func TestRedisRateLimiterNil(t *testing.T) {
 	req, err := http.NewRequest("GET", "/healthz", nil)
 	require.Equal(t, err, nil)
 	router.ServeHTTP(w, req)
-	require.Equal(t, 200, w.Code)
-	require.Equal(t, "ok", w.Body.String())
-	require.Equal(t, "", w.Result().Header.Get(ratelimit.RatelimitLimit))
-	require.Equal(t, "", w.Result().Header.Get(ratelimit.RatelimitRemaining))
+	assert.Equal(t, 200, w.Code)
+	assert.Equal(t, "ok", w.Body.String())
+	assert.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderLimit))
+	assert.Equal(t, "", w.Result().Header.Get(ratelimit.HeaderRemaining))
 }
 
 func intPtr(i int) *int { return &i }
