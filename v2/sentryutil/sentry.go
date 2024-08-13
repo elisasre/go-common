@@ -28,15 +28,15 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 	}
 }
 
-// SentryErr sends error to Sentry.
-func SentryErr(ctx context.Context, err error) {
+// Error sends error to Sentry.
+func Error(ctx context.Context, err error) {
 	_, hub := setHubToContext(ctx)
 	hub.CaptureException(err)
 	slog.Error(err.Error()) //nolint: sloglint
 }
 
-// MakeSentryTransaction creates Sentry transaction.
-func MakeSentryTransaction(ctx context.Context, name string, opts ...sentry.SpanOption) (context.Context, *sentry.Span, *sentry.Hub) {
+// MakeTransaction creates new Sentry transaction.
+func MakeTransaction(ctx context.Context, name string, opts ...sentry.SpanOption) (context.Context, *sentry.Span, *sentry.Hub) {
 	var hub *sentry.Hub
 	ctx, hub = setHubToContext(ctx)
 	options := []sentry.SpanOption{
@@ -59,8 +59,8 @@ func setHubToContext(ctx context.Context) (context.Context, *sentry.Hub) {
 	return ctx, hub
 }
 
-// sentrySpanTracer middleware for sentry span time reporting.
-func sentrySpanTracer() gin.HandlerFunc {
+// spanTracer middleware for sentry span time reporting.
+func spanTracer() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		span := sentry.StartSpan(c.Request.Context(), c.HandlerName())
 		defer span.Finish()
@@ -108,6 +108,6 @@ func PATCH(group *gin.RouterGroup, relativePath string, handlers ...gin.HandlerF
 func addSpanTracer(handlers []gin.HandlerFunc) []gin.HandlerFunc {
 	lastElement := handlers[len(handlers)-1]
 	handlers = handlers[:len(handlers)-1]
-	handlers = append(handlers, sentrySpanTracer(), lastElement)
+	handlers = append(handlers, spanTracer(), lastElement)
 	return handlers
 }
