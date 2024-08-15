@@ -7,8 +7,10 @@ import (
 	"crypto/md5" //nolint:gosec // G501: Blocklisted import crypto/md5: weak cryptographic primitive
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/hex"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"math/big"
@@ -24,23 +26,11 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
-// TODO: detach jwt logic from DB implementation.
-// Model is tuned gorm.model.
-type Model struct {
-	ID        uint      `json:"id" gorm:"primarykey"`
-	CreatedAt time.Time `gorm:"index"`
-	UpdatedAt time.Time
-	DeletedAt time.Time `json:"-" gorm:"index"`
-}
-
 // JWTKey is struct for storing auth private keys.
 type JWTKey struct {
-	Model
-	KID               string          `yaml:"kid" json:"kid"`
-	PrivateKey        *rsa.PrivateKey `yaml:"-" json:"-"`
-	PrivateKeyAsBytes []byte          `yaml:"-" json:"-"`
-	PublicKey         *rsa.PublicKey  `yaml:"-" json:"-"`
-	PublicKeyAsBytes  []byte          `yaml:"-" json:"-"`
+	KID        string          `yaml:"kid" json:"kid"`
+	PrivateKey *rsa.PrivateKey `yaml:"-" json:"-"`
+	PublicKey  *rsa.PublicKey  `yaml:"-" json:"-"`
 }
 type OAuth2 struct {
 	ClientID         string
@@ -189,23 +179,23 @@ func Decrypt(data []byte, passphrase string) ([]byte, error) {
 }
 
 // GenerateNewKeyPair generates new private and public keys.
-func GenerateNewKeyPair() (*JWTKey, error) {
+func GenerateNewKeyPair() (JWTKey, error) {
 	rsaKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
-		return nil, fmt.Errorf("error generating RSA private key: %w", err)
+		return JWTKey{}, fmt.Errorf("error generating RSA private key: %w", err)
 	}
 
 	err = rsaKey.Validate()
 	if err != nil {
-		return nil, err
+		return JWTKey{}, err
 	}
 
 	serial, err := BuildPKISerial()
 	if err != nil {
-		return nil, err
+		return JWTKey{}, err
 	}
 
-	return &JWTKey{
+	return JWTKey{
 		KID:        serial.String(),
 		PrivateKey: rsaKey,
 		PublicKey:  &rsaKey.PublicKey,
@@ -225,4 +215,22 @@ func BuildPKISerial() (*big.Int, error) {
 	serial.Or(serial, randomComponent)
 
 	return serial, nil
+}
+
+func EncodePrivateKeyToPEM(privateKey *rsa.PrivateKey) []byte {
+	privBlock := pem.Block{
+		Type:    "RSA PRIVATE KEY",
+		Headers: nil,
+		Bytes:   x509.MarshalPKCS1PrivateKey(privateKey),
+	}
+	return pem.EncodeToMemory(&privBlock)
+}
+
+func EncodePublicKeyToPEM(publicKey *rsa.PublicKey) []byte {
+	privBlock := pem.Block{
+		Type:    "RSA PUBLIC KEY",
+		Headers: nil,
+		Bytes:   x509.MarshalPKCS1PublicKey(publicKey),
+	}
+	return pem.EncodeToMemory(&privBlock)
 }

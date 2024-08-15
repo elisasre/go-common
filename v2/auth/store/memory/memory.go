@@ -39,9 +39,8 @@ func (m *Memory) RotateKeys(ctx context.Context) error {
 	// private key is needed only in newest which are used to generate new tokens
 	for i := range m.keys {
 		m.keys[i].PrivateKey = nil
-		m.keys[i].PrivateKeyAsBytes = nil
 	}
-	m.keys = append([]auth.JWTKey{*keys}, m.keys...)
+	m.keys = append([]auth.JWTKey{keys}, m.keys...)
 
 	// keep 3 latest public keys
 	if len(m.keys) > 3 {

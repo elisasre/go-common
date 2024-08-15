@@ -2,9 +2,7 @@ package cache_test
 
 import (
 	"context"
-	"math/rand"
 	"testing"
-	"time"
 
 	"github.com/elisasre/go-common/v2/auth"
 	"github.com/elisasre/go-common/v2/auth/cache"
@@ -15,25 +13,20 @@ type DB struct {
 	keys []auth.JWTKey
 }
 
-func (store *DB) AddJWTKey(c context.Context, payload auth.JWTKey) (*auth.JWTKey, error) {
-	id := rand.Intn(1000000) //nolint:gosec
-	payload.Model.ID = uint(id)
-	payload.Model.CreatedAt = time.Now()
-	payload.Model.UpdatedAt = time.Now()
+func (store *DB) AddJWTKey(c context.Context, payload auth.JWTKey) error {
 	store.keys = append(store.keys, payload)
-	return &payload, nil
+	return nil
 }
 
 func (store *DB) ListJWTKeys(c context.Context) ([]auth.JWTKey, error) {
 	return store.keys, nil
 }
 
-func (store *DB) RotateJWTKeys(c context.Context, idx uint) error {
+func (store *DB) RotateJWTKeys(c context.Context, kid string) error {
 	out := []auth.JWTKey{}
 	for _, key := range store.keys {
-		if key.ID != idx {
+		if key.KID != kid {
 			key.PrivateKey = nil
-			key.PrivateKeyAsBytes = nil
 		}
 		out = append(out, key)
 	}

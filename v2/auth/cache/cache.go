@@ -12,9 +12,9 @@ import (
 
 // Datastore represents required storage interface.
 type Datastore interface {
-	AddJWTKey(context.Context, auth.JWTKey) (*auth.JWTKey, error)
+	AddJWTKey(context.Context, auth.JWTKey) error
 	ListJWTKeys(context.Context) ([]auth.JWTKey, error)
-	RotateJWTKeys(context.Context, uint) error
+	RotateJWTKeys(context.Context, string) error
 }
 
 // Cache provides in-memory owerlay for JWT key storage with key rotation functionality.
@@ -66,12 +66,11 @@ func (db *Cache) RotateKeys(ctx context.Context) error {
 		return fmt.Errorf("error GenerateNewKeyPair: %w", err)
 	}
 
-	newest, err := db.store.AddJWTKey(ctx, *keys)
-	if err != nil {
+	if err := db.store.AddJWTKey(ctx, keys); err != nil {
 		return fmt.Errorf("error AddKeys: %w", err)
 	}
 
-	err = db.store.RotateJWTKeys(ctx, newest.ID)
+	err = db.store.RotateJWTKeys(ctx, keys.KID)
 	if err != nil {
 		return err
 	}
