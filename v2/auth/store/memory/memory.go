@@ -2,73 +2,46 @@ package memory
 
 import (
 	"context"
-	"log/slog"
-	"sync"
-	"time"
 
 	"github.com/elisasre/go-common/v2/auth"
 )
 
 // Memory is im-memory storage for JWT keys which can be used as storage provider for Cache.
 type Memory struct {
-	keys   []auth.JWTKey
-	keysMu sync.RWMutex
+	keys []auth.JWTKey
 }
 
-// New init new memory interface.
-// Memory is used mainly for testing do NOT use in production.
-func New(ctx context.Context) (*Memory, error) {
-	m := &Memory{}
-	err := m.RotateKeys(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return m, nil
+// New creates new storage jwt key in-memory.
+// Memory is meant for testing purposes, do NOT use in production.
+func New() *Memory {
+	return &Memory{keys: make([]auth.JWTKey, 0, 3)}
+}
+
+// AddJWTKey adds jwt key to storage.
+func (m *Memory) AddJWTKey(_ context.Context, key auth.JWTKey) error {
+	m.keys = append([]auth.JWTKey{key}, m.keys...)
+	return nil
+}
+
+// GetKeys fetch all keys from cache.
+func (m *Memory) ListJWTKeys(context.Context) ([]auth.JWTKey, error) {
+	data := make([]auth.JWTKey, len(m.keys))
+	copy(data, m.keys)
+	return data, nil
 }
 
 // RotateKeys rotates the jwt secrets.
-func (m *Memory) RotateKeys(ctx context.Context) error {
-	m.keysMu.Lock()
-	defer m.keysMu.Unlock()
-	start := time.Now()
-	keys, err := auth.GenerateNewKeyPair()
-	if err != nil {
-		return err
-	}
-
+func (m *Memory) RotateJWTKeys(_ context.Context, kid string) error {
 	// private key is needed only in newest which are used to generate new tokens
 	for i := range m.keys {
-		m.keys[i].PrivateKey = nil
+		if m.keys[i].KID != kid {
+			m.keys[i].PrivateKey = nil
+		}
 	}
-	m.keys = append([]auth.JWTKey{keys}, m.keys...)
 
 	// keep 3 latest public keys
 	if len(m.keys) > 3 {
 		m.keys = m.keys[0:3]
 	}
-	slog.Info("rotate keys",
-		slog.Duration("duration", time.Since(start)),
-	)
 	return nil
-}
-
-// GetKeys fetch all keys from cache.
-func (m *Memory) GetKeys() []auth.JWTKey {
-	m.keysMu.RLock()
-	defer m.keysMu.RUnlock()
-	data := make([]auth.JWTKey, len(m.keys))
-	copy(data, m.keys)
-	return data
-}
-
-// GetCurrentKey fetch latest key from cache, it should have privatekey.
-func (m *Memory) GetCurrentKey() auth.JWTKey {
-	m.keysMu.RLock()
-	defer m.keysMu.RUnlock()
-	return m.keys[0]
-}
-
-// RefreshKeys refresh the keys from database.
-func (m *Memory) RefreshKeys(ctx context.Context, reload bool) ([]auth.JWTKey, error) {
-	return m.keys, nil
 }

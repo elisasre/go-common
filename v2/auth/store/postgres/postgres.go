@@ -131,15 +131,15 @@ func (db *DB) ListJWTKeys(c context.Context) ([]auth.JWTKey, error) {
 }
 
 // RotateJWTKeys rotates the JWT keys in database.
-func (db *DB) RotateJWTKeys(c context.Context, newestid uint) error {
+func (db *DB) RotateJWTKeys(c context.Context, kid string) error {
 	span := sentryutil.MakeSpan(c, 1)
 	defer span.Finish()
 
 	const updateQuery = `
 		UPDATE jwt_keys
 		SET private_key_as_bytes=NULL
-		WHERE id != $1`
-	if _, err := db.db.ExecContext(c, updateQuery, newestid); err != nil {
+		WHERE k_id != $1`
+	if _, err := db.db.ExecContext(c, updateQuery, kid); err != nil {
 		return fmt.Errorf("resetting old jwt keys failed: %w", err)
 	}
 

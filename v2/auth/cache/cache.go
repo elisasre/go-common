@@ -56,7 +56,7 @@ func getKIDs(keys []auth.JWTKey) []string {
 	return ids
 }
 
-// RotateKeys rotates the jwt secrets.
+// RotateKeys rotates the jwt keys.
 func (db *Cache) RotateKeys(ctx context.Context) error {
 	db.keysMu.Lock()
 	defer db.keysMu.Unlock()
