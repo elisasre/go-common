@@ -1,4 +1,4 @@
-package db
+package cache
 
 import (
 	"context"
@@ -17,16 +17,16 @@ type Datastore interface {
 	RotateJWTKeys(context.Context, uint) error
 }
 
-// DB is an implementation of Interface for database auth.
-type DB struct {
+// Cache provides in-memory owerlay for JWT key storage with key rotation functionality.
+type Cache struct {
 	keys   []auth.JWTKey
 	store  Datastore
 	keysMu sync.RWMutex
 }
 
 // New init new database interface.
-func New(ctx context.Context, store Datastore) (*DB, error) {
-	db := &DB{
+func New(ctx context.Context, store Datastore) (*Cache, error) {
+	db := &Cache{
 		store: store,
 	}
 	keys, err := db.store.ListJWTKeys(ctx)
@@ -57,7 +57,7 @@ func getKIDs(keys []auth.JWTKey) []string {
 }
 
 // RotateKeys rotates the jwt secrets.
-func (db *DB) RotateKeys(ctx context.Context) error {
+func (db *Cache) RotateKeys(ctx context.Context) error {
 	db.keysMu.Lock()
 	defer db.keysMu.Unlock()
 	start := time.Now()
@@ -88,7 +88,7 @@ func (db *DB) RotateKeys(ctx context.Context) error {
 	return nil
 }
 
-func (db *DB) refreshKeys(ctx context.Context, reload bool) ([]auth.JWTKey, error) {
+func (db *Cache) refreshKeys(ctx context.Context, reload bool) ([]auth.JWTKey, error) {
 	keys, err := db.store.ListJWTKeys(ctx)
 	if err != nil {
 		return keys, fmt.Errorf("error ListKeys: %w", err)
@@ -103,14 +103,14 @@ func (db *DB) refreshKeys(ctx context.Context, reload bool) ([]auth.JWTKey, erro
 }
 
 // RefreshKeys refresh the keys from database.
-func (db *DB) RefreshKeys(ctx context.Context, reload bool) ([]auth.JWTKey, error) {
+func (db *Cache) RefreshKeys(ctx context.Context, reload bool) ([]auth.JWTKey, error) {
 	db.keysMu.Lock()
 	defer db.keysMu.Unlock()
 	return db.refreshKeys(ctx, reload)
 }
 
 // GetKeys fetch all keys from cache.
-func (db *DB) GetKeys() []auth.JWTKey {
+func (db *Cache) GetKeys() []auth.JWTKey {
 	db.keysMu.RLock()
 	defer db.keysMu.RUnlock()
 	data := make([]auth.JWTKey, len(db.keys))
@@ -119,7 +119,7 @@ func (db *DB) GetKeys() []auth.JWTKey {
 }
 
 // GetCurrentKey fetch latest key from cache, it should have privatekey.
-func (db *DB) GetCurrentKey() auth.JWTKey {
+func (db *Cache) GetCurrentKey() auth.JWTKey {
 	db.keysMu.RLock()
 	defer db.keysMu.RUnlock()
 	return db.keys[0]

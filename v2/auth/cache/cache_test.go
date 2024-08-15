@@ -1,4 +1,4 @@
-package db_test
+package cache_test
 
 import (
 	"context"
@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/elisasre/go-common/v2/auth"
-	"github.com/elisasre/go-common/v2/auth/db"
+	"github.com/elisasre/go-common/v2/auth/cache"
 	"github.com/stretchr/testify/require"
 )
 
@@ -49,11 +49,11 @@ func (store *DB) RotateJWTKeys(c context.Context, idx uint) error {
 func TestRotateKeys(t *testing.T) {
 	ctx := context.Background()
 	store := &DB{}
-	db1, err := db.New(ctx, store)
+	db1, err := cache.New(ctx, store)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(db1.GetKeys()))
 
-	db2, err := db.New(ctx, store)
+	db2, err := cache.New(ctx, store)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(db2.GetKeys()))
 	require.Equal(t, db1.GetKeys(), db2.GetKeys())
@@ -88,7 +88,7 @@ func TestRotateKeys(t *testing.T) {
 func TestGetAndRefresh(t *testing.T) {
 	ctx := context.Background()
 	store := &DB{}
-	db, err := db.New(ctx, store)
+	db, err := cache.New(ctx, store)
 	require.NoError(t, err)
 	require.Equal(t, 1, len(db.GetKeys()))
 	require.Equal(t, db.GetKeys()[0], db.GetCurrentKey())

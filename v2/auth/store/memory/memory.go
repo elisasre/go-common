@@ -9,15 +9,15 @@ import (
 	"github.com/elisasre/go-common/v2/auth"
 )
 
-// Memory is an implementation of Interface for memory auth.
+// Memory is im-memory storage for JWT keys which can be used as storage provider for Cache.
 type Memory struct {
 	keys   []auth.JWTKey
 	keysMu sync.RWMutex
 }
 
-// NewMemory init new memory interface.
+// New init new memory interface.
 // Memory is used mainly for testing do NOT use in production.
-func NewMemory(ctx context.Context) (*Memory, error) {
+func New(ctx context.Context) (*Memory, error) {
 	m := &Memory{}
 	err := m.RotateKeys(ctx)
 	if err != nil {
