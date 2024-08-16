@@ -5,6 +5,10 @@ on:
     branches:
       - main
 
+defaults:
+  run:
+    working-directory: ./v2
+    
 jobs:
   analyze:
     runs-on: elisa-normal
