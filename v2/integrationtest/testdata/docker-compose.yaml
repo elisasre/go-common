@@ -1,0 +1,8 @@
+version: '3.7'
+services:
+  echo:
+    image: hashicorp/http-echo:1.0
+    restart: always
+    ports:
+      - '9999:9999'
+    command: ["-listen", ":9999", "-text", "hello world"]
