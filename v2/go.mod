@@ -6,6 +6,9 @@ toolchain go1.22.6
 
 require (
 	github.com/alicebob/miniredis/v2 v2.33.0
+	github.com/aws/aws-sdk-go-v2 v1.30.3
+	github.com/aws/aws-sdk-go-v2/config v1.27.27
+	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.4.15
 	github.com/elisasre/go-common v1.4.25
 	github.com/getsentry/sentry-go v0.28.1
 	github.com/gin-gonic/gin v1.10.0
@@ -19,9 +22,12 @@ require (
 	github.com/stretchr/testify v1.9.0
 	github.com/testcontainers/testcontainers-go v0.32.0
 	github.com/testcontainers/testcontainers-go/modules/compose v0.32.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.32.0
 	github.com/urfave/cli/v2 v2.27.2
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.49.0
 	golang.org/x/oauth2 v0.22.0
+	gorm.io/driver/postgres v1.5.9
+	gorm.io/gorm v1.25.11
 	k8s.io/apimachinery v0.31.0
 	k8s.io/client-go v0.31.0
 )
@@ -37,8 +43,6 @@ require (
 	github.com/Microsoft/hcsshim v0.11.5 // indirect
 	github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
 	github.com/alicebob/gopher-json v0.0.0-20200520072559-a9ecdc9d1d3a // indirect
-	github.com/aws/aws-sdk-go-v2 v1.30.3 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.27.27 // indirect
 	github.com/aws/aws-sdk-go-v2/credentials v1.17.27 // indirect
 	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.11 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.15 // indirect
@@ -119,6 +123,12 @@ require (
 	github.com/imdario/mergo v0.3.16 // indirect
 	github.com/in-toto/in-toto-golang v0.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jackc/pgpassfile v1.0.0 // indirect
+	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
+	github.com/jackc/pgx/v5 v5.5.5 // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jonboulle/clockwork v0.4.0 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
