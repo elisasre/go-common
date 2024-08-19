@@ -10,7 +10,7 @@ on:
 defaults:
   run:
     working-directory: ./v2
-    
+
 jobs:
   analyze:
     runs-on: elisa-normal
@@ -24,6 +24,8 @@ jobs:
           fetch-depth: 1
 
       - uses: elisa-actions/setup-go-and-mage@v1
+        with:
+          modFile: ./v2/go.mod
 
       - name: Verify dependencies
         run: mage go:tidyAndVerify

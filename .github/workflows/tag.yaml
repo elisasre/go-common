@@ -20,6 +20,8 @@ jobs:
         fetch-depth: 1
 
     - uses: elisa-actions/setup-go-and-mage@v1
+      with:
+          modFile: ./v2/go.mod
 
     - name: publish package
       run: GOPROXY=proxy.golang.org go list -m github.com/elisasre/go-common/v2@${{ github.event.release.tag_name }}
