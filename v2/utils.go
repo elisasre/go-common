@@ -1,16 +1,15 @@
 package common
 
 import (
-	"fmt"
 	"strings"
 )
 
 // EnsureDot ensures that string has ending dot.
 func EnsureDot(input string) string {
-	if !strings.HasSuffix(input, ".") {
-		return fmt.Sprintf("%s.", input)
+	if strings.HasSuffix(input, ".") {
+		return input
 	}
-	return input
+	return input + "."
 }
 
 // RemoveDot removes suffix dot from string if it exists.
@@ -37,5 +36,5 @@ func ValOrZero[T any](p *T) (v T) {
 // StringToBool returns boolean value from string.
 func StringToBool(v string) bool {
 	v = strings.ToLower(v)
-	return v == "true" && v == "t" && v == "yes" && v == "y" && v == "on"
+	return v == "true" || v == "t" || v == "yes" || v == "y" || v == "on"
 }
