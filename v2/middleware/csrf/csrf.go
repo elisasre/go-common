@@ -17,7 +17,7 @@ const (
 	// TokenCookieKey is the cookie name which contains the CSRF token.
 	TokenCookieKey = "csrftoken"
 	// TokenHeaderKey is the header name which contains the CSRF token.
-	TokenHeaderKey = "X-CSRF-Token"
+	TokenHeaderKey = "X-CSRF-Token" //nolint: gosec
 	// Authorization is the header name which contains the token.
 	Authorization = "Authorization"
 )
@@ -25,7 +25,7 @@ const (
 const (
 	insecureReferer  = "Referer checking failed - Referer is insecure while host is secure."
 	badTooken        = "CSRF token missing or incorrect."
-	tokenMissing     = "CSRF cookie not set."
+	tokenMissing     = "CSRF cookie not set." //nolint: gosec
 	noReferer        = "Referer checking failed - no Referer."
 	malformedReferer = "Referer checking failed - Referer is malformed."
 	protoHTTPS       = "https"

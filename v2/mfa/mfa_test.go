@@ -12,8 +12,8 @@ func TestValidate(t *testing.T) {
 	now = func() time.Time { return time.Date(1999, 1, 1, 1, 1, 1, 1, time.UTC) }
 
 	const (
-		secret = "QT7TBTDOLMKLRYIHV7U4JQMDSY77FYXV"
-		code   = "459115" // calculated using the secret and the fixed time above
+		secret = "QT7TBTDOLMKLRYIHV7U4JQMDSY77FYXV" //nolint: gosec
+		code   = "459115"                           // calculated using the secret and the fixed time above
 	)
 
 	err := Validate(secret, code)

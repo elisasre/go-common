@@ -157,7 +157,8 @@ func TestCSRF(t *testing.T) {
 			r := gin.New()
 			r.Use(csrf.New(tt.excludePaths))
 			r.Handle(tt.method, testPath, func(c *gin.Context) {
-				c.Writer.WriteString("hello from handler")
+				_, err := c.Writer.WriteString("hello from handler")
+				assert.NoError(t, err)
 			})
 
 			w := httptest.NewRecorder()
