@@ -62,7 +62,7 @@ func (p *Prometheus) Init() (err error) {
 		p.reqDur = reqDur
 		p.ReqCntURLLabelMappingFn = func(c *gin.Context) string { return c.Request.URL.Path }
 		p.SkipMetricsURLFn = func(c *gin.Context) bool { return false }
-		p.reg = prometheus.NewRegistry()
+		p.reg = prometheus.NewPedanticRegistry()
 
 		collectors := []prometheus.Collector{
 			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
