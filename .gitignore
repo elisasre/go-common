@@ -13,7 +13,7 @@ testdata/test.yaml
 testdata/test2.yaml
 
 .tools/
-/target/
+target/
 
 # editors
 .idea

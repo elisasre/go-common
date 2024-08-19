@@ -7,6 +7,10 @@ on:
       - synchronize
       - reopened
 
+defaults:
+  run:
+    working-directory: ./v2
+
 jobs:
   analyze:
     runs-on: elisa-normal
@@ -20,6 +24,8 @@ jobs:
           fetch-depth: 1
 
       - uses: elisa-actions/setup-go-and-mage@v1
+        with:
+          modFile: ./v2/go.mod
 
       - name: Verify dependencies
         run: mage go:tidyAndVerify
@@ -32,7 +38,7 @@ jobs:
         with:
           url: https://codecov.csf.elisa.fi
           flags: unit
-          files: ./target/tests/cover/unit/cover.txt
+          files: ./v2/target/tests/cover/unit/cover.txt
           use_oidc: true
 
       - name: Lint
