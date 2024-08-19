@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/elisasre/go-common/metrics"
+	"github.com/elisasre/go-common/v2/metrics"
 	"github.com/elisasre/go-common/v2/service/module/httpserver"
 	"github.com/elisasre/go-common/v2/service/module/httpserver/prom"
 	"github.com/hashicorp/go-multierror"
