@@ -4,7 +4,7 @@ package prom
 import (
 	"fmt"
 
-	"github.com/elisasre/go-common/metrics"
+	"github.com/elisasre/go-common/v2/metrics"
 	"github.com/elisasre/go-common/v2/service/module/httpserver"
 )
 
