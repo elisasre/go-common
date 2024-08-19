@@ -36,7 +36,7 @@ jobs:
         with:
           url: https://codecov.csf.elisa.fi
           flags: unit
-          files: ./target/tests/cover/unit/cover.txt
+          files: ./v2/target/tests/cover/unit/cover.txt
           use_oidc: true
 
       - name: Lint
