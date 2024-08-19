@@ -14,7 +14,8 @@ import (
 func TestPrometheus(t *testing.T) {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.New()
-	p := NewPrometheus(65001)
+	p, err := NewPrometheus(65001)
+	assert.NoError(t, err)
 	p.AddSkipMetricsURLFn(func(c *gin.Context) bool {
 		return c.Request.URL.Path == "/skip"
 	})

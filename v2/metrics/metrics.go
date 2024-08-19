@@ -31,11 +31,10 @@ func New(cs ...prometheus.Collector) *Prometheus {
 }
 
 // NewPrometheus creates registers collectors and starts metrics server.
-// Deprecated: This function will panic instead of returning error. Use metrics module instead.
-func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
+func NewPrometheus(port int, cs ...prometheus.Collector) (*Prometheus, error) {
 	p := New(cs...)
 	if err := p.Init(); err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	pMux := http.NewServeMux()
@@ -50,10 +49,10 @@ func NewPrometheus(port int, cs ...prometheus.Collector) *Prometheus {
 		}
 		err := srv.ListenAndServe()
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 	}()
-	return p
+	return p, nil
 }
 
 func (p *Prometheus) Init() (err error) {
