@@ -49,7 +49,7 @@ func NewPrometheus(port int, cs ...prometheus.Collector) (*Prometheus, error) {
 		}
 		err := srv.ListenAndServe()
 		if err != nil {
-			return nil, err
+			panic(err)
 		}
 	}()
 	return p, nil
