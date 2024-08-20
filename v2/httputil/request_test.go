@@ -71,7 +71,7 @@ func TestMakeRequestMock(t *testing.T) {
 
 	helloWorld := `{"hello":"world"}`
 
-	client := &MockClient{
+	client := &httputil.MockClient{
 		DoFunc: func(req *http.Request) (*http.Response, error) {
 			return &http.Response{
 				StatusCode: 200,
@@ -95,14 +95,4 @@ func TestMakeRequestMock(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, helloWorld, string(body.Body))
 	assert.Equal(t, 200, body.StatusCode)
-}
-
-// MockClient is helper client for mock tests.
-type MockClient struct {
-	DoFunc func(req *http.Request) (*http.Response, error)
-}
-
-// Do executes the HTTPClient interface Do function.
-func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
-	return m.DoFunc(req)
 }
