@@ -150,3 +150,13 @@ func SleepUntil(backoff Backoff, condition ConditionFunc) error {
 	}
 	return ErrTimeout
 }
+
+// MockClient is helper client for mock tests.
+type MockClient struct {
+	DoFunc func(req *http.Request) (*http.Response, error)
+}
+
+// Do executes the HTTPClient interface Do function.
+func (m *MockClient) Do(req *http.Request) (*http.Response, error) {
+	return m.DoFunc(req)
+}
