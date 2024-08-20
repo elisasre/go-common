@@ -20,13 +20,14 @@ type HTTPClient interface {
 
 // Request contains all relevant data for making http requst.
 type Request struct {
-	Method      string
-	URL         string
-	Body        []byte
-	Cookies     []*http.Cookie
-	Headers     map[string]string
-	OKCode      []int
-	Unmarshaler func(data []byte, v any) error
+	Method                 string
+	URL                    string
+	Body                   []byte
+	Cookies                []*http.Cookie
+	Headers                map[string]string
+	OKCode                 []int
+	Unmarshaler            func(data []byte, v any) error
+	RetryOnContextDeadline bool
 }
 
 // Response contains basic fields extracted from http.Response.
@@ -80,7 +81,7 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 				slog.String("url", request.URL),
 				slog.String("error", err.Error()),
 			)
-			if errors.Is(err, context.DeadlineExceeded) {
+			if !request.RetryOnContextDeadline && errors.Is(err, context.DeadlineExceeded) {
 				return true, err
 			}
 			return false, err
