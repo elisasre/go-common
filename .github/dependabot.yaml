@@ -10,3 +10,16 @@ updates:
   schedule:
     interval: "weekly"
     day: "sunday"
+  groups:
+    k8s.io:
+      patterns:
+      - "k8s.io/*"
+    github.com/testcontainers:
+      patterns:
+      - "github.com/testcontainers/*"
+    go.opentelemetry.io:
+      patterns:
+      - "go.opentelemetry/*"
+    github.com/aws/aws-sdk-go-v2:
+      patterns:
+      - "github.com/aws/aws-sdk-go-v2/*"
