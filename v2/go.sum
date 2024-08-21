@@ -823,8 +823,8 @@ github.com/tenntenn/text/transform v0.0.0-20200319021203-7eef512accb3 h1:f+jULpR
 github.com/tenntenn/text/transform v0.0.0-20200319021203-7eef512accb3/go.mod h1:ON8b8w4BN/kE1EOhwT0o+d62W65a6aPw1nouo9LMgyY=
 github.com/testcontainers/testcontainers-go v0.33.0 h1:zJS9PfXYT5O0ZFXM2xxXfk4J5UMw/kRiISng037Gxdw=
 github.com/testcontainers/testcontainers-go v0.33.0/go.mod h1:W80YpTa8D5C3Yy16icheD01UTDu+LmXIA2Keo+jWtT8=
-github.com/testcontainers/testcontainers-go/modules/compose v0.32.0 h1:7Ei3qamJeXZc4jurAwzV2hGGihiabZ01MxIbll1Ee3U=
-github.com/testcontainers/testcontainers-go/modules/compose v0.32.0/go.mod h1:A/it0TCrstoVkp0qmU5/LHiF1ZQyO7yqi8KKBD3WchY=
+github.com/testcontainers/testcontainers-go/modules/compose v0.33.0 h1:PyrUOF+zG+xrS3p+FesyVxMI+9U+7pwhZhyFozH3jKY=
+github.com/testcontainers/testcontainers-go/modules/compose v0.33.0/go.mod h1:oqZaUnFEskdZriO51YBquku/jhgzoXHPot6xe1DqKV4=
 github.com/testcontainers/testcontainers-go/modules/postgres v0.33.0 h1:c+Gt+XLJjqFAejgX4hSpnHIpC9eAhvgI/TFWL/PbrFI=
 github.com/testcontainers/testcontainers-go/modules/postgres v0.33.0/go.mod h1:I4DazHBoWDyf69ByOIyt3OdNjefiUx372459txOpQ3o=
 github.com/tetafro/godot v1.4.16 h1:4ChfhveiNLk4NveAZ9Pu2AN8QZ2nkUGFuadM9lrr5D0=
