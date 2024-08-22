@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"net/url"
 	"slices"
-	"strings"
 
+	"github.com/elisasre/go-common/v2/httputil"
 	"github.com/gin-gonic/gin"
 )
 
@@ -71,7 +71,7 @@ func New(excludePaths []string) gin.HandlerFunc {
 					Path:     "/",
 					Domain:   c.Request.URL.Host,
 					HttpOnly: false,
-					Secure:   isHTTPS(c.Request),
+					Secure:   httputil.IsHTTPS(c.Request),
 					MaxAge:   12 * 60 * 60,
 					SameSite: http.SameSiteLaxMode,
 				})
@@ -82,7 +82,7 @@ func New(excludePaths []string) gin.HandlerFunc {
 			return
 		}
 
-		if isHTTPS(c.Request) {
+		if httputil.IsHTTPS(c.Request) {
 			referer := c.Request.Header.Get("Referer")
 			if referer == "" {
 				c.JSON(403, ErrorResponse{Code: 403, Message: noReferer})
@@ -156,21 +156,6 @@ func randomString(n int) (string, error) {
 	}
 
 	return string(b), nil
-}
-
-func isHTTPS(r *http.Request) bool {
-	switch {
-	case r.URL.Scheme == protoHTTPS:
-		return true
-	case r.TLS != nil:
-		return true
-	case strings.HasPrefix(strings.ToLower(r.Proto), protoHTTPS):
-		return true
-	case r.Header.Get("X-Forwarded-Proto") == protoHTTPS:
-		return true
-	default:
-		return false
-	}
 }
 
 func getHeader(c *gin.Context) string {
