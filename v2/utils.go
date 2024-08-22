@@ -1,6 +1,8 @@
 package common
 
 import (
+	"crypto/rand"
+	"math/big"
 	"strings"
 )
 
@@ -37,4 +39,19 @@ func ValOrZero[T any](p *T) (v T) {
 func StringToBool(v string) bool {
 	v = strings.ToLower(v)
 	return v == "true" || v == "t" || v == "yes" || v == "y" || v == "on"
+}
+
+func RandomString(n int) (string, error) {
+	characterRunes := []byte("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
+
+	b := make([]byte, n)
+	for i := range b {
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(characterRunes))))
+		if err != nil {
+			return "", err
+		}
+		b[i] = characterRunes[num.Int64()]
+	}
+
+	return string(b), nil
 }
