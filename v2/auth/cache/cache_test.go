@@ -13,19 +13,15 @@ type DB struct {
 	keys []auth.JWTKey
 }
 
-func (store *DB) AddJWTKey(c context.Context, payload auth.JWTKey) error {
-	store.keys = append(store.keys, payload)
-	return nil
-}
-
 func (store *DB) ListJWTKeys(c context.Context) ([]auth.JWTKey, error) {
 	return store.keys, nil
 }
 
-func (store *DB) RotateJWTKeys(c context.Context, kid string) error {
+func (store *DB) RotateJWTKeys(c context.Context, payload auth.JWTKey) error {
+	store.keys = append(store.keys, payload)
 	out := []auth.JWTKey{}
 	for _, key := range store.keys {
-		if key.KID != kid {
+		if key.KID != payload.KID {
 			key.PrivateKey = nil
 		}
 		out = append(out, key)

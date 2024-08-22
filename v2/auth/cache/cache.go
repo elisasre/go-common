@@ -12,9 +12,8 @@ import (
 
 // Datastore represents required storage interface.
 type Datastore interface {
-	AddJWTKey(context.Context, auth.JWTKey) error
 	ListJWTKeys(context.Context) ([]auth.JWTKey, error)
-	RotateJWTKeys(context.Context, string) error
+	RotateJWTKeys(context.Context, auth.JWTKey) error
 }
 
 // Cache provides in-memory owerlay for JWT key storage with key rotation functionality.
@@ -66,22 +65,15 @@ func (db *Cache) RotateKeys(ctx context.Context) error {
 		return fmt.Errorf("error GenerateNewKeyPair: %w", err)
 	}
 
-	if err := db.store.AddJWTKey(ctx, keys); err != nil {
-		return fmt.Errorf("error AddKeys: %w", err)
-	}
-
-	err = db.store.RotateJWTKeys(ctx, keys.KID)
-	if err != nil {
+	if err := db.store.RotateJWTKeys(ctx, keys); err != nil {
 		return err
 	}
 
-	newKeys, err := db.refreshKeys(ctx, false)
-	if err != nil {
+	if _, err := db.refreshKeys(ctx, true); err != nil {
 		return err
 	}
-	db.keys = newKeys
-	slog.Info("JWT RotateKeys called",
-		slog.Any("keys", getKIDs(db.keys)),
+
+	slog.Info("JWT RotateKeys finished",
 		slog.Duration("duration", time.Since(start)),
 	)
 	return nil
@@ -94,7 +86,7 @@ func (db *Cache) refreshKeys(ctx context.Context, reload bool) ([]auth.JWTKey, e
 	}
 	if reload {
 		db.keys = keys
-		slog.Info("JWT RefreshKeys called",
+		slog.Info("JWT RefreshKeys executed",
 			slog.Any("keys", getKIDs(db.keys)),
 		)
 	}

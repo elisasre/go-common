@@ -56,53 +56,6 @@ type RawKey struct {
 	PublicKey  []byte `db:"public_key_as_bytes"`
 }
 
-// AddJWTKey adds new keys to database.
-func (db *DB) AddJWTKey(c context.Context, payload auth.JWTKey) error {
-	privKey, err := auth.Encrypt(auth.EncodePrivateKeyToPEM(payload.PrivateKey), keySecret(payload.KID, db.secret))
-	if err != nil {
-		return err
-	}
-
-	key := RawKey{
-		KID:        payload.KID,
-		PrivateKey: privKey,
-		PublicKey:  auth.EncodePublicKeyToPEM(payload.PublicKey),
-	}
-
-	if err := db.addKey(c, &key); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (db *DB) addKey(c context.Context, key *RawKey) error {
-	span := sentryutil.MakeSpan(c, 1)
-	defer span.Finish()
-
-	const query = `
-		INSERT INTO jwt_keys (
-			k_id,
-			private_key_as_bytes,
-			public_key_as_bytes,
-			created_at,
-			updated_at
-		) VALUES (
-			:k_id,
-			:private_key_as_bytes,
-			:public_key_as_bytes,
-			:created_at,
-			:updated_at
-		)
-		RETURNING id`
-
-	if err := sqlxutil.CreateNamed(c, db.db, key, query); err != nil {
-		return fmt.Errorf("creating jwt_key failed: %w", err)
-	}
-
-	return nil
-}
-
 // ListJWTKeys lists the keys from database.
 func (db *DB) ListJWTKeys(c context.Context) ([]auth.JWTKey, error) {
 	span := sentryutil.MakeSpan(c, 1)
@@ -131,20 +84,45 @@ func (db *DB) ListJWTKeys(c context.Context) ([]auth.JWTKey, error) {
 }
 
 // RotateJWTKeys rotates the JWT keys in database.
-func (db *DB) RotateJWTKeys(c context.Context, kid string) error {
-	span := sentryutil.MakeSpan(c, 1)
+func (db *DB) RotateJWTKeys(ctx context.Context, new auth.JWTKey) error {
+	span := sentryutil.MakeSpan(ctx, 1)
 	defer span.Finish()
 
-	const updateQuery = `
-		UPDATE jwt_keys
-		SET private_key_as_bytes=NULL
-		WHERE k_id != $1`
-	if _, err := db.db.ExecContext(c, updateQuery, kid); err != nil {
-		return fmt.Errorf("resetting old jwt keys failed: %w", err)
+	key, err := prepareRawKey(new, db.secret)
+	if err != nil {
+		return err
 	}
 
-	// keep 3 latest ones
-	const deleteQuery = `
+	return sqlxutil.WithTx(ctx, db.db, func(ctx context.Context, tx *sqlx.Tx) error {
+		const addQuery = `
+			INSERT INTO jwt_keys (
+				k_id,
+				private_key_as_bytes,
+				public_key_as_bytes,
+				created_at,
+				updated_at
+			) VALUES (
+				:k_id,
+				:private_key_as_bytes,
+				:public_key_as_bytes,
+				:created_at,
+				:updated_at
+			)
+			RETURNING id`
+		if err := sqlxutil.CreateNamed(ctx, tx, key, addQuery); err != nil {
+			return fmt.Errorf("adding jwt key to db failed: %w", err)
+		}
+
+		const updateQuery = `
+			UPDATE jwt_keys
+			SET private_key_as_bytes=NULL
+			WHERE k_id != $1`
+		if _, err := tx.ExecContext(ctx, updateQuery, new.KID); err != nil {
+			return fmt.Errorf("resetting old jwt keys failed: %w", err)
+		}
+
+		// keep 3 latest ones
+		const deleteQuery = `
 			DELETE FROM jwt_keys
 			WHERE id not in (
 				SELECT id
@@ -152,10 +130,11 @@ func (db *DB) RotateJWTKeys(c context.Context, kid string) error {
 				ORDER BY ID DESC
 				LIMIT 3
 			)`
-	if _, err := db.db.ExecContext(c, deleteQuery); err != nil {
-		return fmt.Errorf("deleting old jwt keys failed: %w", err)
-	}
-	return nil
+		if _, err := tx.ExecContext(ctx, deleteQuery); err != nil {
+			return fmt.Errorf("deleting old jwt keys failed: %w", err)
+		}
+		return nil
+	})
 }
 
 func DecryptRawKey(key RawKey, secret string) (auth.JWTKey, error) {
@@ -166,6 +145,7 @@ func DecryptRawKey(key RawKey, secret string) (auth.JWTKey, error) {
 	}
 
 	response := auth.JWTKey{
+		CreatedAt: key.CreatedAt,
 		KID:       key.KID,
 		PublicKey: pub,
 	}
@@ -188,4 +168,17 @@ func DecryptRawKey(key RawKey, secret string) (auth.JWTKey, error) {
 
 func keySecret(kid string, secret string) string {
 	return fmt.Sprintf("%s.%s", secret, kid)
+}
+
+func prepareRawKey(key auth.JWTKey, secret string) (*RawKey, error) {
+	privKey, err := auth.Encrypt(auth.EncodePrivateKeyToPEM(key.PrivateKey), keySecret(key.KID, secret))
+	if err != nil {
+		return nil, err
+	}
+
+	return &RawKey{
+		KID:        key.KID,
+		PrivateKey: privKey,
+		PublicKey:  auth.EncodePublicKeyToPEM(key.PublicKey),
+	}, nil
 }
