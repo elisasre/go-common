@@ -28,6 +28,7 @@ import (
 
 // JWTKey is struct for storing auth private keys.
 type JWTKey struct {
+	CreatedAt  time.Time       `yaml:"created_at" json:"created_at"`
 	KID        string          `yaml:"kid" json:"kid"`
 	PrivateKey *rsa.PrivateKey `yaml:"-" json:"-"`
 	PublicKey  *rsa.PublicKey  `yaml:"-" json:"-"`

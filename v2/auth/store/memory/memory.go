@@ -17,12 +17,6 @@ func New() *Memory {
 	return &Memory{keys: make([]auth.JWTKey, 0, 3)}
 }
 
-// AddJWTKey adds jwt key to storage.
-func (m *Memory) AddJWTKey(_ context.Context, key auth.JWTKey) error {
-	m.keys = append([]auth.JWTKey{key}, m.keys...)
-	return nil
-}
-
 // GetKeys fetch all keys from cache.
 func (m *Memory) ListJWTKeys(context.Context) ([]auth.JWTKey, error) {
 	data := make([]auth.JWTKey, len(m.keys))
@@ -31,10 +25,12 @@ func (m *Memory) ListJWTKeys(context.Context) ([]auth.JWTKey, error) {
 }
 
 // RotateKeys rotates the jwt secrets.
-func (m *Memory) RotateJWTKeys(_ context.Context, kid string) error {
+func (m *Memory) RotateJWTKeys(_ context.Context, key auth.JWTKey) error {
+	m.keys = append([]auth.JWTKey{key}, m.keys...)
+
 	// private key is needed only in newest which are used to generate new tokens
 	for i := range m.keys {
-		if m.keys[i].KID != kid {
+		if m.keys[i].KID != key.KID {
 			m.keys[i].PrivateKey = nil
 		}
 	}
