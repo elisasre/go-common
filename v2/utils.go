@@ -55,3 +55,21 @@ func RandomString(n int) (string, error) {
 
 	return string(b), nil
 }
+
+type Ordered interface {
+	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr | ~int | ~int8 | ~int16 | ~int32 | ~int64 | ~float32 | ~float64 | ~string
+}
+
+func Min[T Ordered](a, b T) T {
+	if a < b {
+		return a
+	}
+	return b
+}
+
+func Max[T Ordered](a, b T) T {
+	if a > b {
+		return a
+	}
+	return b
+}
