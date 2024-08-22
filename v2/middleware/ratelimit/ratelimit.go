@@ -1,11 +1,11 @@
 package ratelimit
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/elisasre/go-common/v2/httputil"
 	"github.com/gin-gonic/gin"
 	"github.com/go-redis/redis_rate/v10"
 	"github.com/redis/go-redis/v9"
@@ -22,17 +22,6 @@ const (
 	HeaderRemaining = "X-Ratelimit-Remaining"
 )
 
-func (e ErrorResponse) Error() string {
-	return fmt.Sprintf("%d: %s", e.Code, e.Message)
-}
-
-// ErrorResponse provides HTTP error response.
-type ErrorResponse struct {
-	Code      uint   `json:"code,omitempty" example:"400"`
-	Message   string `json:"message" example:"Bad request"`
-	ErrorType string `json:"error_type,omitempty" example:"invalid_scope"`
-}
-
 // New creates a distributed rate limiter middleware using redis for state management.
 func New(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.HandlerFunc {
 	limiter := redis_rate.NewLimiter(rdb)
@@ -40,7 +29,7 @@ func New(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.HandlerFunc {
 		ctx := c.Request.Context()
 		key, limit, err := key(c)
 		if err != nil {
-			c.JSON(400, ErrorResponse{Code: 400, Message: err.Error()})
+			c.JSON(400, httputil.ErrorResponse{Code: 400, Message: err.Error()})
 			c.Abort()
 			return
 		}
@@ -61,7 +50,7 @@ func New(rdb *redis.Client, key KeyFunc, errFunc ErrFunc) gin.HandlerFunc {
 			c.Header(HeaderLimit, strconv.Itoa(*limit))
 			c.Header(HeaderRemaining, strconv.Itoa(res.Remaining))
 			if res.Allowed <= 0 {
-				c.JSON(http.StatusTooManyRequests, ErrorResponse{Code: http.StatusTooManyRequests, Message: "rate limit exceeded"})
+				c.JSON(http.StatusTooManyRequests, httputil.ErrorResponse{Code: http.StatusTooManyRequests, Message: "rate limit exceeded"})
 				c.Abort()
 				return
 			}

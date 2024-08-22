@@ -33,17 +33,6 @@ const (
 
 var ignoreMethods = []string{"GET", "HEAD", "OPTIONS", "TRACE"}
 
-func (e ErrorResponse) Error() string {
-	return fmt.Sprintf("%d: %s", e.Code, e.Message)
-}
-
-// ErrorResponse provides HTTP error response.
-type ErrorResponse struct {
-	Code      uint   `json:"code,omitempty" example:"400"`
-	Message   string `json:"message" example:"Bad request"`
-	ErrorType string `json:"error_type,omitempty" example:"invalid_scope"`
-}
-
 // New creates new CSRF middleware for gin.
 func New(excludePaths []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -61,7 +50,7 @@ func New(excludePaths []string) gin.HandlerFunc {
 			if csrfToken == "" {
 				val, err := RandomToken()
 				if err != nil {
-					c.JSON(403, ErrorResponse{Code: 403, Message: malformedReferer})
+					c.JSON(403, httputil.ErrorResponse{Code: 403, Message: malformedReferer})
 					c.Abort()
 					return
 				}
@@ -85,27 +74,27 @@ func New(excludePaths []string) gin.HandlerFunc {
 		if httputil.IsHTTPS(c.Request) {
 			referer := c.Request.Header.Get("Referer")
 			if referer == "" {
-				c.JSON(403, ErrorResponse{Code: 403, Message: noReferer})
+				c.JSON(403, httputil.ErrorResponse{Code: 403, Message: noReferer})
 				c.Abort()
 				return
 			}
 
 			parsedURL, err := url.Parse(referer)
 			if err != nil {
-				c.JSON(403, ErrorResponse{Code: 403, Message: malformedReferer})
+				c.JSON(403, httputil.ErrorResponse{Code: 403, Message: malformedReferer})
 				c.Abort()
 				return
 			}
 
 			if parsedURL.Scheme != protoHTTPS {
-				c.JSON(403, ErrorResponse{Code: 403, Message: insecureReferer})
+				c.JSON(403, httputil.ErrorResponse{Code: 403, Message: insecureReferer})
 				c.Abort()
 				return
 			}
 
 			if parsedURL.Host != c.Request.Host {
 				msg := fmt.Sprintf("Referer checking failed - %s does not match any trusted origins.", parsedURL.Host)
-				c.JSON(403, ErrorResponse{Code: 403, Message: msg})
+				c.JSON(403, httputil.ErrorResponse{Code: 403, Message: msg})
 				c.Abort()
 				return
 			}
@@ -113,13 +102,13 @@ func New(excludePaths []string) gin.HandlerFunc {
 
 		requestCSRFToken := getHeader(c)
 		if csrfToken == "" {
-			c.JSON(403, ErrorResponse{Code: 403, Message: tokenMissing})
+			c.JSON(403, httputil.ErrorResponse{Code: 403, Message: tokenMissing})
 			c.Abort()
 			return
 		}
 
 		if requestCSRFToken != csrfToken {
-			c.JSON(403, ErrorResponse{Code: 403, Message: badTooken})
+			c.JSON(403, httputil.ErrorResponse{Code: 403, Message: badTooken})
 			c.Abort()
 			return
 		}

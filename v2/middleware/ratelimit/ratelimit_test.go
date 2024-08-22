@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/alicebob/miniredis/v2"
+	"github.com/elisasre/go-common/v2/httputil"
 	"github.com/elisasre/go-common/v2/middleware/ratelimit"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
@@ -117,7 +118,7 @@ func TestRedisRateLimiterForce(t *testing.T) {
 				t.Log(err)
 			}
 			c.JSON(http.StatusBadRequest,
-				ratelimit.ErrorResponse{Code: http.StatusBadRequest, Message: err.Error()},
+				httputil.ErrorResponse{Code: http.StatusBadRequest, Message: err.Error()},
 			)
 			c.Abort()
 			return true
@@ -154,7 +155,7 @@ func TestRedisRateLimiterNil(t *testing.T) {
 				t.Log(err)
 			}
 			c.JSON(http.StatusBadRequest,
-				ratelimit.ErrorResponse{Code: http.StatusBadRequest, Message: err.Error()},
+				httputil.ErrorResponse{Code: http.StatusBadRequest, Message: err.Error()},
 			)
 			c.Abort()
 			return true
