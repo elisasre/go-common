@@ -2,6 +2,7 @@ package memory
 
 import (
 	"context"
+	"time"
 
 	"github.com/elisasre/go-common/v2/auth"
 )
@@ -26,6 +27,7 @@ func (m *Memory) ListJWTKeys(context.Context) ([]auth.JWTKey, error) {
 
 // RotateKeys rotates the jwt secrets.
 func (m *Memory) RotateJWTKeys(_ context.Context, key auth.JWTKey) error {
+	key.CreatedAt = time.Now().Round(time.Millisecond).UTC()
 	m.keys = append([]auth.JWTKey{key}, m.keys...)
 
 	// private key is needed only in newest which are used to generate new tokens
