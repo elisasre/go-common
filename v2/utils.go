@@ -3,6 +3,7 @@ package common
 import (
 	"crypto/rand"
 	"math/big"
+	"slices"
 	"strings"
 )
 
@@ -72,4 +73,11 @@ func Max[T Ordered](a, b T) T {
 		return a
 	}
 	return b
+}
+
+func ReverseCopy[T any](in []T) []T {
+	arr := make([]T, len(in))
+	copy(arr, in)
+	slices.Reverse(arr)
+	return arr
 }
