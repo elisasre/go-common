@@ -2,6 +2,8 @@ package golden
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"os"
 	"testing"
 
@@ -18,15 +20,8 @@ type test struct {
 }
 
 func TestFileString(t *testing.T) {
-	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata"), "failed to remove testdata") })
+	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata/TestFunc"), "failed to remove testdata") })
 	tests := []test{
-		{
-			name:         "plain test func",
-			mt:           mockT{name: "TestPlainFunc"},
-			data:         "some data",
-			expectedData: "some data",
-			expectedPath: "./testdata/TestPlainFunc/TestPlainFunc.golden",
-		},
 		{
 			name:         "sub test",
 			mt:           mockT{name: "TestFunc/subtest"},
@@ -118,7 +113,7 @@ func TestFolderDoesNotExist(t *testing.T) {
 }
 
 func TestEqual(t *testing.T) {
-	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata"), "failed to remove testdata") })
+	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata/TestSomeBytes"), "failed to remove testdata") })
 
 	data := []byte("some data")
 	assert.NoError(t, os.MkdirAll("./testdata/TestSomeBytes", 0o755))
@@ -132,7 +127,7 @@ func TestEqual(t *testing.T) {
 }
 
 func TestEqualString(t *testing.T) {
-	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata"), "failed to remove testdata") })
+	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata/TestSomeString"), "failed to remove testdata") })
 
 	data := []byte("some string")
 	assert.NoError(t, os.MkdirAll("./testdata/TestSomeString", 0o755))
@@ -146,17 +141,28 @@ func TestEqualString(t *testing.T) {
 }
 
 func TestEqualS_No_Match(t *testing.T) {
-	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata"), "failed to remove testdata") })
+	t.Cleanup(func() { assert.NoError(t, os.RemoveAll("./testdata/TestSomeOtherString"), "failed to remove testdata") })
 
 	data := []byte("some string")
-	assert.NoError(t, os.MkdirAll("./testdata/TestSomeString", 0o755))
-	assert.NoError(t, os.WriteFile("./testdata/TestSomeString/TestSomeString.golden", data, 0o600))
+	assert.NoError(t, os.MkdirAll("./testdata/TestSomeOtherString", 0o755))
+	assert.NoError(t, os.WriteFile("./testdata/TestSomeOtherString/TestSomeOtherString.golden", data, 0o600))
 
-	mt := mockT{name: "TestSomeString"}
+	mt := mockT{name: "TestSomeOtherString"}
 	got := EqualString(&mt, []byte("other string"))
 	assert.False(t, got)
 	assert.Contains(t, mt.msg, "Not equal:")
 	assert.False(t, mt.failed) // In case of assert failure, FailNow is not called
+}
+
+func TestRequest(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "bad request", http.StatusBadRequest)
+	}))
+	t.Cleanup(srv.Close)
+
+	req, err := http.NewRequest(http.MethodGet, srv.URL, nil)
+	require.NoError(t, err)
+	Request(t, http.DefaultClient, req, http.StatusBadRequest)
 }
 
 func assertResult(t *testing.T, tt test, mt *mockT, got string) {
@@ -179,3 +185,4 @@ type mockT struct {
 func (m *mockT) Name() string                         { return m.name }
 func (m *mockT) Errorf(f string, args ...interface{}) { m.msg = fmt.Sprintf(f, args...) }
 func (m *mockT) FailNow()                             { m.failed = true }
+func (m *mockT) Helper()                              {}
