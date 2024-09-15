@@ -10,7 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.33
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.4.17
 	github.com/elisasre/mageutil v1.6.1
-	github.com/getsentry/sentry-go v0.28.1
+	github.com/getsentry/sentry-go v0.29.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
