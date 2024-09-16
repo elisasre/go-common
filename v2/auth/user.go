@@ -39,9 +39,9 @@ func (u *User) MakeSub() string {
 		prefix = "m2m"
 		email = strings.ReplaceAll(email, ServiceAccountPrefix, "")
 	}
-	sub := fmt.Sprintf("%s:%s", prefix, email)
+	sub := fmt.Sprintf("%s=%s", prefix, email)
 	if u.Internal != nil && u.Internal.EmployeeID != "" {
-		sub = fmt.Sprintf("eid:%s", u.Internal.EmployeeID)
+		sub = fmt.Sprintf("eid=%s", u.Internal.EmployeeID)
 	}
 	return strings.ToLower(sub)
 }
