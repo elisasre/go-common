@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/config v1.27.36
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.4.18
 	github.com/elisasre/mageutil v1.6.1
+	github.com/fsnotify/fsnotify v1.7.0
 	github.com/getsentry/sentry-go v0.29.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-redis/redis_rate/v10 v10.0.1
@@ -127,7 +128,6 @@ require (
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/firefart/nonamedreturns v1.0.5 // indirect
 	github.com/fsnotify/fsevents v0.2.0 // indirect
-	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/fvbommel/sortorder v1.0.2 // indirect
 	github.com/fxamacker/cbor/v2 v2.7.0 // indirect
 	github.com/fzipp/gocyclo v0.6.0 // indirect
