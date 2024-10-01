@@ -8,19 +8,19 @@ import (
 )
 
 var (
-	ErrMissingWithFilename = fmt.Errorf("watcher.Watcher missing WithFilename option or empty filename")
-	ErrMissingWithFunc     = fmt.Errorf("watcher.Watcher missing WithFunc option")
+	ErrMissingWithTarget = fmt.Errorf("watcher.Watcher missing or empty WithTarget option")
+	ErrMissingWithFunc   = fmt.Errorf("watcher.Watcher missing WithFunc option")
 )
 
 type Watcher struct {
-	w        *fsnotify.Watcher
-	filename string
-	fn       func() error
-	opts     []Opt
+	w      *fsnotify.Watcher
+	target string
+	fn     func() error
+	opts   []Opt
 }
 
 // New creates watcher with given options.
-// WithFilename and WithFunc options are mandatory.
+// WithTarget and WithFunc options are mandatory.
 func New(opts ...Opt) *Watcher {
 	return &Watcher{opts: opts}
 }
@@ -39,13 +39,13 @@ func (w *Watcher) Init() error {
 	}
 
 	switch {
-	case w.filename == "":
-		return ErrMissingWithFilename
+	case w.target == "":
+		return ErrMissingWithTarget
 	case w.fn == nil:
 		return ErrMissingWithFunc
 	}
 
-	return w.w.Add(w.filename)
+	return w.w.Add(w.target)
 }
 
 func (w *Watcher) Run() error {
@@ -55,7 +55,7 @@ func (w *Watcher) Run() error {
 			if !ok {
 				return nil
 			}
-			if event.Op&fsnotify.Write == fsnotify.Write {
+			if event.Op.Has(fsnotify.Write) || event.Op.Has(fsnotify.Create) {
 				err := w.fn()
 				if err != nil {
 					return err
@@ -80,9 +80,9 @@ func (w *Watcher) Name() string {
 
 type Opt func(*Watcher) error
 
-func WithFilename(filename string) Opt {
+func WithTarget(fileOrDirName string) Opt {
 	return func(w *Watcher) error {
-		w.filename = filename
+		w.target = fileOrDirName
 		return nil
 	}
 }

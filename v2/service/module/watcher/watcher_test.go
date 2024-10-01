@@ -13,14 +13,14 @@ import (
 
 var testFilePattern = "watcher-test-*"
 
-func TestListener(t *testing.T) {
+func TestFileWatcher(t *testing.T) {
 	tmpFile, err := os.CreateTemp("", testFilePattern)
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
 	called := make(chan struct{}, 100)
 	watcherMod := watcher.New(
-		watcher.WithFilename(tmpFile.Name()),
+		watcher.WithTarget(tmpFile.Name()),
 		watcher.WithFunc(func() error {
 			called <- struct{}{}
 			return nil
@@ -38,14 +38,67 @@ func TestListener(t *testing.T) {
 	require.Equal(t, "watcher.Watcher", watcherMod.Name())
 }
 
-func TestListenerRunError(t *testing.T) {
+func TestDirectoryWatcherModify(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", testFilePattern)
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+	tmpFile, err := os.CreateTemp(tmpDir, testFilePattern)
+	require.NoError(t, err)
+
+	called := make(chan struct{}, 100)
+	watcherMod := watcher.New(
+		watcher.WithTarget(tmpDir),
+		watcher.WithFunc(func() error {
+			called <- struct{}{}
+			return nil
+		}),
+	)
+
+	require.NoError(t, watcherMod.Init())
+	wg := &multierror.Group{}
+	wg.Go(watcherMod.Run)
+	_, err = tmpFile.Write([]byte("updated"))
+	require.NoError(t, err)
+	<-called
+	require.NoError(t, watcherMod.Stop())
+	require.NoError(t, wg.Wait().ErrorOrNil())
+	require.Equal(t, "watcher.Watcher", watcherMod.Name())
+}
+
+func TestDirectoryWatcherCreate(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", testFilePattern)
+	require.NoError(t, err)
+	defer os.RemoveAll(tmpDir)
+
+	called := make(chan struct{}, 100)
+	watcherMod := watcher.New(
+		watcher.WithTarget(tmpDir),
+		watcher.WithFunc(func() error {
+			called <- struct{}{}
+			return nil
+		}),
+	)
+
+	require.NoError(t, watcherMod.Init())
+	wg := &multierror.Group{}
+	wg.Go(watcherMod.Run)
+	tmpFile, err := os.CreateTemp(tmpDir, testFilePattern)
+	require.NoError(t, err)
+	<-called
+	os.Remove(tmpFile.Name()) // deferred removeAll would remove the file as well
+	require.NoError(t, watcherMod.Stop())
+	require.NoError(t, wg.Wait().ErrorOrNil())
+	require.Equal(t, "watcher.Watcher", watcherMod.Name())
+}
+
+func TestWatcherRunError(t *testing.T) {
 	tmpFile, err := os.CreateTemp("", testFilePattern)
 	require.NoError(t, err)
 	defer os.Remove(tmpFile.Name())
 
 	errRun := errors.New("run error")
 	watcherMod := watcher.New(
-		watcher.WithFilename(tmpFile.Name()),
+		watcher.WithTarget(tmpFile.Name()),
 		watcher.WithFunc(func() error { return errRun }),
 	)
 
@@ -58,7 +111,7 @@ func TestListenerRunError(t *testing.T) {
 	require.NoError(t, watcherMod.Stop())
 }
 
-func TestListenerInitErrors(t *testing.T) {
+func TestWatcherInitErrors(t *testing.T) {
 	errOpt := errors.New("opt error")
 
 	tests := []struct {
@@ -73,18 +126,18 @@ func TestListenerInitErrors(t *testing.T) {
 		},
 		{
 			name:        "ErrMissingWithFunc",
-			watcher:     watcher.New(watcher.WithFilename("something")),
+			watcher:     watcher.New(watcher.WithTarget("something")),
 			expectedErr: watcher.ErrMissingWithFunc,
 		},
 		{
 			name:        "ErrMissingWithFilename",
 			watcher:     watcher.New(watcher.WithFunc(func() error { return nil })),
-			expectedErr: watcher.ErrMissingWithFilename,
+			expectedErr: watcher.ErrMissingWithTarget,
 		},
 		{
 			name:        "ErrEmptyFilename",
-			watcher:     watcher.New(watcher.WithFilename(""), watcher.WithFunc(func() error { return nil })),
-			expectedErr: watcher.ErrMissingWithFilename,
+			watcher:     watcher.New(watcher.WithTarget(""), watcher.WithFunc(func() error { return nil })),
+			expectedErr: watcher.ErrMissingWithTarget,
 		},
 	}
 

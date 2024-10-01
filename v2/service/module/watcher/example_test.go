@@ -32,7 +32,7 @@ func ExampleNew() {
 	)
 
 	w := watcher.New(
-		watcher.WithFilename(tmpFile.Name()),
+		watcher.WithTarget(tmpFile.Name()),
 		watcher.WithFunc(func() error {
 			slog.Info("Hello from watcher")
 			return errors.New("watcher error")
