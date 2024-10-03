@@ -47,6 +47,25 @@ type Backoff struct {
 	MaxTries int
 }
 
+func requestHeaders(httpreq *http.Request, request Request, bearerToken []byte) *http.Request {
+	if len(request.Body) > 0 {
+		httpreq.Body = io.NopCloser(bytes.NewReader(request.Body))
+	}
+
+	for k, v := range request.Headers {
+		httpreq.Header.Add(k, v)
+	}
+
+	if bearerToken != nil {
+		httpreq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
+	}
+
+	for _, cookie := range request.Cookies {
+		httpreq.AddCookie(cookie)
+	}
+	return httpreq
+}
+
 // MakeRequest is hihg level wrapper for http.Do with added functionality like retries and automatic response parsing.
 func MakeRequest(ctx context.Context, request Request, output interface{}, client HTTPClient, backoff Backoff) (*Response, error) {
 	httpresp := &Response{}
@@ -73,21 +92,8 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 			)
 			return false, err
 		}
-		if len(request.Body) > 0 {
-			httpreq.Body = io.NopCloser(bytes.NewReader(request.Body))
-		}
 
-		for k, v := range request.Headers {
-			httpreq.Header.Add(k, v)
-		}
-
-		if bearerToken != nil {
-			httpreq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
-		}
-
-		for _, cookie := range request.Cookies {
-			httpreq.AddCookie(cookie)
-		}
+		httpreq = requestHeaders(httpreq, request, bearerToken)
 
 		resp, err := client.Do(httpreq)
 		if err != nil {
