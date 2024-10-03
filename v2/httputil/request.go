@@ -9,6 +9,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"os"
 	"slices"
 	"time"
 )
@@ -25,6 +26,7 @@ type Request struct {
 	Body                   []byte
 	Cookies                []*http.Cookie
 	Headers                map[string]string
+	BearerTokenFile        string
 	OKCode                 []int
 	Unmarshaler            func(data []byte, v any) error
 	RetryOnContextDeadline bool
@@ -52,6 +54,15 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 		request.Unmarshaler = json.Unmarshal
 	}
 
+	var bearerToken []byte
+	if request.BearerTokenFile != "" {
+		var err error
+		bearerToken, err = os.ReadFile(request.BearerTokenFile)
+		if err != nil {
+			return nil, fmt.Errorf("could not read bearer token file %w", err)
+		}
+	}
+
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequestWithContext(ctx, request.Method, request.URL, nil)
 		if err != nil {
@@ -68,6 +79,10 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 
 		for k, v := range request.Headers {
 			httpreq.Header.Add(k, v)
+		}
+
+		if bearerToken != nil {
+			httpreq.Header.Add("Authorization", fmt.Sprintf("Bearer %s", bearerToken))
 		}
 
 		for _, cookie := range request.Cookies {
