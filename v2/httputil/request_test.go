@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"strings"
 	"testing"
 	"time"
@@ -87,6 +88,55 @@ func TestMakeRequestMock(t *testing.T) {
 			URL:    "http://foobar",
 			Method: "GET",
 			OKCode: []int{200},
+		},
+		nil,
+		client,
+		backoff,
+	)
+	require.NoError(t, err)
+	assert.Equal(t, helloWorld, string(body.Body))
+	assert.Equal(t, 200, body.StatusCode)
+}
+
+func TestBearerTokenFileMock(t *testing.T) {
+	backoff := httputil.Backoff{
+		Duration: 100 * time.Millisecond,
+		MaxTries: 1,
+	}
+
+	file, err := os.CreateTemp("", "")
+	require.NoError(t, err)
+	defer os.Remove(file.Name())
+
+	_, err = file.WriteString("mytoken")
+	require.NoError(t, err)
+
+	helloWorld := `{"hello":"world"}`
+
+	client := &httputil.MockClient{
+		DoFunc: func(req *http.Request) (*http.Response, error) {
+			authz := req.Header.Get("Authorization")
+			if authz != "Bearer mytoken" {
+				return &http.Response{
+					StatusCode: 401,
+					Body:       io.NopCloser(strings.NewReader("Bearer token not found or invalid")),
+				}, nil
+			}
+			return &http.Response{
+				StatusCode: 200,
+				Body:       io.NopCloser(strings.NewReader(helloWorld)),
+			}, nil
+		},
+	}
+
+	ctx := context.Background()
+	body, err := httputil.MakeRequest(
+		ctx,
+		httputil.Request{
+			BearerTokenFile: file.Name(),
+			URL:             "http://foobar",
+			Method:          "GET",
+			OKCode:          []int{200},
 		},
 		nil,
 		client,
