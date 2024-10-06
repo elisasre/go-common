@@ -83,7 +83,7 @@ func (p *Prometheus) Init() (err error) {
 	return err
 }
 
-func (p *Prometheus) RegisterCollector(collector prometheus.Collector) error {
+func (p *Prometheus) Register(collector prometheus.Collector) error {
 	return p.reg.Register(collector)
 }
 

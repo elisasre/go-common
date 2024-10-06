@@ -8,6 +8,7 @@ import (
 
 	"github.com/elisasre/go-common/v2"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -19,6 +20,17 @@ func TestPrometheus(t *testing.T) {
 	p.AddSkipMetricsURLFn(func(c *gin.Context) bool {
 		return c.Request.URL.Path == "/skip"
 	})
+
+	foobarGauge := prometheus.NewGauge(prometheus.GaugeOpts{
+		Name:      "foobar",
+		Subsystem: "",
+		Namespace: "pulse",
+		Help:      "foobar metric",
+	})
+	err = p.Register(foobarGauge)
+	assert.NoError(t, err)
+	foobarGauge.Set(1)
+
 	reg := p.GetRegistry()
 	r.Use(p.HandlerFunc())
 	r.GET("/ping", func(c *gin.Context) {
