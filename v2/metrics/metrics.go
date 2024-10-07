@@ -27,7 +27,10 @@ type Prometheus struct {
 // New creates Prometheus instance with given collectors.
 // Before usage p.Init() must be called.
 func New(cs ...prometheus.Collector) *Prometheus {
-	return &Prometheus{cs: cs}
+	return &Prometheus{
+		cs:  cs,
+		reg: prometheus.NewPedanticRegistry(),
+	}
 }
 
 // NewPrometheus creates registers collectors and starts metrics server.
@@ -61,7 +64,6 @@ func (p *Prometheus) Init() (err error) {
 		p.reqDur = reqDur
 		p.ReqCntURLLabelMappingFn = func(c *gin.Context) string { return c.Request.URL.Path }
 		p.SkipMetricsURLFn = func(c *gin.Context) bool { return false }
-		p.reg = prometheus.NewPedanticRegistry()
 
 		collectors := []prometheus.Collector{
 			collectors.NewProcessCollector(collectors.ProcessCollectorOpts{}),
@@ -79,6 +81,10 @@ func (p *Prometheus) Init() (err error) {
 	})
 
 	return err
+}
+
+func (p *Prometheus) Register(collector prometheus.Collector) error {
+	return p.reg.Register(collector)
 }
 
 func (p *Prometheus) GetRegistry() *prometheus.Registry {
