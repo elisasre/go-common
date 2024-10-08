@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
@@ -27,13 +28,13 @@ var (
 
 type TracerProvider struct {
 	provider         *trace.TracerProvider
-	ctx              context.Context //nolint:containedctx
 	serviceName      attribute.KeyValue
 	resource         *resource.Resource
 	processorName    string
 	batchProcessor   trace.SpanProcessor
 	collectorHost    string
 	collectorPort    int
+	flushDuration    time.Duration
 	samplePercentage float64
 	credentials      credentials.TransportCredentials
 	stopped          chan struct{}
@@ -47,6 +48,7 @@ func New(opts ...Opt) *TracerProvider {
 
 func (tp *TracerProvider) Init() error {
 	tp.stopped = make(chan struct{})
+	tp.flushDuration = 2 * time.Second
 
 	for _, opt := range tp.opts {
 		if err := opt(tp); err != nil {
@@ -54,7 +56,9 @@ func (tp *TracerProvider) Init() error {
 		}
 	}
 
-	res, err := resource.New(tp.ctx,
+	ctx := context.Background()
+
+	res, err := resource.New(ctx,
 		resource.WithAttributes(
 			tp.serviceName,
 		),
@@ -72,7 +76,7 @@ func (tp *TracerProvider) Init() error {
 		return fmt.Errorf("failed to create gRPC connection to collector: %w", err)
 	}
 
-	exporter, err := otlptracegrpc.New(tp.ctx, otlptracegrpc.WithGRPCConn(conn))
+	exporter, err := otlptracegrpc.New(ctx, otlptracegrpc.WithGRPCConn(conn))
 	if err != nil {
 		return fmt.Errorf("failed to create trace exporter: %w", err)
 	}
@@ -85,16 +89,16 @@ func (tp *TracerProvider) Init() error {
 		slog.Warn("using simple span processor, this should NOT be used in production")
 	}
 
-	return nil
-}
-
-func (tp *TracerProvider) Run() error {
 	tp.provider = trace.NewTracerProvider(
 		trace.WithSampler(trace.TraceIDRatioBased(tp.samplePercentage)),
 		trace.WithResource(tp.resource),
 		trace.WithSpanProcessor(tp.batchProcessor),
 	)
 
+	return nil
+}
+
+func (tp *TracerProvider) Run() error {
 	otel.SetTracerProvider(tp.provider)
 
 	otel.SetTextMapPropagator(propagation.TraceContext{})
@@ -106,7 +110,9 @@ func (tp *TracerProvider) Run() error {
 
 func (tp *TracerProvider) Stop() error {
 	close(tp.stopped)
-	return tp.provider.Shutdown(tp.ctx)
+	ctx, cancel := context.WithTimeout(context.Background(), tp.flushDuration)
+	defer cancel()
+	return tp.provider.Shutdown(ctx)
 }
 
 func (tp *TracerProvider) Name() string {
@@ -134,13 +140,6 @@ func WithCollector(host string, port int, credentials credentials.TransportCrede
 	}
 }
 
-func WithContext(ctx context.Context) Opt {
-	return func(tp *TracerProvider) error {
-		tp.ctx = ctx
-		return nil
-	}
-}
-
 func WithServiceName(serviceName string) Opt {
 	return func(tp *TracerProvider) error {
 		tp.serviceName = semconv.ServiceNameKey.String(serviceName)
@@ -156,6 +155,14 @@ func WithProcessor(processorName string) Opt {
 		default:
 			return ErrInvalidProcessor
 		}
+		return nil
+	}
+}
+
+// WithFlushDuration sets timeout for flushing spans.
+func WithFlushDuration(d time.Duration) Opt {
+	return func(tp *TracerProvider) error {
+		tp.flushDuration = d
 		return nil
 	}
 }

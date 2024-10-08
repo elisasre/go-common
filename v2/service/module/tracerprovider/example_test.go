@@ -1,7 +1,6 @@
 package tracerprovider_test
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/elisasre/go-common/v2/service"
@@ -13,7 +12,6 @@ func ExampleNew() {
 	tp := tracerprovider.New(
 		tracerprovider.WithSamplePercentage(42),
 		tracerprovider.WithCollector("localhost", 4317, insecure.NewCredentials()),
-		tracerprovider.WithContext(context.TODO()),
 		tracerprovider.WithServiceName("test"),
 		tracerprovider.WithProcessor("batch"),
 	)
