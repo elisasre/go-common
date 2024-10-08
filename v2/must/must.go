@@ -2,6 +2,7 @@
 package must
 
 import (
+	"bytes"
 	"encoding/json"
 	"io"
 	"net/http"
@@ -25,6 +26,7 @@ func DoRequest(t T, client Client, req *http.Request) (*http.Response, []byte) {
 	require.NoError(t, err)
 	defer func() { require.NoError(t, resp.Body.Close()) }()
 	body := ReadAll(t, resp.Body)
+	resp.Body = io.NopCloser(bytes.NewReader(body))
 	return resp, body
 }
 

@@ -9,6 +9,7 @@ import (
 
 	"github.com/elisasre/go-common/v2/must"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHappyPath(t *testing.T) {
@@ -37,6 +38,9 @@ func TestHappyPath(t *testing.T) {
 	var s string
 	noFail(t, func(mt *mockT) { must.Unmarshal(mt, body, &s) })
 	assert.Equal(t, "pong", s)
+
+	data := must.ReadAll(t, resp.Body)
+	require.Equal(t, body, data)
 }
 
 type mockT struct {
