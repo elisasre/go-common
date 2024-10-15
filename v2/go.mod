@@ -1,6 +1,7 @@
 module github.com/elisasre/go-common/v2
 
-go 1.23
+go 1.23.1
+
 toolchain go1.23.2
 
 require (
