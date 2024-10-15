@@ -31,7 +31,7 @@ func TestRecoverWithContext(t *testing.T) {
 		{
 			name:  "runtime error",
 			cause: "panic: runtime error: index out of range",
-			fn:    func() { _ = []int{}[1] },
+			fn:    func() { _ = []int{}[1] }, //nolint:gosec // G602: error expected
 		},
 	}
 
