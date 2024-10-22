@@ -16,7 +16,7 @@ const (
 type IntegrationTestRunner struct {
 	base        string
 	preHandlers []PreHandler
-	binHandler  BinHandler
+	binHandler  *BinHandler
 	ready       func() error
 	testRunner  func() error
 	opts        []Opt
@@ -25,9 +25,10 @@ type IntegrationTestRunner struct {
 // NewIntegrationTestRunner creates new IntegrationTestRunner with given options.
 func NewIntegrationTestRunner(opts ...Opt) *IntegrationTestRunner {
 	return &IntegrationTestRunner{
-		opts:  opts,
-		ready: func() error { return nil },
-		base:  ".",
+		opts:       opts,
+		ready:      func() error { return nil },
+		base:       ".",
+		binHandler: NewBinHandler(),
 	}
 }
 
