@@ -123,7 +123,7 @@ func WithSamplePercentage(percentage int) Opt {
 		if percentage > 100 || percentage < 0 {
 			return ErrInvalidSamplePercentage
 		}
-		tp.samplePercentage = float64(tp.samplePercentage) / 100
+		tp.samplePercentage = float64(percentage) / 100
 		return nil
 	}
 }
