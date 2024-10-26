@@ -11,12 +11,30 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func TestTracerProvider(t *testing.T) {
+func TestTracerProviderGRPC(t *testing.T) {
 	tp := tracerprovider.New(
 		tracerprovider.WithSamplePercentage(42),
-		tracerprovider.WithCollector("localhost", 4317, insecure.NewCredentials()),
+		tracerprovider.WithGRPCExporter("localhost:4317", insecure.NewCredentials()),
 		tracerprovider.WithContext(context.Background()),
 		tracerprovider.WithServiceName("test"),
+		tracerprovider.WithEnvironment("development"),
+		tracerprovider.WithProcessor(tracerprovider.ProcessorBatch),
+	)
+	require.NoError(t, tp.Init())
+	wg := &multierror.Group{}
+	wg.Go(tp.Run)
+	require.NoError(t, tp.Stop())
+	require.NoError(t, wg.Wait().ErrorOrNil())
+	require.Equal(t, "otel.TracerProvider", tp.Name())
+}
+
+func TestTracerProviderHTTP(t *testing.T) {
+	tp := tracerprovider.New(
+		tracerprovider.WithSamplePercentage(42),
+		tracerprovider.WithHTTPExporter("localhost:4318", "ApiKey verysecret", true),
+		tracerprovider.WithContext(context.Background()),
+		tracerprovider.WithServiceName("test"),
+		tracerprovider.WithEnvironment("development"),
 		tracerprovider.WithProcessor(tracerprovider.ProcessorBatch),
 	)
 	require.NoError(t, tp.Init())
@@ -54,6 +72,11 @@ func TestTracerProviderInitErrors(t *testing.T) {
 			name:        "ErrInvalidProcessor",
 			tp:          tracerprovider.New(tracerprovider.WithProcessor("foo")),
 			expectedErr: tracerprovider.ErrInvalidProcessor,
+		},
+		{
+			name:        "ErrInvalidToken",
+			tp:          tracerprovider.New(tracerprovider.WithHTTPExporter("localhost:4318", "token", true)),
+			expectedErr: tracerprovider.ErrInvalidToken,
 		},
 	}
 

@@ -12,9 +12,10 @@ import (
 func ExampleNew() {
 	tp := tracerprovider.New(
 		tracerprovider.WithSamplePercentage(42),
-		tracerprovider.WithCollector("localhost", 4317, insecure.NewCredentials()),
+		tracerprovider.WithGRPCExporter("localhost:4317", insecure.NewCredentials()),
 		tracerprovider.WithContext(context.Background()),
 		tracerprovider.WithServiceName("test"),
+		tracerprovider.WithEnvironment("development"),
 		tracerprovider.WithProcessor("processor"),
 	)
 	err := service.Run(service.Modules{tp})
