@@ -47,7 +47,7 @@ func getHOTPToken(secret string, interval int64) (string, error) {
 		return "", err
 	}
 	bs := make([]byte, 8)
-	binary.BigEndian.PutUint64(bs, uint64(interval)) //nolint:gosec // G115
+	binary.BigEndian.PutUint64(bs, uint64(interval))
 
 	// Signing the value using HMAC-SHA1 Algorithm
 	hash := hmac.New(sha1.New, key)

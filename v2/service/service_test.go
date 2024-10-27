@@ -65,7 +65,6 @@ func TestRun(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			stopMod, stop := StopMod()
 			tc.mods = append(tc.mods, stopMod)

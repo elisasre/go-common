@@ -81,7 +81,6 @@ func TestTracerProviderInitErrors(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			err := tc.tp.Init()
 			require.ErrorIs(t, err, tc.expectedErr)
