@@ -7,7 +7,7 @@ toolchain go1.23.2
 require (
 	github.com/alicebob/miniredis/v2 v2.33.0
 	github.com/aws/aws-sdk-go-v2 v1.32.2
-	github.com/aws/aws-sdk-go-v2/config v1.27.43
+	github.com/aws/aws-sdk-go-v2/config v1.28.0
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.4.21
 	github.com/elisasre/mageutil v1.6.2
 	github.com/fsnotify/fsnotify v1.7.0
