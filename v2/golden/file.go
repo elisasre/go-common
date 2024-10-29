@@ -28,6 +28,32 @@ type Client interface {
 
 // Request sends the request and asserts that the response status code is equal to the expectedStatusCode.
 // It also asserts that the response body is equal to the golden file content using EqualString.
+// Example test function:
+//
+//	func TestAPI(t *testing.T) {
+//		tests := []struct {
+//			name         string
+//			method       string
+//			path         string
+//			body         io.Reader
+//			expectedCode int
+//		}{
+//			{
+//				name:   "create user",
+//				method: "POST",
+//				path:   "/api/v1/user",
+//				body: strings.NewReader(`{"name": "someone"}`),
+//				expectedCode: 200,
+//			},
+//		}
+//
+//		for _, tt := range tests {
+//			t.Run(tt.name, func(t *testing.T) {
+//				req := must.NewRequest(t, tt.method, "http://127.0.0.1:8080"+tt.path, tt.body)
+//				golden.Request(t, http.DefaultClient, req, tt.expectedCode)
+//			})
+//		}
+//	}
 func Request(t T, client Client, req *http.Request, expectedStatusCode int) (*http.Response, bool) {
 	t.Helper()
 	resp, body := must.DoRequest(t, client, req)
