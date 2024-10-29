@@ -71,7 +71,6 @@ func TestListenerInitErrors(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			err := tc.ticker.Init()
 			require.ErrorIs(t, err, tc.expectedErr)

@@ -73,7 +73,6 @@ type runner struct {
 func (r *runner) run() error {
 	slog.Info("initializing modules")
 	for _, mod := range r.modules {
-		mod := mod
 		slog.Info("module initializing", slog.String("name", mod.Name()))
 		err := catchPanic(mod.Init)
 		if err != nil {
@@ -89,7 +88,6 @@ func (r *runner) run() error {
 
 	wg := &multierror.Group{}
 	for _, mod := range r.modules {
-		mod := mod
 		wg.Go(func() error {
 			defer func() {
 				slog.Info("module run exited", slog.String("name", mod.Name()))

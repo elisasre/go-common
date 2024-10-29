@@ -54,7 +54,6 @@ func TestFileString(t *testing.T) {
 
 	t.Run("create", func(t *testing.T) {
 		for _, tt := range tests {
-			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				mt := &tt.mt
 				got := string(file(mt, []byte(tt.data), true))
@@ -65,7 +64,6 @@ func TestFileString(t *testing.T) {
 
 	t.Run("read only", func(t *testing.T) {
 		for _, tt := range tests {
-			tt := tt
 			t.Run(tt.name, func(t *testing.T) {
 				mt := &tt.mt
 				got := FileString(mt, []byte(tt.data))
@@ -78,7 +76,6 @@ func TestFileString(t *testing.T) {
 
 	t.Run("override", func(t *testing.T) {
 		for _, tt := range tests {
-			tt := tt
 			tt.data += suffix
 			tt.expectedData += suffix
 			t.Run(tt.name, func(t *testing.T) {
@@ -91,7 +88,6 @@ func TestFileString(t *testing.T) {
 
 	t.Run("read only after override", func(t *testing.T) {
 		for _, tt := range tests {
-			tt := tt
 			tt.data += suffix
 			tt.expectedData += suffix
 			t.Run(tt.name, func(t *testing.T) {

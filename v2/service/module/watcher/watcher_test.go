@@ -142,7 +142,6 @@ func TestWatcherInitErrors(t *testing.T) {
 	}
 
 	for _, tc := range tests {
-		tc := tc
 		t.Run(tc.name, func(t *testing.T) {
 			err := tc.watcher.Init()
 			require.ErrorIs(t, err, tc.expectedErr)
