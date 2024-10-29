@@ -82,12 +82,24 @@ func OptCoverDir(coverDir string) Opt {
 // OptTestMain allows wrapping testing.M into IntegrationTestRunner.
 // Example TestMain:
 //
+//	import (
+//		"io"
+//		"log"
+//		"os"
+//		"time"
+//
+//		it "github.com/elisasre/go-common/v2/integrationtest"
+//		tc "github.com/testcontainers/testcontainers-go/modules/compose"
+//	)
+//
 //	func TestMain(m *testing.M) {
+//		os.Setenv("GOFLAGS", "-tags=integration")
 //		itr := it.NewIntegrationTestRunner(
 //			it.OptBase("../"),
 //			it.OptTarget("./cmd/app"),
-//			it.OptCompose("docker-compose.yaml"),
-//			it.OptWaitHTTPReady("http://127.0.0.1:8080", time.Second*10),
+//			it.OptCoverDir(it.IntegrationTestCoverDir),
+//			it.OptCompose("docker-compose.yaml", it.ComposeUpOptions(tc.Wait(true))),
+//			it.OptWaitHTTPReady("http://127.0.0.1:8080/healthz", time.Second*10),
 //			it.OptTestMain(m),
 //		)
 //		if err := itr.InitAndRun(); err != nil {
