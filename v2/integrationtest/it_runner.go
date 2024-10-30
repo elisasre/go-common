@@ -117,8 +117,8 @@ func (itr *IntegrationTestRunner) cleanup() error {
 		result = multierror.Append(result, fmt.Errorf("running application failed: %w", err))
 	}
 
-	for _, h := range itr.preHandlers {
-		if err := h.Stop(); err != nil {
+	for i := len(itr.preHandlers) - 1; i >= 0; i-- {
+		if err := itr.preHandlers[i].Stop(); err != nil {
 			result = multierror.Append(result, err)
 		}
 	}
