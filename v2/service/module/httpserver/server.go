@@ -17,6 +17,7 @@ type Server struct {
 	ln              net.Listener
 	shutdownTimeout time.Duration
 	opts            []Opt
+	url             string
 }
 
 // New creates Server module with given options.
@@ -43,15 +44,18 @@ func (s *Server) Init() error {
 	}
 
 	s.ln = ln
+
+	if s.srv.TLSConfig == nil {
+		s.url = "http://" + s.ln.Addr().String()
+	} else {
+		s.url = "https://" + s.ln.Addr().String()
+	}
 	return nil
 }
 
 // URL returns server's URL and can be called after initialization.
 func (s *Server) URL() string {
-	if s.srv.TLSConfig == nil {
-		return "http://" + s.ln.Addr().String()
-	}
-	return "https://" + s.ln.Addr().String()
+	return s.url
 }
 
 // Run starts serving http request and can be called after initialization.
