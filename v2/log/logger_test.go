@@ -11,6 +11,8 @@ import (
 
 	"github.com/elisasre/go-common/v2/log"
 	"github.com/stretchr/testify/assert"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/trace"
 )
 
 func TestParseLogLevel(t *testing.T) {
@@ -129,4 +131,24 @@ func TestRefreshLogLevel(t *testing.T) {
 	assert.Contains(t, buf.String(), "foo")
 	debugEnabled = logger.Handler().Enabled(context.Background(), slog.LevelDebug)
 	assert.True(t, debugEnabled)
+}
+
+func TestTracing(t *testing.T) {
+	buf := &bytes.Buffer{}
+	logger := log.NewDefaultEnvLogger(log.WithOutput(buf), log.WithGCPReplacer(true))
+
+	tracer := otel.Tracer("github.com/elisasre/go-common")
+
+	spanCtx := trace.ContextWithSpanContext(context.Background(), trace.NewSpanContext(trace.SpanContextConfig{
+		TraceID: trace.TraceID([16]byte{1}),
+		SpanID:  trace.SpanID([8]byte{1}),
+		Remote:  true,
+	}))
+	ctx, span := tracer.Start(spanCtx, "tracetest")
+	logger.ErrorContext(ctx, "foo")
+	logger.WarnContext(ctx, "bar")
+	span.End()
+	assert.Contains(t, buf.String(), "span_id")
+	assert.Contains(t, buf.String(), "trace_id")
+	assert.Contains(t, buf.String(), "WARNING")
 }
