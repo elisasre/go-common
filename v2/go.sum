@@ -243,8 +243,8 @@ github.com/docker/libtrust v0.0.0-20160708172513-aabc10ec26b7/go.mod h1:cyGadeNE
 github.com/dvsekhvalnov/jose2go v0.0.0-20170216131308-f21a8cedbbae/go.mod h1:7BvyPhdbLxMXIYTFPLsyJRFMsKmOZnQmzh6Gb+uquuM=
 github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203 h1:XBBHcIb256gUJtLmY22n99HaZTz+r2Z51xUPi01m3wg=
 github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203/go.mod h1:E1jcSv8FaEny+OP/5k9UxZVw9YFWGj7eI4KR/iOBqCg=
-github.com/elisasre/mageutil v1.7.0 h1:38i/SBr9y5e6CZ4E2/+U/HJq9XYyY0AF9JL5xZAlK7s=
-github.com/elisasre/mageutil v1.7.0/go.mod h1:zuKZV939dV8tfFNy/4veDwG2rTZQtie1iHl0gbd2RaY=
+github.com/elisasre/mageutil v1.7.1 h1:KCcOP522oM9x/plK12V1IVcHzTidgb7s9GxzZ7jHezo=
+github.com/elisasre/mageutil v1.7.1/go.mod h1:zuKZV939dV8tfFNy/4veDwG2rTZQtie1iHl0gbd2RaY=
 github.com/emicklei/go-restful/v3 v3.11.0 h1:rAQeMHw1c7zTmncogyy8VvRZwtkmkZ4FxERmMY4rD+g=
 github.com/emicklei/go-restful/v3 v3.11.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5/go.mod h1:a2zkGnVExMxdzMo3M0Hi/3sEU+cWnZpSni0O6/Yb/P0=
