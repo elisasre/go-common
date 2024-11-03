@@ -2,11 +2,20 @@
 package log
 
 import (
+	"context"
 	"io"
 	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"go.opentelemetry.io/otel/trace"
+)
+
+var (
+	TraceID      = "trace_id"
+	SpanID       = "span_id"
+	TraceSampled = "trace_sampled"
 )
 
 // NewDefaultEnvLogger creates new slog.Logger using sane default configuration and sets it as a default logger.
@@ -32,10 +41,38 @@ func NewDefaultEnvLogger(opts ...Opt) *slog.Logger {
 		opt(b)
 	}
 
-	logger := slog.New(b.handlerFn(b.output, b.opts))
+	instrumentedHandler := handlerWithSpanContext(b.handlerFn(b.output, b.opts))
+	logger := slog.New(instrumentedHandler)
 	slog.SetDefault(logger)
 
 	return logger
+}
+
+func handlerWithSpanContext(handler slog.Handler) *spanContextLogHandler {
+	return &spanContextLogHandler{Handler: handler}
+}
+
+// spanContextLogHandler is an slog.Handler which adds attributes from the
+// span context.
+type spanContextLogHandler struct {
+	slog.Handler
+}
+
+// Handle overrides slog.Handler's Handle method. This adds attributes from the
+// span context to the slog.Record.
+func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) error {
+	if s := trace.SpanContextFromContext(ctx); s.IsValid() {
+		record.AddAttrs(
+			slog.Any(TraceID, s.TraceID()),
+		)
+		record.AddAttrs(
+			slog.Any(SpanID, s.SpanID()),
+		)
+		record.AddAttrs(
+			slog.Bool(TraceSampled, s.TraceFlags().IsSampled()),
+		)
+	}
+	return t.Handler.Handle(ctx, record)
 }
 
 type builder struct {
@@ -81,6 +118,34 @@ func WithShortSource(short bool) Opt {
 func WithReplacer(fn func([]string, slog.Attr) slog.Attr) Opt {
 	return func(b *builder) {
 		b.opts.ReplaceAttr = fn
+	}
+}
+
+// WithGCPReplacer sets slog.HandlerOptions.ReplaceAttr to GCP structured logging format.
+// https://cloud.google.com/logging/docs/structured-logging#special-payload-fields
+func WithGCPReplacer(short bool) Opt {
+	return func(b *builder) {
+		b.opts.ReplaceAttr = func(groups []string, a slog.Attr) slog.Attr {
+			switch a.Key {
+			case slog.SourceKey:
+				if short {
+					source, ok := a.Value.Any().(*slog.Source)
+					if ok && source != nil {
+						source.File = filepath.Base(source.File)
+					}
+				}
+			case slog.LevelKey:
+				a.Key = "severity"
+				if level := a.Value.Any().(slog.Level); level == slog.LevelWarn {
+					a.Value = slog.StringValue("WARNING")
+				}
+			case slog.TimeKey:
+				a.Key = "timestamp"
+			case slog.MessageKey:
+				a.Key = "message"
+			}
+			return a
+		}
 	}
 }
 
