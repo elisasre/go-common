@@ -9,7 +9,7 @@ import (
 func IsHTTPS(r *http.Request) bool {
 	const protoHTTPS = "https"
 	switch {
-	case r.URL.Scheme == protoHTTPS:
+	case r.URL != nil && r.URL.Scheme == protoHTTPS:
 		return true
 	case r.TLS != nil:
 		return true
