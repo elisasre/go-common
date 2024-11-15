@@ -30,52 +30,61 @@ func OptBase(base string) Opt {
 	}
 }
 
+// OptBinHandler allows setting BinHandler.
+// This can be useful when you want to reuse BinHandler between multiple IntegrationTestRunners.
+func OptBinHandler(bh *BinHandler) Opt {
+	return func(itr *IntegrationTestRunner) error {
+		itr.binHandler = bh
+		return nil
+	}
+}
+
 // OptTarget sets path to compilation target.
 func OptTarget(target string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptTarget(target)(&itr.binHandler)
+		return BinOptTarget(target)(itr.binHandler)
 	}
 }
 
 // OptOutput sets output for compilation target.
 func OptOutput(output string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptOutput(output)(&itr.binHandler)
+		return BinOptOutput(output)(itr.binHandler)
 	}
 }
 
 // OptRunArgs adds args to run arguments for test binary.
 func OptRunArgs(args ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptRunArgs(args...)(&itr.binHandler)
+		return BinOptRunArgs(args...)(itr.binHandler)
 	}
 }
 
 // OptBuildArgs adds args to build arguments for test binary.
 func OptBuildArgs(args ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptBuildArgs(args...)(&itr.binHandler)
+		return BinOptBuildArgs(args...)(itr.binHandler)
 	}
 }
 
 // OptRunEnv adds env to test binary's run env.
 func OptRunEnv(env ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptRunEnv(env...)(&itr.binHandler)
+		return BinOptRunEnv(env...)(itr.binHandler)
 	}
 }
 
 // OptBuildEnv adds env to test binary's build env.
 func OptBuildEnv(env ...string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptBuildEnv(env...)(&itr.binHandler)
+		return BinOptBuildEnv(env...)(itr.binHandler)
 	}
 }
 
 // OptCoverDir sets coverage directory for test binary.
 func OptCoverDir(coverDir string) Opt {
 	return func(itr *IntegrationTestRunner) error {
-		return BinOptCoverDir(coverDir)(&itr.binHandler)
+		return BinOptCoverDir(coverDir)(itr.binHandler)
 	}
 }
 

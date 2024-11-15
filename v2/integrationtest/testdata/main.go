@@ -13,18 +13,24 @@ import (
 )
 
 func main() {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /ready", func(w http.ResponseWriter, r *http.Request) {
+		slog.Info("Readyness endpoint called", slog.String("host", r.Host))
+	})
+	mux.HandleFunc("GET /remote", func(w http.ResponseWriter, r *http.Request) {
+		slog.Info("Remote endpoint called", slog.String("host", r.Host))
+		resp, err := http.Get("http://127.0.0.1:9999")
+		if err != nil {
+			http.Error(w, err.Error(), 500)
+			return
+		}
+		defer resp.Body.Close()
+		io.Copy(w, resp.Body)
+	})
+
 	srv := &http.Server{
-		Addr: ":8080",
-		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			slog.Info("Request received")
-			resp, err := http.Get("http://127.0.0.1:9999")
-			if err != nil {
-				http.Error(w, err.Error(), 500)
-				return
-			}
-			defer resp.Body.Close()
-			io.Copy(w, resp.Body)
-		}),
+		Addr:    os.Getenv("ITR_TEST_ADDR"),
+		Handler: mux,
 	}
 
 	go func() {
@@ -41,7 +47,7 @@ func main() {
 		}
 	}()
 
-	slog.Info("Starting server")
+	slog.Info("Starting server", slog.String("addr", srv.Addr))
 	if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		slog.Error(err.Error())
 		os.Exit(1)

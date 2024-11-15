@@ -46,6 +46,14 @@ func BinOptRunArgs(args ...string) BinOpt {
 	}
 }
 
+// BinOptSetRunArgs sets run arguments for test binary.
+func BinOptSetRunArgs(args ...string) BinOpt {
+	return func(bh *BinHandler) error {
+		bh.runArgs = args
+		return nil
+	}
+}
+
 // BinOptBuildArgs adds args to build arguments for test binary.
 func BinOptBuildArgs(args ...string) BinOpt {
 	return func(bh *BinHandler) error {
@@ -58,6 +66,14 @@ func BinOptBuildArgs(args ...string) BinOpt {
 func BinOptRunEnv(env ...string) BinOpt {
 	return func(bh *BinHandler) error {
 		bh.runEnv = append(bh.runEnv, env...)
+		return nil
+	}
+}
+
+// BinOptSetRunEnv sets test binary's run env.
+func BinOptSetRunEnv(env ...string) BinOpt {
+	return func(bh *BinHandler) error {
+		bh.runEnv = env
 		return nil
 	}
 }

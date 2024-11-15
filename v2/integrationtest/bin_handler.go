@@ -1,16 +1,22 @@
 package integrationtest
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"path"
 	"strings"
+	"sync"
 )
 
 type BinHandler struct {
 	buildCmd *exec.Cmd
 	runCmd   *exec.Cmd
+
+	buildOnce *sync.Once
+	buildErr  error
 
 	base      string
 	target    string
@@ -25,9 +31,15 @@ type BinHandler struct {
 
 func NewBinHandler(opts ...BinOpt) *BinHandler {
 	return &BinHandler{
-		base: ".",
-		opts: opts,
+		base:      ".",
+		opts:      opts,
+		buildOnce: &sync.Once{},
 	}
+}
+
+// AddOpts adds options to bin handler.
+func (bh *BinHandler) AddOpts(opts ...BinOpt) {
+	bh.opts = append(bh.opts, opts...)
 }
 
 // Init applies all options to bin handler.
@@ -44,40 +56,42 @@ func (bh *BinHandler) Init() error {
 			return err
 		}
 	}
-
 	return nil
 }
 
 func (bh *BinHandler) Build() error {
-	if bh.bin == "" {
-		parts := strings.Split(strings.TrimSuffix(bh.target, "/"), "/")
-		name := parts[len(parts)-1]
-		bh.bin = path.Join(BinDir, name)
-	}
+	bh.buildOnce.Do(func() {
+		if bh.bin == "" {
+			parts := strings.Split(strings.TrimSuffix(bh.target, "/"), "/")
+			name := parts[len(parts)-1]
+			bh.bin = path.Join(BinDir, name)
+		}
 
-	pkgs, err := ListPackages(bh.base, "./...")
-	if err != nil {
-		return fmt.Errorf("listing packages failed: %w", err)
-	}
+		pkgs, err := ListPackages(bh.base, "./...")
+		if err != nil {
+			bh.buildErr = fmt.Errorf("listing packages failed: %w", err)
+			return
+		}
 
-	if len(bh.buildArgs) == 0 {
-		coverPkgs := "-coverpkg=" + strings.Join(pkgs, ",")
-		bh.buildArgs = []string{"-race", "-cover", "-covermode", "atomic", coverPkgs}
+		if len(bh.buildArgs) == 0 {
+			coverPkgs := "-coverpkg=" + strings.Join(pkgs, ",")
+			bh.buildArgs = []string{"-race", "-cover", "-covermode", "atomic", coverPkgs}
+		}
 
-	}
+		bh.buildArgs = append([]string{"build", "-o", bh.bin}, bh.buildArgs...)
+		bh.buildArgs = append(bh.buildArgs, bh.target)
+		bh.buildEnv = append(bh.buildEnv, "CGO_ENABLED=1")
 
-	bh.buildArgs = append([]string{"build", "-o", bh.bin}, bh.buildArgs...)
-	bh.buildArgs = append(bh.buildArgs, bh.target)
-	bh.buildEnv = append(bh.buildEnv, "CGO_ENABLED=1")
-
-	bh.buildCmd = exec.Command("go", bh.buildArgs...) //nolint:gosec
-	bh.buildCmd.Stdout = os.Stdout
-	bh.buildCmd.Stderr = os.Stderr
-	bh.buildCmd.Env = append(bh.buildCmd.Environ(), bh.buildEnv...)
-	bh.buildCmd.Dir = bh.base
-	fmt.Println("PWD:", bh.buildCmd.Dir)
-	fmt.Println("CMD:", bh.buildCmd.String())
-	return bh.buildCmd.Run()
+		bh.buildCmd = exec.Command("go", bh.buildArgs...) //nolint:gosec
+		bh.buildCmd.Stdout = os.Stdout
+		bh.buildCmd.Stderr = os.Stderr
+		bh.buildCmd.Env = append(bh.buildCmd.Environ(), bh.buildEnv...)
+		bh.buildCmd.Dir = bh.base
+		fmt.Println("PWD:", bh.buildCmd.Dir)
+		fmt.Println("CMD:", bh.buildCmd.String())
+		bh.buildErr = bh.buildCmd.Run()
+	})
+	return bh.buildErr
 }
 
 func (bh *BinHandler) initRunCommand() error {
@@ -119,6 +133,10 @@ func (bh *BinHandler) Stop() error {
 	return bh.runCmd.Wait()
 }
 
+func (bh BinHandler) Copy() *BinHandler {
+	return &bh
+}
+
 func ListPackages(base, target string) ([]string, error) {
 	cmd := exec.Command("go", "list", target)
 	cmd.Dir = base
@@ -129,6 +147,14 @@ func ListPackages(base, target string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	pkgs := strings.Split(strings.ReplaceAll(string(pkgsRaw), "\r\n", ","), "\n")
+
+	pkgs := make([]string, 0)
+	lines := bufio.NewScanner(bytes.NewReader(pkgsRaw))
+	for lines.Scan() {
+		pkg := strings.TrimSpace(lines.Text())
+		if pkg != "" {
+			pkgs = append(pkgs, pkg)
+		}
+	}
 	return pkgs, nil
 }
