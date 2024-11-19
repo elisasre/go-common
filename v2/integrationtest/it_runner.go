@@ -75,6 +75,7 @@ func (itr *IntegrationTestRunner) Init() error {
 // The contents of above steps will depend on given options.
 func (itr *IntegrationTestRunner) Run() error {
 	if err := itr.preSetup(); err != nil {
+		_ = itr.preCleanup()
 		return err
 	}
 
@@ -102,7 +103,7 @@ func (itr *IntegrationTestRunner) preSetup() error {
 
 func (itr *IntegrationTestRunner) buildAndRunBin() error {
 	if err := itr.binHandler.Build(); err != nil {
-		return fmt.Errorf("building applicfunc Teation failed: %w", err)
+		return fmt.Errorf("building application failed: %w", err)
 	}
 
 	if err := itr.binHandler.Start(); err != nil {
@@ -112,16 +113,25 @@ func (itr *IntegrationTestRunner) buildAndRunBin() error {
 	return itr.ready()
 }
 
+func (itr *IntegrationTestRunner) preCleanup() error {
+	var result error
+	for i := len(itr.preHandlers) - 1; i >= 0; i-- {
+		if err := itr.preHandlers[i].Stop(); err != nil {
+			result = multierror.Append(result, err)
+		}
+	}
+
+	return result
+}
+
 func (itr *IntegrationTestRunner) cleanup() error {
 	var result error
 	if err := itr.binHandler.Stop(); err != nil {
 		result = multierror.Append(result, fmt.Errorf("running application failed: %w", err))
 	}
 
-	for i := len(itr.preHandlers) - 1; i >= 0; i-- {
-		if err := itr.preHandlers[i].Stop(); err != nil {
-			result = multierror.Append(result, err)
-		}
+	if err := itr.preCleanup(); err != nil {
+		result = multierror.Append(result, err)
 	}
 
 	return result
