@@ -49,6 +49,18 @@ func Unmarshal(t T, data []byte, v interface{}) {
 	require.NoError(t, json.Unmarshal(data, v))
 }
 
+func EncodeJSON(t T, w io.Writer, v interface{}) {
+	t.Helper()
+	err := json.NewEncoder(w).Encode(v)
+	require.NoError(t, err)
+}
+
+func DecodeJSON(t T, r io.Reader, v interface{}) {
+	t.Helper()
+	err := json.NewDecoder(r).Decode(v)
+	require.NoError(t, err)
+}
+
 func ReadAll(t T, r io.Reader) []byte {
 	t.Helper()
 	b, err := io.ReadAll(r)
