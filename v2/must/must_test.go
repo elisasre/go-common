@@ -43,6 +43,19 @@ func TestHappyPath(t *testing.T) {
 	require.Equal(t, body, data)
 }
 
+func TestMustEncodeJSON(t *testing.T) {
+	buf := &bytes.Buffer{}
+	noFail(t, func(mt *mockT) { must.EncodeJSON(mt, buf, "hello") })
+	assert.JSONEq(t, `"hello"`, buf.String())
+}
+
+func TestMustDecodeJSON(t *testing.T) {
+	buf := bytes.NewReader([]byte(`"world"`))
+	var s string
+	noFail(t, func(mt *mockT) { must.DecodeJSON(mt, buf, &s) })
+	assert.Equal(t, "world", s)
+}
+
 type mockT struct {
 	failed bool
 	msg    string
