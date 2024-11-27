@@ -27,6 +27,14 @@ var (
 	ErrInvalidSamplePercentage = errors.New("invalid sample percentage")
 	ErrInvalidProcessor        = errors.New("invalid processor")
 	ErrInvalidToken            = errors.New("invalid token")
+
+	defaultIgnoreSpans = []string{
+		"HTTP GET route not found",
+		"HTTP POST route not found",
+		"HTTP PUT route not found",
+		"HTTP DELETE route not found",
+		"HTTP PATCH route not found",
+	}
 )
 
 type ExporterHTTP struct {
@@ -51,6 +59,7 @@ type TracerProvider struct {
 	grpc             ExporterGRPC
 	http             ExporterHTTP
 	samplePercentage float64
+	ignoreSpans      []string
 	stopped          chan struct{}
 	opts             []Opt
 }
@@ -97,6 +106,18 @@ func (tp *TracerProvider) Init() error {
 	case ProcessorSimple:
 		tp.batchProcessor = trace.NewSimpleSpanProcessor(exporter)
 		slog.Warn("using simple span processor, this should NOT be used in production")
+	}
+
+	ignoreSpans := make(map[string]struct{}, len(defaultIgnoreSpans)+len(tp.ignoreSpans))
+	for _, span := range append(defaultIgnoreSpans, tp.ignoreSpans...) {
+		ignoreSpans[span] = struct{}{}
+	}
+	slog.Debug("using span filters",
+		slog.Any("ignore", ignoreSpans),
+	)
+	tp.batchProcessor = SpanFilter{
+		SpanProcessor: tp.batchProcessor,
+		Ignore:        ignoreSpans,
 	}
 
 	tp.provider = trace.NewTracerProvider(
@@ -247,6 +268,14 @@ func WithProcessor(processorName string) Opt {
 		default:
 			return ErrInvalidProcessor
 		}
+		return nil
+	}
+}
+
+// WithIgnore sets the ignore filter of span names for the tracer provider, e.g. ["/healthz"].
+func WithIgnore(ignoreSpans []string) Opt {
+	return func(tp *TracerProvider) error {
+		tp.ignoreSpans = ignoreSpans
 		return nil
 	}
 }

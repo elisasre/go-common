@@ -17,6 +17,7 @@ func ExampleNew() {
 		tracerprovider.WithServiceName("test"),
 		tracerprovider.WithEnvironment("development"),
 		tracerprovider.WithProcessor("processor"),
+		tracerprovider.WithIgnore([]string{"/healthz"}),
 	)
 	err := service.Run(service.Modules{tp})
 	if err != nil {

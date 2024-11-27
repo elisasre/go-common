@@ -19,6 +19,7 @@ func TestTracerProviderGRPC(t *testing.T) {
 		tracerprovider.WithServiceName("test"),
 		tracerprovider.WithEnvironment("development"),
 		tracerprovider.WithProcessor(tracerprovider.ProcessorBatch),
+		tracerprovider.WithIgnore([]string{"/foo", "/bar"}),
 	)
 	require.NoError(t, tp.Init())
 	wg := &multierror.Group{}
@@ -36,6 +37,7 @@ func TestTracerProviderHTTP(t *testing.T) {
 		tracerprovider.WithServiceName("test"),
 		tracerprovider.WithEnvironment("development"),
 		tracerprovider.WithProcessor(tracerprovider.ProcessorBatch),
+		tracerprovider.WithIgnore([]string{"/foo", "/bar"}),
 	)
 	require.NoError(t, tp.Init())
 	wg := &multierror.Group{}
