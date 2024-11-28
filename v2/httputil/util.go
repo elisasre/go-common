@@ -28,7 +28,7 @@ func (e ErrorResponse) Error() string {
 
 // ErrorResponse provides HTTP error response.
 type ErrorResponse struct {
-	Code      uint              `json:"code,omitempty" example:"400"`
+	Code      int64             `json:"code,omitempty" format:"int64" example:"400"`
 	Message   string            `json:"message" example:"Bad request"`
 	ErrorType string            `json:"error_type,omitempty" example:"invalid_scope"`
 	Params    map[string]string `json:"params,omitempty"`
