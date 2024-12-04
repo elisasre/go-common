@@ -25,7 +25,7 @@ jobs:
 
       - uses: elisa-actions/setup-go-and-mage@v1
         with:
-          modFile: ./v2/go.mod
+          modFile: go.mod
 
       - name: Verify dependencies
         run: mage go:tidyAndVerify
@@ -38,7 +38,7 @@ jobs:
         with:
           url: https://codecov.csf.elisa.fi
           flags: unit
-          files: ./v2/target/tests/cover/unit/cover.txt
+          files: v2/target/tests/cover/unit/cover.txt
           use_oidc: true
 
       - name: Lint
@@ -55,8 +55,7 @@ jobs:
       github.event.pull_request.user.login == 'dops-sre'
     steps:
       - name: Automerge dependabot and repo-updater PR's
-        run: gh pr merge --auto --merge "$PR_URL"
+        run: cd .. && gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GH_TOKEN: ${{ secrets.DOPS_SRE_PAT }}
-
