@@ -7,12 +7,11 @@ on:
       - synchronize
       - reopened
 
-defaults:
-  run:
-    working-directory: ./v2
-
 jobs:
   analyze:
+    defaults:
+      run:
+        working-directory: ./v2
     runs-on: elisa-normal
     timeout-minutes: 15
     permissions:
@@ -55,7 +54,7 @@ jobs:
       github.event.pull_request.user.login == 'dops-sre'
     steps:
       - name: Automerge dependabot and repo-updater PR's
-        run: cd .. && gh pr merge --auto --merge "$PR_URL"
+        run: gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GH_TOKEN: ${{ secrets.DOPS_SRE_PAT }}
