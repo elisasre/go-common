@@ -33,6 +33,10 @@ func New(cs ...prometheus.Collector) *Prometheus {
 	}
 }
 
+func (p *Prometheus) AppendCollectors(cs ...prometheus.Collector) {
+	p.cs = append(p.cs, cs...)
+}
+
 // NewPrometheus creates registers collectors and starts metrics server.
 func NewPrometheus(port int, cs ...prometheus.Collector) (*Prometheus, error) {
 	p := New(cs...)
