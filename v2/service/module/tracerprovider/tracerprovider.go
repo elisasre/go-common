@@ -192,12 +192,6 @@ func WithSamplePercentage(percentage int) Opt {
 	}
 }
 
-// WithCollector is deprecated. Use WithGRPCExporter instead.
-func WithCollector(host string, port int, credentials credentials.TransportCredentials) Opt {
-	slog.Warn("WithCollector is deprecated, use WithGRPCExporter instead")
-	return WithGRPCExporter(fmt.Sprintf("%s:%d", host, port), credentials)
-}
-
 // WithGRPCExporter sets gRPC collector endpoint for trace exporter.
 // Endpoint is "host:port" of the collector and you can set transport credentials to "insecure.NewCredentials()"
 // if secure connection is not required.
