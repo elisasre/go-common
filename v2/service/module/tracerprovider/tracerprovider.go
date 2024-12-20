@@ -27,14 +27,6 @@ var (
 	ErrInvalidSamplePercentage = errors.New("invalid sample percentage")
 	ErrInvalidProcessor        = errors.New("invalid processor")
 	ErrInvalidToken            = errors.New("invalid token")
-
-	defaultIgnoreSpans = []string{
-		"HTTP GET route not found",
-		"HTTP POST route not found",
-		"HTTP PUT route not found",
-		"HTTP DELETE route not found",
-		"HTTP PATCH route not found",
-	}
 )
 
 type ExporterHTTP struct {
@@ -108,8 +100,8 @@ func (tp *TracerProvider) Init() error {
 		slog.Warn("using simple span processor, this should NOT be used in production")
 	}
 
-	ignoreSpans := make(map[string]struct{}, len(defaultIgnoreSpans)+len(tp.ignoreSpans))
-	for _, span := range append(defaultIgnoreSpans, tp.ignoreSpans...) {
+	ignoreSpans := make(map[string]struct{}, len(tp.ignoreSpans))
+	for _, span := range tp.ignoreSpans {
 		ignoreSpans[span] = struct{}{}
 	}
 	slog.Debug("using span filters",
