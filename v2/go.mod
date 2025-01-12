@@ -22,9 +22,9 @@ require (
 	github.com/redis/go-redis/v9 v9.7.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.10.0
-	github.com/testcontainers/testcontainers-go v0.34.0
-	github.com/testcontainers/testcontainers-go/modules/compose v0.34.0
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.34.0
+	github.com/testcontainers/testcontainers-go v0.35.0
+	github.com/testcontainers/testcontainers-go/modules/compose v0.35.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.35.0
 	github.com/urfave/cli/v2 v2.27.5
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.58.0
 	go.opentelemetry.io/otel v1.33.0

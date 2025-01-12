@@ -570,6 +570,8 @@ github.com/mattn/go-sqlite3 v1.6.0/go.mod h1:FPy6KqzDD04eiIsT53CuJW3U88zkxoIYsOq
 github.com/mattn/go-sqlite3 v1.14.22 h1:2gZY6PC6kBnID23Tichd1K+Z0oS6nE/XwU+Vz/5o4kU=
 github.com/mattn/go-sqlite3 v1.14.22/go.mod h1:Uh1q+B4BYcTPb+yiD3kU8Ct7aC0hY9fxUwlHK0RXw+Y=
 github.com/matttproud/golang_protobuf_extensions v1.0.1/go.mod h1:D8He9yQNgCq6Z5Ld7szi9bcBfOoFv/3dc6xSMkL2PC0=
+github.com/mdelapenya/tlscert v0.1.0 h1:YTpF579PYUX475eOL+6zyEO3ngLTOUWck78NBuJVXaM=
+github.com/mdelapenya/tlscert v0.1.0/go.mod h1:wrbyM/DwbFCeCeqdPX/8c6hNOqQgbf0rUDErE1uD+64=
 github.com/mgechev/revive v1.5.0 h1:oaSmjA7rP8+HyoRuCgC531VHwnLH1AlJdjj+1AnQceQ=
 github.com/mgechev/revive v1.5.0/go.mod h1:L6T3H8EoerRO86c7WuGpvohIUmiploGiyoYbtIWFmV8=
 github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b h1:j7+1HpAFS1zy5+Q4qx1fWh90gTKwiN4QCGoY9TWyyO4=
@@ -826,12 +828,12 @@ github.com/tenntenn/modver v1.0.1 h1:2klLppGhDgzJrScMpkj9Ujy3rXPUspSjAcev9tSEBgA
 github.com/tenntenn/modver v1.0.1/go.mod h1:bePIyQPb7UeioSRkw3Q0XeMhYZSMx9B8ePqg6SAMGH0=
 github.com/tenntenn/text/transform v0.0.0-20200319021203-7eef512accb3 h1:f+jULpRQGxTSkNYKJ51yaw6ChIqO+Je8UqsTKN/cDag=
 github.com/tenntenn/text/transform v0.0.0-20200319021203-7eef512accb3/go.mod h1:ON8b8w4BN/kE1EOhwT0o+d62W65a6aPw1nouo9LMgyY=
-github.com/testcontainers/testcontainers-go v0.34.0 h1:5fbgF0vIN5u+nD3IWabQwRybuB4GY8G2HHgCkbMzMHo=
-github.com/testcontainers/testcontainers-go v0.34.0/go.mod h1:6P/kMkQe8yqPHfPWNulFGdFHTD8HB2vLq/231xY2iPQ=
-github.com/testcontainers/testcontainers-go/modules/compose v0.34.0 h1:DrpbkHLvPhf4DIatCe6POzIMsT+c/VnbdO2zV+qAVoQ=
-github.com/testcontainers/testcontainers-go/modules/compose v0.34.0/go.mod h1:Fr6tIXogKQlYOPcKieJz0XGfYtcAw2FQLHFiTXXOXmQ=
-github.com/testcontainers/testcontainers-go/modules/postgres v0.34.0 h1:c51aBXT3v2HEBVarmaBnsKzvgZjC5amn0qsj8Naqi50=
-github.com/testcontainers/testcontainers-go/modules/postgres v0.34.0/go.mod h1:EWP75ogLQU4M4L8U+20mFipjV4WIR9WtlMXSB6/wiuc=
+github.com/testcontainers/testcontainers-go v0.35.0 h1:uADsZpTKFAtp8SLK+hMwSaa+X+JiERHtd4sQAFmXeMo=
+github.com/testcontainers/testcontainers-go v0.35.0/go.mod h1:oEVBj5zrfJTrgjwONs1SsRbnBtH9OKl+IGl3UMcr2B4=
+github.com/testcontainers/testcontainers-go/modules/compose v0.35.0 h1:bqtmGQ1VprJp3LedAbkSpwCDffjrc2LuZ9AoiAKBmSI=
+github.com/testcontainers/testcontainers-go/modules/compose v0.35.0/go.mod h1:7b6Mpri9NZYC3Nd4PZ+qpP5O6Q/N8mFvk4TjeLwwksw=
+github.com/testcontainers/testcontainers-go/modules/postgres v0.35.0 h1:eEGx9kYzZb2cNhRbBrNOCL/YPOM7+RMJiy3bB+ie0/I=
+github.com/testcontainers/testcontainers-go/modules/postgres v0.35.0/go.mod h1:hfH71Mia/WWLBgMD2YctYcMlfsbnT0hflweL1dy8Q4s=
 github.com/tetafro/godot v1.4.18 h1:ouX3XGiziKDypbpXqShBfnNLTSjR8r3/HVzrtJ+bHlI=
 github.com/tetafro/godot v1.4.18/go.mod h1:2oVxTBSftRTh4+MVfUaUXR6bn2GDXCaMcOG4Dk3rfio=
 github.com/theupdateframework/notary v0.7.0 h1:QyagRZ7wlSpjT5N2qQAh/pN+DVqgekv4DzbAiAiEL3c=
