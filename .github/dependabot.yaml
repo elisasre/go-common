@@ -10,10 +10,9 @@ updates:
   schedule:
     interval: "weekly"
     day: "sunday"
+  ignore:
+    - dependency-name: "k8s.io/*"
   groups:
-    k8s.io:
-      patterns:
-      - "k8s.io/*"
     github.com/testcontainers:
       patterns:
       - "github.com/testcontainers/*"
