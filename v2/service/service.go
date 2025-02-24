@@ -74,19 +74,18 @@ func (r *runner) run() error {
 	slog.Info("initializing modules")
 	for _, mod := range r.modules {
 		slog.Info("module initializing", slog.String("name", mod.Name()))
-		err := catchPanic(mod.Init)
-		if err != nil {
+		if err := catchPanic(mod.Init); err != nil {
 			return fmt.Errorf("failed to initialize module %s: %w", mod.Name(), err)
 		}
 		slog.Info("module initialized", slog.String("name", mod.Name()))
 	}
+
 	slog.Info("all modules initialized successfully")
 
 	slog.Info("starting modules")
+	wg := &multierror.Group{}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	wg := &multierror.Group{}
 	for _, mod := range r.modules {
 		wg.Go(func() error {
 			defer func() {
@@ -104,25 +103,20 @@ func (r *runner) run() error {
 		})
 	}
 
+	// As soon as any module Run() returns start Stop sequence.
 	<-ctx.Done()
 
 	slog.Info("stopping modules")
+	var err error
 	for i := len(r.modules) - 1; i >= 0; i-- {
 		mod := r.modules[i]
-		closed := make(chan struct{})
-		wg.Go(func() error {
-			defer func() {
-				close(closed)
-				slog.Info("module stopped", slog.String("name", mod.Name()))
-			}()
-
-			slog.Info("module stopping", slog.String("name", mod.Name()))
-			return catchPanic(mod.Stop)
-		})
-		<-closed
+		slog.Info("module stopping", slog.String("name", mod.Name()))
+		err = errors.Join(err, catchPanic(mod.Stop))
+		slog.Info("module stopped", slog.String("name", mod.Name()))
 	}
 
-	return wg.Wait().ErrorOrNil()
+	runErr := wg.Wait().ErrorOrNil()
+	return errors.Join(err, runErr)
 }
 
 var ErrPanic = errors.New("recovered from panic")
