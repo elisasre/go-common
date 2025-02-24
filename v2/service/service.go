@@ -32,10 +32,11 @@ type Module interface {
 	Stop() error
 }
 
-// Run runs svc using following control flow:
+// Run executes svc using following control flow:
 //
 //  1. Exec Init() for each module in order.
-//     If error is occurred Run returns immediately.
+//     If module.Run return and error, all already successfully initilized modules
+//     will be be stopped with module.Stop() to allow automatic cleanup.
 //  2. Exec Run() for each module in own goroutine.
 //  3. Wait for any Run() function to return.
 //     When that happens move to Stop sequence.
@@ -62,22 +63,16 @@ func RunAndExit(svc Service) {
 	}
 }
 
-type runner struct {
-	modules []Module
-}
-
 func execute(mods []Module) error {
+	waitForRun := func() error { return nil }
 	initialized, err := initMods(mods)
-	if err != nil {
-		return err
+	if err == nil {
+		// run blocks until one of the modules exits
+		waitForRun = run(initialized)
 	}
 
-	// run blocks until one of the modules exits
-	waitForErr := run(initialized)
-
-	err = stop(initialized)
-	runErr := waitForErr()
-	return errors.Join(err, runErr)
+	err = errors.Join(err, stop(initialized))
+	return errors.Join(err, waitForRun())
 }
 
 func initMods(modules []Module) (initialized []Module, err error) {
