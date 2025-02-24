@@ -38,6 +38,11 @@ func TestRun(t *testing.T) {
 			expectedErr: errInit,
 		},
 		{
+			name:        "InitAndStopError",
+			mods:        []service.Module{StopErrMod(), InitErrMod()},
+			expectedErr: errStop,
+		},
+		{
 			name:        "RunError",
 			mods:        []service.Module{RunErrMod()},
 			expectedErr: errRun,
