@@ -70,6 +70,10 @@ func (tp *TracerProvider) Init() error {
 		}
 	}
 
+	if tp.ctx == nil {
+		tp.ctx = context.Background()
+	}
+
 	res, err := resource.New(tp.ctx,
 		resource.WithAttributes(
 			tp.serviceName,
