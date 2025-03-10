@@ -3,6 +3,7 @@ package integrationtest
 import (
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"path"
 	"path/filepath"
@@ -85,6 +86,20 @@ func OptBuildEnv(env ...string) Opt {
 func OptCoverDir(coverDir string) Opt {
 	return func(itr *IntegrationTestRunner) error {
 		return BinOptCoverDir(coverDir)(itr.binHandler)
+	}
+}
+
+// OptRunStdout sets stdout for test binary.
+func OptRunStdout(stdout io.Writer) Opt {
+	return func(itr *IntegrationTestRunner) error {
+		return BinOptRunStdout(stdout)(itr.binHandler)
+	}
+}
+
+// OptRunStderr sets stderr for test binary.
+func OptRunStderr(stderr io.Writer) Opt {
+	return func(itr *IntegrationTestRunner) error {
+		return BinOptRunStderr(stderr)(itr.binHandler)
 	}
 }
 

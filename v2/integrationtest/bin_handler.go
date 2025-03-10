@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -25,6 +26,8 @@ type BinHandler struct {
 	buildEnv  []string
 	runArgs   []string
 	runEnv    []string
+	runStdout io.Writer
+	runStderr io.Writer
 	coverDir  string
 	opts      []BinOpt
 }
@@ -34,6 +37,8 @@ func NewBinHandler(opts ...BinOpt) *BinHandler {
 		base:      ".",
 		opts:      opts,
 		buildOnce: &sync.Once{},
+		runStdout: os.Stdout,
+		runStderr: os.Stderr,
 	}
 }
 
@@ -102,8 +107,8 @@ func (bh *BinHandler) initRunCommand() error {
 
 	bh.runEnv = append(bh.runEnv, "GOCOVERDIR="+bh.coverDir)
 	bh.runCmd = exec.Command(bh.bin, bh.runArgs...) //nolint:gosec
-	bh.runCmd.Stdout = os.Stdout
-	bh.runCmd.Stderr = os.Stderr
+	bh.runCmd.Stdout = bh.runStdout
+	bh.runCmd.Stderr = bh.runStderr
 	bh.runCmd.Env = append(bh.runCmd.Environ(), bh.runEnv...)
 	bh.runCmd.Dir = bh.base
 

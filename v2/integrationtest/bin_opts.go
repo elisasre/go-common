@@ -2,6 +2,7 @@ package integrationtest
 
 import (
 	"fmt"
+	"io"
 	"path/filepath"
 )
 
@@ -90,6 +91,22 @@ func BinOptBuildEnv(env ...string) BinOpt {
 func BinOptCoverDir(coverDir string) BinOpt {
 	return func(bh *BinHandler) error {
 		bh.coverDir = coverDir
+		return nil
+	}
+}
+
+// BinOptRunStdout sets stdout for test binary.
+func BinOptRunStdout(stdout io.Writer) BinOpt {
+	return func(bh *BinHandler) error {
+		bh.runStdout = stdout
+		return nil
+	}
+}
+
+// BinOptRunStderr sets stderr for test binary.
+func BinOptRunStderr(stderr io.Writer) BinOpt {
+	return func(bh *BinHandler) error {
+		bh.runStderr = stderr
 		return nil
 	}
 }
