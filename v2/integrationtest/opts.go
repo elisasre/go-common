@@ -103,6 +103,13 @@ func OptRunStderr(stderr io.Writer) Opt {
 	}
 }
 
+// OptRunInheritEnv sets boolean to determine whether test binary inherits env from caller.
+func OptRunInheritEnv(inherit bool) Opt {
+	return func(itr *IntegrationTestRunner) error {
+		return BinOptRunInheritEnv(inherit)(itr.binHandler)
+	}
+}
+
 // OptTestMain allows wrapping testing.M into IntegrationTestRunner.
 // Example TestMain:
 //

@@ -19,26 +19,28 @@ type BinHandler struct {
 	buildOnce *sync.Once
 	buildErr  error
 
-	base      string
-	target    string
-	bin       string
-	buildArgs []string
-	buildEnv  []string
-	runArgs   []string
-	runEnv    []string
-	runStdout io.Writer
-	runStderr io.Writer
-	coverDir  string
-	opts      []BinOpt
+	base          string
+	target        string
+	bin           string
+	buildArgs     []string
+	buildEnv      []string
+	runArgs       []string
+	runEnv        []string
+	runStdout     io.Writer
+	runStderr     io.Writer
+	runInheritEnv bool
+	coverDir      string
+	opts          []BinOpt
 }
 
 func NewBinHandler(opts ...BinOpt) *BinHandler {
 	return &BinHandler{
-		base:      ".",
-		opts:      opts,
-		buildOnce: &sync.Once{},
-		runStdout: os.Stdout,
-		runStderr: os.Stderr,
+		base:          ".",
+		opts:          opts,
+		buildOnce:     &sync.Once{},
+		runStdout:     os.Stdout,
+		runStderr:     os.Stderr,
+		runInheritEnv: true,
 	}
 }
 
@@ -109,7 +111,11 @@ func (bh *BinHandler) initRunCommand() error {
 	bh.runCmd = exec.Command(bh.bin, bh.runArgs...) //nolint:gosec
 	bh.runCmd.Stdout = bh.runStdout
 	bh.runCmd.Stderr = bh.runStderr
-	bh.runCmd.Env = append(bh.runCmd.Environ(), bh.runEnv...)
+	if bh.runInheritEnv {
+		bh.runCmd.Env = append(bh.runCmd.Environ(), bh.runEnv...)
+	} else {
+		bh.runCmd.Env = bh.runEnv
+	}
 	bh.runCmd.Dir = bh.base
 
 	fmt.Println("PWD:", bh.runCmd.Dir)

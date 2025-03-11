@@ -110,3 +110,11 @@ func BinOptRunStderr(stderr io.Writer) BinOpt {
 		return nil
 	}
 }
+
+// BinOptRunInheritEnv sets boolean to determine whether test binary inherits env from caller.
+func BinOptRunInheritEnv(inherit bool) BinOpt {
+	return func(bh *BinHandler) error {
+		bh.runInheritEnv = inherit
+		return nil
+	}
+}
