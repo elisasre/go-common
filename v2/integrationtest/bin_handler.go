@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
@@ -18,22 +19,28 @@ type BinHandler struct {
 	buildOnce *sync.Once
 	buildErr  error
 
-	base      string
-	target    string
-	bin       string
-	buildArgs []string
-	buildEnv  []string
-	runArgs   []string
-	runEnv    []string
-	coverDir  string
-	opts      []BinOpt
+	base          string
+	target        string
+	bin           string
+	buildArgs     []string
+	buildEnv      []string
+	runArgs       []string
+	runEnv        []string
+	runStdout     io.Writer
+	runStderr     io.Writer
+	runInheritEnv bool
+	coverDir      string
+	opts          []BinOpt
 }
 
 func NewBinHandler(opts ...BinOpt) *BinHandler {
 	return &BinHandler{
-		base:      ".",
-		opts:      opts,
-		buildOnce: &sync.Once{},
+		base:          ".",
+		opts:          opts,
+		buildOnce:     &sync.Once{},
+		runStdout:     os.Stdout,
+		runStderr:     os.Stderr,
+		runInheritEnv: true,
 	}
 }
 
@@ -102,9 +109,13 @@ func (bh *BinHandler) initRunCommand() error {
 
 	bh.runEnv = append(bh.runEnv, "GOCOVERDIR="+bh.coverDir)
 	bh.runCmd = exec.Command(bh.bin, bh.runArgs...) //nolint:gosec
-	bh.runCmd.Stdout = os.Stdout
-	bh.runCmd.Stderr = os.Stderr
-	bh.runCmd.Env = append(bh.runCmd.Environ(), bh.runEnv...)
+	bh.runCmd.Stdout = bh.runStdout
+	bh.runCmd.Stderr = bh.runStderr
+	if bh.runInheritEnv {
+		bh.runCmd.Env = append(bh.runCmd.Environ(), bh.runEnv...)
+	} else {
+		bh.runCmd.Env = bh.runEnv
+	}
 	bh.runCmd.Dir = bh.base
 
 	fmt.Println("PWD:", bh.runCmd.Dir)

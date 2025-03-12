@@ -61,6 +61,9 @@ func TestOptBinHandler(t *testing.T) {
 	itr := it.NewIntegrationTestRunner(
 		it.OptBase("./testdata"),
 		it.OptBinHandler(bh),
+		it.OptRunStdout(os.Stdout),
+		it.OptRunStderr(os.Stderr),
+		it.OptRunInheritEnv(true),
 		it.OptRunEnv("ITR_TEST_ADDR=:8180"),
 		it.OptWaitHTTPReady("http://127.0.0.1:8180/ready", time.Second*10),
 		it.OptCompose("docker-compose.yaml",
