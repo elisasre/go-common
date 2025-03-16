@@ -2,6 +2,8 @@ module github.com/elisasre/go-common/v2
 
 go 1.24.0
 
+toolchain go1.24.1
+
 require (
 	github.com/alicebob/miniredis/v2 v2.34.0
 	github.com/aws/aws-sdk-go-v2 v1.36.3
@@ -16,7 +18,7 @@ require (
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
-	github.com/prometheus/client_golang v1.21.0
+	github.com/prometheus/client_golang v1.21.1
 	github.com/redis/go-redis/v9 v9.7.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.10.0
