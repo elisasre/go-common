@@ -13,6 +13,11 @@ func AddEnvVars(app *cli.App, prefix string) {
 	for _, flag := range app.Flags {
 		AddEnvVar(flag, prefix)
 	}
+	for _, command := range app.Commands {
+		for _, flag := range command.Flags {
+			AddEnvVar(flag, prefix)
+		}
+	}
 }
 
 // AddEnvVar sets f.EnvVar given that flag is has type.
