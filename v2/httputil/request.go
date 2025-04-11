@@ -28,6 +28,7 @@ type Request struct {
 	Headers                map[string]string
 	BearerTokenFile        string
 	OKCode                 []int
+	StopRetryCodes         []int
 	Unmarshaler            func(data []byte, v any) error
 	RetryOnContextDeadline bool
 }
@@ -82,6 +83,10 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 		}
 	}
 
+	if !slices.Contains(request.StopRetryCodes, http.StatusTooManyRequests) {
+		request.StopRetryCodes = append(request.StopRetryCodes, http.StatusTooManyRequests)
+	}
+
 	err := SleepUntil(backoff, func() (bool, error) {
 		httpreq, err := http.NewRequestWithContext(ctx, request.Method, request.URL, nil)
 		if err != nil {
@@ -115,15 +120,6 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 		}
 		httpresp.Body = responseBody
 		httpresp.Headers = resp.Header
-		if slices.Contains(request.OKCode, resp.StatusCode) {
-			if output != nil {
-				err = request.Unmarshaler(httpresp.Body, &output)
-				if err != nil {
-					return true, fmt.Errorf("could not marshal %w", err)
-				}
-			}
-			return true, nil
-		}
 
 		l := slog.With(
 			slog.Int("status_code", resp.StatusCode),
@@ -132,15 +128,23 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 			slog.String("body", string(responseBody)),
 		)
 
-		rtn := false
-		if resp.StatusCode == http.StatusTooManyRequests {
-			rtn = true
-			err = fmt.Errorf("rate limit exceeded")
-			l.Error("too many requests")
+		if slices.Contains(request.OKCode, resp.StatusCode) {
+			if output != nil {
+				err = request.Unmarshaler(httpresp.Body, &output)
+				if err != nil {
+					return true, fmt.Errorf("could not unmarshal %w", err)
+				}
+			}
+			return true, nil
+		} else if slices.Contains(request.StopRetryCodes, resp.StatusCode) {
+			status := http.StatusText(resp.StatusCode)
+			l.Error("skipping retry",
+				slog.String("status", status))
+			return true, errors.New(status)
 		}
 
 		l.Error("retrying")
-		return rtn, err
+		return false, err
 	})
 	return httpresp, err
 }
