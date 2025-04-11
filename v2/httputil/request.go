@@ -132,7 +132,7 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 			if output != nil {
 				err = request.Unmarshaler(httpresp.Body, &output)
 				if err != nil {
-					return true, fmt.Errorf("could not marshal %w", err)
+					return true, fmt.Errorf("could not unmarshal %w", err)
 				}
 			}
 			return true, nil
