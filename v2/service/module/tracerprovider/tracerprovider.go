@@ -212,7 +212,7 @@ func WithGRPCExporter(endpoint string, credentials credentials.TransportCredenti
 // Set token to empty if not needed. Insecure disables TLS.
 func WithHTTPExporter(endpoint string, token string, insecure bool) Opt {
 	return func(tp *TracerProvider) error {
-		if token != "" && !(strings.HasPrefix(strings.ToLower(token), "apikey ") || strings.HasPrefix(strings.ToLower(token), "bearer ")) {
+		if token != "" && !strings.HasPrefix(strings.ToLower(token), "apikey ") && !strings.HasPrefix(strings.ToLower(token), "bearer ") {
 			return ErrInvalidToken
 		}
 		tp.http.endpoint = endpoint
