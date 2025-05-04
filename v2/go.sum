@@ -276,8 +276,8 @@ github.com/ebitengine/purego v0.8.2 h1:jPPGWs2sZ1UgOSgD2bClL0MJIqu58nOmIcBuXr62z
 github.com/ebitengine/purego v0.8.2/go.mod h1:iIjxzd6CiRiOG0UyXP+V1+jWqUXVjPKLAI0mRfJZTmQ=
 github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203 h1:XBBHcIb256gUJtLmY22n99HaZTz+r2Z51xUPi01m3wg=
 github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203/go.mod h1:E1jcSv8FaEny+OP/5k9UxZVw9YFWGj7eI4KR/iOBqCg=
-github.com/elisasre/mageutil v1.10.2 h1:i5GGvbghTFoMfNCwGLri3FL1vLrQxfteKTdFO7uX+PA=
-github.com/elisasre/mageutil v1.10.2/go.mod h1:0cMZzJFaeGYCACodeeymtqJslSgzDGpUt+voZniPxGE=
+github.com/elisasre/mageutil v1.10.3 h1:GxR3mGTiweyfWsgfqF73WDUXZKZCUOySye3B3OrkfPw=
+github.com/elisasre/mageutil v1.10.3/go.mod h1:7sduTs8cqR4Kxg2+jMZf55E0b78hlB1kEkJs3CY4D/o=
 github.com/emicklei/go-restful/v3 v3.11.0 h1:rAQeMHw1c7zTmncogyy8VvRZwtkmkZ4FxERmMY4rD+g=
 github.com/emicklei/go-restful/v3 v3.11.0/go.mod h1:6n3XBCmQQb25CM2LCACGz8ukIrRry+4bhvbpWn3mrbc=
 github.com/erikstmartin/go-testdb v0.0.0-20160219214506-8d10e4a1bae5/go.mod h1:a2zkGnVExMxdzMo3M0Hi/3sEU+cWnZpSni0O6/Yb/P0=
