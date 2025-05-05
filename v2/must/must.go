@@ -37,6 +37,13 @@ func NewRequest(t T, method, url string, body io.Reader) *http.Request {
 	return req
 }
 
+func MarshalIndent(t T, v interface{}) []byte {
+	t.Helper()
+	b, err := json.MarshalIndent(v, "", "    ")
+	require.NoError(t, err)
+	return b
+}
+
 func Marshal(t T, v interface{}) []byte {
 	t.Helper()
 	b, err := json.Marshal(v)
