@@ -36,7 +36,7 @@ require (
 	golang.org/x/oauth2 v0.29.0
 	google.golang.org/grpc v1.72.0
 	gorm.io/driver/postgres v1.5.11
-	gorm.io/gorm v1.26.0
+	gorm.io/gorm v1.26.1
 	k8s.io/apimachinery v0.31.3
 	k8s.io/client-go v0.31.3
 )
