@@ -6,7 +6,7 @@ toolchain go1.24.4
 
 require (
 	github.com/alicebob/miniredis/v2 v2.35.0
-	github.com/aws/aws-sdk-go-v2 v1.36.3
+	github.com/aws/aws-sdk-go-v2 v1.36.4
 	github.com/aws/aws-sdk-go-v2/config v1.29.15
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.11
 	github.com/elisasre/mageutil v1.10.4
