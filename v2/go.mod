@@ -11,7 +11,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.13
 	github.com/elisasre/mageutil v1.10.4
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/getsentry/sentry-go v0.34.0
+	github.com/getsentry/sentry-go v0.34.1
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
