@@ -22,9 +22,9 @@ require (
 	github.com/redis/go-redis/v9 v9.11.0
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.10.0
-	github.com/testcontainers/testcontainers-go v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/compose v0.37.0
-	github.com/testcontainers/testcontainers-go/modules/postgres v0.37.0
+	github.com/testcontainers/testcontainers-go v0.38.0
+	github.com/testcontainers/testcontainers-go/modules/compose v0.38.0
+	github.com/testcontainers/testcontainers-go/modules/postgres v0.38.0
 	github.com/urfave/cli/v2 v2.27.7
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.62.0
 	go.opentelemetry.io/otel v1.37.0
@@ -135,13 +135,13 @@ require (
 	github.com/docker/cli-docs-tool v0.9.0 // indirect
 	github.com/docker/compose/v2 v2.35.0 // indirect
 	github.com/docker/distribution v2.8.3+incompatible // indirect
-	github.com/docker/docker v28.0.4+incompatible // indirect
+	github.com/docker/docker v28.2.2+incompatible // indirect
 	github.com/docker/docker-credential-helpers v0.8.2 // indirect
 	github.com/docker/go v1.5.1-1.0.20160303222718-d30aec9fd63c // indirect
 	github.com/docker/go-connections v0.5.0 // indirect
 	github.com/docker/go-metrics v0.0.1 // indirect
 	github.com/docker/go-units v0.5.0 // indirect
-	github.com/ebitengine/purego v0.8.2 // indirect
+	github.com/ebitengine/purego v0.8.4 // indirect
 	github.com/eiannone/keyboard v0.0.0-20220611211555-0d226195f203 // indirect
 	github.com/emicklei/go-restful/v3 v3.11.0 // indirect
 	github.com/ettle/strcase v0.2.0 // indirect
@@ -264,6 +264,7 @@ require (
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/moby/buildkit v0.20.1 // indirect
 	github.com/moby/docker-image-spec v1.3.1 // indirect
+	github.com/moby/go-archive v0.1.0 // indirect
 	github.com/moby/locker v1.0.1 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
 	github.com/moby/spdystream v0.5.0 // indirect
@@ -273,7 +274,7 @@ require (
 	github.com/moby/sys/sequential v0.6.0 // indirect
 	github.com/moby/sys/signal v0.7.1 // indirect
 	github.com/moby/sys/symlink v0.3.0 // indirect
-	github.com/moby/sys/user v0.3.0 // indirect
+	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
 	github.com/moby/term v0.5.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
@@ -322,7 +323,7 @@ require (
 	github.com/securego/gosec/v2 v2.22.3 // indirect
 	github.com/serialx/hashring v0.0.0-20200727003509-22c0c7ab6b1b // indirect
 	github.com/shibumi/go-pathspec v1.3.0 // indirect
-	github.com/shirou/gopsutil/v4 v4.25.3 // indirect
+	github.com/shirou/gopsutil/v4 v4.25.5 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sivchari/containedctx v1.0.3 // indirect
 	github.com/skratchdot/open-golang v0.0.0-20200116055534-eef842397966 // indirect
