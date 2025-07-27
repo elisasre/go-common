@@ -9,7 +9,7 @@ require (
 	github.com/aws/aws-sdk-go-v2 v1.36.6
 	github.com/aws/aws-sdk-go-v2/config v1.29.18
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.5.14
-	github.com/elisasre/mageutil v1.10.4
+	github.com/elisasre/mageutil v1.10.5
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/getsentry/sentry-go v0.34.1
 	github.com/gin-gonic/gin v1.10.1
