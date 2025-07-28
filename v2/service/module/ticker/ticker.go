@@ -2,6 +2,7 @@
 package ticker
 
 import (
+	"context"
 	"fmt"
 	"time"
 )
@@ -12,20 +13,23 @@ var (
 )
 
 type Ticker struct {
-	t       *time.Ticker
-	stopped chan struct{}
-	fn      func() error
-	opts    []Opt
+	t      *time.Ticker
+	cancel func()
+	// required to avoid concurrency issues, only used privately
+	ctx  context.Context //nolint: containedctx
+	fn   func(ctx context.Context) error
+	opts []Opt
 }
 
 // New creates ticker with given options.
 // WithInterval and WithFunc options are mandatory.
 func New(opts ...Opt) *Ticker {
-	return &Ticker{opts: opts}
+	return &Ticker{opts: opts, cancel: func() {}}
 }
 
 func (t *Ticker) Init() error {
-	t.stopped = make(chan struct{})
+	t.ctx, t.cancel = context.WithCancel(context.Background())
+
 	for _, opt := range t.opts {
 		if err := opt(t); err != nil {
 			return fmt.Errorf("ticker.Ticker Option error: %w", err)
@@ -46,17 +50,17 @@ func (t *Ticker) Run() error {
 	for {
 		select {
 		case <-t.t.C:
-			if err := t.fn(); err != nil {
+			if err := t.fn(t.ctx); err != nil {
 				return err
 			}
-		case <-t.stopped:
+		case <-t.ctx.Done():
 			return nil
 		}
 	}
 }
 
 func (t *Ticker) Stop() error {
-	defer close(t.stopped)
+	t.cancel()
 	t.t.Stop()
 	return nil
 }
@@ -75,6 +79,15 @@ func WithInterval(d time.Duration) Opt {
 }
 
 func WithFunc(fn func() error) Opt {
+	return func(t *Ticker) error {
+		t.fn = func(context.Context) error {
+			return fn()
+		}
+		return nil
+	}
+}
+
+func WithFuncContext(fn func(context.Context) error) Opt {
 	return func(t *Ticker) error {
 		t.fn = fn
 		return nil
