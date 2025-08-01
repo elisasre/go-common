@@ -43,6 +43,7 @@ func TestServer(t *testing.T) {
 	srv := httpserver.New(
 		httpserver.WithServer(&http.Server{ReadHeaderTimeout: time.Second}),
 		httpserver.WithAddr("127.0.0.1:0"),
+		httpserver.WithName("test-server"),
 		httpserver.WithHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprint(w, "Hello")
 		})),
@@ -54,6 +55,7 @@ func TestServer(t *testing.T) {
 	wg.Go(srv.Run)
 
 	assertGet(t, srv.URL(), "Hello")
+	assert.Equal(t, "test-server", srv.Name())
 
 	assert.NoError(t, srv.Stop())
 	err := wg.Wait().ErrorOrNil()
