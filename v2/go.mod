@@ -14,7 +14,7 @@ require (
 	github.com/getsentry/sentry-go v0.35.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-redis/redis_rate/v10 v10.0.1
-	github.com/golang-jwt/jwt/v5 v5.2.3
+	github.com/golang-jwt/jwt/v5 v5.3.0
 	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.10.9
