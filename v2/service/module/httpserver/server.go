@@ -18,12 +18,14 @@ type Server struct {
 	shutdownTimeout time.Duration
 	opts            []Opt
 	url             string
+	name            string
 }
 
 // New creates Server module with given options.
 func New(opts ...Opt) *Server {
 	return &Server{
 		opts: opts,
+		name: "httpserver.Server",
 	}
 }
 
@@ -75,13 +77,21 @@ func (s *Server) Stop() error {
 }
 
 func (s *Server) Name() string {
-	return "httpserver.Server"
+	return s.name
 }
 
 // WithServer sets http.Server for module.
 func WithServer(srv *http.Server) Opt {
 	return func(s *Server) error {
 		s.srv = srv
+		return nil
+	}
+}
+
+// WithName sets server name.
+func WithName(name string) Opt {
+	return func(s *Server) error {
+		s.name = name
 		return nil
 	}
 }
