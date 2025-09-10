@@ -117,6 +117,13 @@ func TestMakeTransaction(t *testing.T) {
 }
 
 func TestErrorDoesntPanic(t *testing.T) {
+	ctx := context.Background()
 	err := fmt.Errorf("test error")
-	Error(context.Background(), err)
+
+	Error(ctx, err)
+
+	ErrorUnlessIgnored(ctx, err)
+	ErrorUnlessIgnored(ctx, nil)
+	ErrorUnlessIgnored(ctx, context.Canceled)
+	ErrorUnlessIgnored(ctx, context.DeadlineExceeded, context.Canceled, context.DeadlineExceeded)
 }

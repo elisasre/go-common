@@ -2,6 +2,7 @@ package sentryutil
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"log/slog"
@@ -30,6 +31,25 @@ func RecoverWithContext(ctx context.Context, transaction *sentry.Span) {
 
 // Error sends error to Sentry.
 func Error(ctx context.Context, err error) {
+	ErrorUnlessIgnored(ctx, err)
+}
+
+// ErrorIgnore sends error to Sentry unless error is in ignoredErrs.
+func ErrorUnlessIgnored(ctx context.Context, err error, ignoredErrs ...error) {
+	if err == nil {
+		return
+	}
+
+	if len(ignoredErrs) == 0 {
+		ignoredErrs = []error{context.Canceled}
+	}
+
+	for _, ignore := range ignoredErrs {
+		if errors.Is(err, ignore) {
+			return
+		}
+	}
+
 	_, hub := setHubToContext(ctx)
 	hub.CaptureException(err)
 	slog.Error(err.Error()) //nolint: sloglint
