@@ -1,24 +1,18 @@
 version: 2
 updates:
-- package-ecosystem: "github-actions"
-  directory: "/"
-  schedule:
-    interval: "weekly"
-    day: "sunday"
-- package-ecosystem: "gomod"
-  directory: "/v2/"
-  schedule:
-    interval: "weekly"
-    day: "sunday"
-  ignore:
-    - dependency-name: "k8s.io/*"
-  groups:
-    github.com/testcontainers:
-      patterns:
-      - "github.com/testcontainers/*"
-    go.opentelemetry.io:
-      patterns:
-      - "go.opentelemetry/*"
-    github.com/aws/aws-sdk-go-v2:
-      patterns:
-      - "github.com/aws/aws-sdk-go-v2/*"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+  - package-ecosystem: "gomod"
+    directory: "/v2/"
+    schedule:
+      interval: "weekly"
+      day: "sunday"
+    ignore:
+      - dependency-name: "k8s.io/*"
+    groups:
+      all:
+        patterns:
+          - "*"
