@@ -34,6 +34,7 @@ const (
 var ignoreMethods = []string{"GET", "HEAD", "OPTIONS", "TRACE"}
 
 // New creates new CSRF middleware for gin.
+// Deprecated: Use NewV2.
 func New(excludePaths []string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// allow machineuser
@@ -116,6 +117,36 @@ func New(excludePaths []string) gin.HandlerFunc {
 		// process request
 		c.Next()
 	}
+}
+
+// NewV2 creates new CSRF middleware for gin using Go 1.25's built-in CrossOriginProtection.
+// trustedOrigins should contain the list of trusted origins (e.g., "https://example.com").
+// excludePaths contains URL patterns that should bypass CSRF protection.
+func NewV2(trustedOrigins []string, excludePaths []string) (gin.HandlerFunc, error) {
+	cop := http.NewCrossOriginProtection()
+	for _, origin := range trustedOrigins {
+		if err := cop.AddTrustedOrigin(origin); err != nil {
+			return nil, fmt.Errorf("failed to add '%s' as trustedOrigin: %w", origin, err)
+		}
+	}
+
+	for _, path := range excludePaths {
+		cop.AddInsecureBypassPattern(path)
+	}
+
+	return func(c *gin.Context) {
+		// allow machineuser
+		if isAPIUser(c) {
+			c.Next()
+			return
+		}
+
+		if err := cop.Check(c.Request); err != nil {
+			c.AbortWithStatusJSON(http.StatusForbidden, httputil.ErrorResponse{Code: 403, Message: err.Error()})
+			return
+		}
+		c.Next()
+	}, nil
 }
 
 // RandomToken returns random sha256 string.
