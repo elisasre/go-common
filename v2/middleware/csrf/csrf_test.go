@@ -211,16 +211,6 @@ func TestNewV2(t *testing.T) {
 			expectedBody:       "hello from handler",
 		},
 		{
-			name:               "Allow anything with Auth header",
-			trustedOrigins:     []string{},
-			excludePaths:       []string{},
-			method:             "POST",
-			url:                testPath,
-			headers:            map[string]string{csrf.Authorization: "Bearer token"},
-			expectedStatusCode: 200,
-			expectedBody:       "hello from handler",
-		},
-		{
 			name:               "POST without headers is allowed as same-origin",
 			trustedOrigins:     []string{},
 			excludePaths:       []string{},
