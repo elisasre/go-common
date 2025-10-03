@@ -135,12 +135,6 @@ func NewV2(trustedOrigins []string, excludePaths []string) (gin.HandlerFunc, err
 	}
 
 	return func(c *gin.Context) {
-		// allow machineuser
-		if isAPIUser(c) {
-			c.Next()
-			return
-		}
-
 		if err := cop.Check(c.Request); err != nil {
 			c.AbortWithStatusJSON(http.StatusForbidden, httputil.ErrorResponse{Code: 403, Message: err.Error()})
 			return
