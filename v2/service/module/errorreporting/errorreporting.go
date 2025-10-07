@@ -10,7 +10,8 @@ type ErrorReportingClient interface {
 }
 
 type ErrorReporting struct {
-	client ErrorReportingClient
+	client  ErrorReportingClient
+	stopped chan struct{}
 }
 
 type Opt func(*ErrorReporting)
@@ -36,14 +37,19 @@ func (er *ErrorReporting) Init() error {
 		return errors.New("error reporting client not provided")
 	}
 
+	er.stopped = make(chan struct{})
+
 	return nil
 }
 
 func (er *ErrorReporting) Run() error {
+	<-er.stopped
 	return nil
 }
 
 func (er *ErrorReporting) Stop() error {
+	close(er.stopped)
+
 	return er.client.Close()
 }
 
