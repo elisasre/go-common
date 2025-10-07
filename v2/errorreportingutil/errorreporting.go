@@ -192,7 +192,8 @@ func Init(ctx context.Context, opts ...Opt) (*errorreporting.Client, error) {
 			cfg.OnError = er.onErrFunc
 		}
 
-		c, err := errorreporting.NewClient(ctx, er.projectID, cfg)
+		var err error
+		c, err = errorreporting.NewClient(ctx, er.projectID, cfg)
 		if err != nil {
 			return nil, err
 		}
