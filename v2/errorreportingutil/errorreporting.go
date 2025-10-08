@@ -2,12 +2,14 @@
 package errorreportingutil
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
 	"log/slog"
 	"net/http"
 	"runtime/debug"
+	"strings"
 	"sync"
 
 	"github.com/elisasre/go-common/v2"
@@ -125,6 +127,30 @@ func getUserFromCtx(ctx context.Context) string {
 	return ""
 }
 
+func captureStackTrace() []byte {
+	stack := debug.Stack()
+	lines := bytes.Split(stack, []byte("\n"))
+	var filtered [][]byte
+
+	// Keep goroutine header and filter out errorreportingutil and debug.Stack frames
+	for i := 0; i < len(lines); i++ {
+		line := lines[i]
+		lineStr := string(line)
+
+		if strings.Contains(lineStr, "errorreportingutil") || strings.Contains(lineStr, "runtime/debug") {
+			// Skip the function line and the next line (file path)
+			if i+1 < len(lines) {
+				i++
+			}
+			continue
+		}
+
+		filtered = append(filtered, line)
+	}
+
+	return bytes.Join(filtered, []byte("\n"))
+}
+
 // Error reports an error and tries to populate request and user information from context.
 // Request parsing works if passed context is a Gin context.
 func Error(ctx context.Context, err error) {
@@ -136,16 +162,22 @@ func Error(ctx context.Context, err error) {
 	}
 
 	user := getUserFromCtx(ctx)
+	stack := captureStackTrace()
 
 	Report(errorreporting.Entry{
 		Error: err,
 		Req:   req,
 		User:  user,
+		Stack: stack,
 	})
 }
 
 // Report an error unless specifically ignored.
 func Report(entry errorreporting.Entry) {
+	// Capture stack trace if not already provided
+	if entry.Stack == nil {
+		entry.Stack = captureStackTrace()
+	}
 	ReportUnlessIgnored(entry)
 }
 
@@ -159,7 +191,7 @@ func Recover() {
 			err = fmt.Errorf("panic: %v", r)
 		}
 
-		stack := debug.Stack()
+		stack := captureStackTrace()
 
 		Report(errorreporting.Entry{
 			Error: err,
@@ -192,7 +224,8 @@ func Init(ctx context.Context, opts ...Opt) (*errorreporting.Client, error) {
 			cfg.OnError = er.onErrFunc
 		}
 
-		c, err := errorreporting.NewClient(ctx, er.projectID, cfg)
+		var err error
+		c, err = errorreporting.NewClient(ctx, er.projectID, cfg)
 		if err != nil {
 			return nil, err
 		}

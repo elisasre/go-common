@@ -145,7 +145,7 @@ func TestRecover_ErrorPanic(t *testing.T) {
 	assert.Equal(t, testErr, mock.reported[0].Error)
 	assert.NotEmpty(t, mock.reported[0].Stack)
 	stackStr := string(mock.reported[0].Stack)
-	assert.Contains(t, stackStr, "errorreportingutil", "stack trace should contain package name")
+	assert.NotContains(t, stackStr, "errorreportingutil", "stack trace should not contain errorreportingutil frames")
 }
 
 func TestRecover_NoPanic(t *testing.T) {
@@ -179,6 +179,49 @@ func TestReport(t *testing.T) {
 
 	require.Len(t, mock.reported, 1)
 	assert.Equal(t, "test error", mock.reported[0].Error.Error())
+	assert.NotEmpty(t, mock.reported[0].Stack, "should capture stack trace when not provided")
+
+	stackStr := string(mock.reported[0].Stack)
+	assert.NotContains(t, stackStr, "errorreportingutil", "stack trace should not contain errorreportingutil frames")
+}
+
+func TestReport_WithStackProvided(t *testing.T) {
+	mock := &mockErrorClient{}
+	_, err := eutil.Init(
+		context.Background(),
+		eutil.WithProjectID("12345"),
+		eutil.WithClient(mock),
+	)
+	require.NoError(t, err)
+
+	testErr := errors.New("test error")
+	providedStack := []byte("custom stack trace")
+	eutil.Report(errorreporting.Entry{Error: testErr, Stack: providedStack})
+
+	require.Len(t, mock.reported, 1)
+	assert.Equal(t, "test error", mock.reported[0].Error.Error())
+	assert.Equal(t, providedStack, mock.reported[0].Stack, "should preserve provided stack trace")
+}
+
+func TestError_StackTrace(t *testing.T) {
+	mock := &mockErrorClient{}
+	_, err := eutil.Init(
+		context.Background(),
+		eutil.WithProjectID("12345"),
+		eutil.WithClient(mock),
+	)
+	require.NoError(t, err)
+
+	testErr := errors.New("test error")
+	eutil.Error(context.Background(), testErr)
+
+	require.Len(t, mock.reported, 1)
+	entry := mock.reported[0]
+	assert.NotEmpty(t, entry.Stack, "should capture stack trace")
+
+	stackStr := string(entry.Stack)
+	assert.NotContains(t, stackStr, "errorreportingutil", "stack trace should not contain errorreportingutil frames")
+	assert.Contains(t, stackStr, "testing", "stack trace should contain testing frames")
 }
 
 func TestError(t *testing.T) {
