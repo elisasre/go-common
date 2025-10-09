@@ -17,3 +17,7 @@ target/
 
 # editors
 .idea
+
+# llm
+.claude
+.cursor
