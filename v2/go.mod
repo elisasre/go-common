@@ -2,7 +2,7 @@ module github.com/elisasre/go-common/v2
 
 go 1.24.0
 
-toolchain go1.25.2
+toolchain go1.25.3
 
 require (
 	cloud.google.com/go/errorreporting v0.3.2
