@@ -1,10 +1,17 @@
 package httpserver_test
 
 import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
 	"crypto/tls"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 	"testing"
 	"time"
@@ -37,6 +44,85 @@ func TestHTTPS(t *testing.T) {
 	err := srv.Init()
 	require.NoError(t, err)
 	require.Contains(t, srv.URL(), "https://127.0.0.1:")
+}
+
+func TestHTTPSWithRequest(t *testing.T) {
+	tlsConfig := generateTLSConfig(t)
+
+	srv := httpserver.New(
+		httpserver.WithAddr("127.0.0.1:0"),
+		httpserver.WithTLSConfig(tlsConfig),
+		httpserver.WithHandler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			fmt.Fprint(w, "Hello HTTPS")
+		})),
+	)
+
+	require.NoError(t, srv.Init())
+	require.Contains(t, srv.URL(), "https://127.0.0.1:")
+
+	wg := &multierror.Group{}
+	wg.Go(srv.Run)
+
+	// Create HTTP client that skips certificate verification for testing
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, //nolint:gosec
+		},
+	}
+	resp, err := client.Get(srv.URL())
+	require.NoError(t, err)
+
+	data, err := io.ReadAll(resp.Body)
+	require.NoError(t, err)
+	require.NoError(t, resp.Body.Close())
+	assert.Equal(t, "Hello HTTPS", string(data))
+
+	assert.NoError(t, srv.Stop())
+	err = wg.Wait().ErrorOrNil()
+	require.NoError(t, err)
+}
+
+// generateTLSConfig creates a self-signed certificate for testing.
+func generateTLSConfig(t *testing.T) *tls.Config {
+	t.Helper()
+
+	// Generate private key
+	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	require.NoError(t, err)
+
+	// Create certificate template
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			Organization: []string{"Test Co"},
+		},
+		NotBefore:             time.Now(),
+		NotAfter:              time.Now().Add(time.Hour),
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	// Create self-signed certificate
+	certDER, err := x509.CreateCertificate(rand.Reader, &template, &template, &privateKey.PublicKey, privateKey)
+	require.NoError(t, err)
+
+	// Encode certificate to PEM
+	certPEM := pem.EncodeToMemory(&pem.Block{Type: "CERTIFICATE", Bytes: certDER})
+
+	// Encode private key to PEM
+	privateKeyBytes, err := x509.MarshalECPrivateKey(privateKey)
+	require.NoError(t, err)
+	keyPEM := pem.EncodeToMemory(&pem.Block{Type: "EC PRIVATE KEY", Bytes: privateKeyBytes})
+
+	// Create TLS certificate
+	cert, err := tls.X509KeyPair(certPEM, keyPEM)
+	require.NoError(t, err)
+
+	return &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS12,
+	}
 }
 
 func TestServer(t *testing.T) {
