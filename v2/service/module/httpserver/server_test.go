@@ -82,7 +82,7 @@ func TestHTTPSWithRequest(t *testing.T) {
 	require.NoError(t, err)
 }
 
-// generateTLSConfig creates a self-signed certificate for testing
+// generateTLSConfig creates a self-signed certificate for testing.
 func generateTLSConfig(t *testing.T) *tls.Config {
 	t.Helper()
 
@@ -121,6 +121,7 @@ func generateTLSConfig(t *testing.T) *tls.Config {
 
 	return &tls.Config{
 		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS12,
 	}
 }
 

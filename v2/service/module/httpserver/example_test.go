@@ -28,6 +28,7 @@ func ExampleNew_https() {
 
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
+		MinVersion:   tls.VersionTLS12,
 	}
 
 	httpserver.New(
