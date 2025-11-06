@@ -3,6 +3,7 @@ package httpserver
 
 import (
 	"context"
+	"crypto/tls"
 	"errors"
 	"fmt"
 	"net"
@@ -60,9 +61,14 @@ func (s *Server) URL() string {
 	return s.url
 }
 
-// Run starts serving http request and can be called after initialization.
+// Run starts serving http/https request and can be called after initialization.
 func (s *Server) Run() error {
-	err := s.srv.Serve(s.ln)
+	var err error
+	if s.srv.TLSConfig != nil {
+		err = s.srv.ServeTLS(s.ln, "", "")
+	} else {
+		err = s.srv.Serve(s.ln)
+	}
 	if err != nil && !errors.Is(err, http.ErrServerClosed) {
 		return err
 	}
@@ -116,6 +122,14 @@ func WithHandler(h http.Handler) Opt {
 func WithShutdownTimeout(d time.Duration) Opt {
 	return func(s *Server) error {
 		s.shutdownTimeout = d
+		return nil
+	}
+}
+
+// WithTLSConfig sets http.Server.TLSConfig.
+func WithTLSConfig(tlsConfig *tls.Config) Opt {
+	return func(s *Server) error {
+		s.srv.TLSConfig = tlsConfig
 		return nil
 	}
 }
