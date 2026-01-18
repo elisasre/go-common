@@ -31,6 +31,11 @@ type Request struct {
 	StopRetryCodes         []int
 	Unmarshaler            func(data []byte, v any) error
 	RetryOnContextDeadline bool
+	// ShouldRetry allows custom retry logic that can override StopRetryCodes behavior.
+	// If provided, this function is called when a StopRetryCode is encountered.
+	// Return true to continue retrying despite the stop code, false to stop as normal.
+	// Parameters: resp is the full response (can be nil on network errors).
+	ShouldRetry func(resp *Response) bool
 }
 
 // Response contains basic fields extracted from http.Response.
@@ -136,7 +141,15 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 				}
 			}
 			return true, nil
-		} else if slices.Contains(request.StopRetryCodes, resp.StatusCode) {
+		}
+
+		if slices.Contains(request.StopRetryCodes, resp.StatusCode) {
+			// Check if custom retry logic wants to override the stop behavior
+			if request.ShouldRetry != nil && request.ShouldRetry(httpresp) {
+				l.Warn("custom retry logic overriding stop retry code",
+					slog.Int("status_code", resp.StatusCode))
+				return false, err // Continue retrying
+			}
 			status := http.StatusText(resp.StatusCode)
 			l.Error("skipping retry",
 				slog.String("status", status))
