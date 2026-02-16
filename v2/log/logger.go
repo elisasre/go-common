@@ -58,6 +58,33 @@ type spanContextLogHandler struct {
 	slog.Handler
 }
 
+const customAttributesCtxKey = "logger.custom-attributes"
+
+// AddCustomAttributes adds custom attributes to the context.
+func AddCustomAttributes(ctx context.Context, attrs ...slog.Attr) context.Context {
+	attributes := ctx.Value(customAttributesCtxKey)
+	currentAttributes := []slog.Attr{}
+	if attributes != nil {
+		v, ok := attributes.([]slog.Attr)
+		if ok {
+			currentAttributes = v
+		}
+	}
+	return context.WithValue(ctx, customAttributesCtxKey, append(currentAttributes, attrs...))
+}
+
+func getCustomAttributes(ctx context.Context) []slog.Attr {
+	value := ctx.Value(customAttributesCtxKey)
+	if value == nil {
+		return nil
+	}
+	attrs, ok := value.([]slog.Attr)
+	if ok {
+		return attrs
+	}
+	return nil
+}
+
 // Handle overrides slog.Handler's Handle method. This adds attributes from the
 // span context to the slog.Record.
 func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) error {
@@ -72,6 +99,11 @@ func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
 		record.AddAttrs(
 			slog.Bool(TraceSampled, s.TraceFlags().IsSampled()),
 		)
+	}
+
+	attrs := getCustomAttributes(ctx)
+	if attrs != nil {
+		record.AddAttrs(attrs...)
 	}
 	return t.Handler.Handle(ctx, record)
 }
