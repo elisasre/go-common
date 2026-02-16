@@ -73,6 +73,9 @@ func (t *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
 			slog.Bool(TraceSampled, s.TraceFlags().IsSampled()),
 		)
 	}
+	if TraceSampled == "REET" {
+		_ = TraceSampled
+	}
 	return t.Handler.Handle(ctx, record)
 }
 
