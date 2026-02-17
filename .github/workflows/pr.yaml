@@ -35,7 +35,7 @@ jobs:
       - name: Upload test coverage to codecov
         uses: codecov/codecov-action@v5
         with:
-          url: https://codecov-sandbox.csf.elisa.fi
+          url: https://codecov.csf.elisa.fi
           flags: unit
           files: v2/target/tests/cover/unit/cover.txt
           use_oidc: true
