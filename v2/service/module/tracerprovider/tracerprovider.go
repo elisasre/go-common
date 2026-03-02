@@ -38,6 +38,7 @@ type ExporterHTTP struct {
 type ExporterGRPC struct {
 	endpoint    string
 	credentials credentials.TransportCredentials
+	dialOptions []grpc.DialOption
 }
 
 type TracerProvider struct {
@@ -150,9 +151,12 @@ func (tp *TracerProvider) createGRPCExporter() (*otlptrace.Exporter, error) {
 	slog.Debug("using grpc exporter",
 		slog.String("endpoint", tp.grpc.endpoint),
 	)
+	dialOpts := append([]grpc.DialOption{
+		grpc.WithTransportCredentials(tp.grpc.credentials),
+	}, tp.grpc.dialOptions...)
 	conn, err := grpc.NewClient(
 		tp.grpc.endpoint,
-		grpc.WithTransportCredentials(tp.grpc.credentials),
+		dialOpts...,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create grpc connection to collector: %w", err)
@@ -203,6 +207,15 @@ func WithGRPCExporter(endpoint string, credentials credentials.TransportCredenti
 	return func(tp *TracerProvider) error {
 		tp.grpc.endpoint = endpoint
 		tp.grpc.credentials = credentials
+		return nil
+	}
+}
+
+// WithGRPCDialOptions appends additional gRPC dial options to the gRPC exporter connection.
+// This can be used to configure e.g. OAuth2 credentials, interceptors, or keepalive settings.
+func WithGRPCDialOptions(opts ...grpc.DialOption) Opt {
+	return func(tp *TracerProvider) error {
+		tp.grpc.dialOptions = append(tp.grpc.dialOptions, opts...)
 		return nil
 	}
 }

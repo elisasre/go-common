@@ -8,6 +8,7 @@ import (
 	"github.com/elisasre/go-common/v2/service/module/tracerprovider"
 	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/require"
+	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
 
@@ -15,6 +16,25 @@ func TestTracerProviderGRPC(t *testing.T) {
 	tp := tracerprovider.New(
 		tracerprovider.WithSamplePercentage(42),
 		tracerprovider.WithGRPCExporter("localhost:4317", insecure.NewCredentials()),
+		tracerprovider.WithContext(context.Background()),
+		tracerprovider.WithServiceName("test"),
+		tracerprovider.WithEnvironment("development"),
+		tracerprovider.WithProcessor(tracerprovider.ProcessorBatch),
+		tracerprovider.WithIgnore([]string{"/foo", "/bar"}),
+	)
+	require.NoError(t, tp.Init())
+	wg := &multierror.Group{}
+	wg.Go(tp.Run)
+	require.NoError(t, tp.Stop())
+	require.NoError(t, wg.Wait().ErrorOrNil())
+	require.Equal(t, "otel.TracerProvider", tp.Name())
+}
+
+func TestTracerProviderGRPCWithDialOptions(t *testing.T) {
+	tp := tracerprovider.New(
+		tracerprovider.WithSamplePercentage(42),
+		tracerprovider.WithGRPCExporter("localhost:4317", insecure.NewCredentials()),
+		tracerprovider.WithGRPCDialOptions(grpc.WithUserAgent("test-agent")),
 		tracerprovider.WithContext(context.Background()),
 		tracerprovider.WithServiceName("test"),
 		tracerprovider.WithEnvironment("development"),
