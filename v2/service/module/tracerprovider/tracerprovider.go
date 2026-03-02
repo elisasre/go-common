@@ -46,6 +46,7 @@ type TracerProvider struct {
 	ctx              context.Context //nolint:containedctx
 	serviceName      attribute.KeyValue
 	environment      attribute.KeyValue
+	customAttributes []attribute.KeyValue
 	resource         *resource.Resource
 	processorName    string
 	batchProcessor   trace.SpanProcessor
@@ -75,11 +76,14 @@ func (tp *TracerProvider) Init() error {
 		tp.ctx = context.Background()
 	}
 
+	attrs := []attribute.KeyValue{
+		tp.serviceName,
+		tp.environment,
+	}
+	attrs = append(attrs, tp.customAttributes...)
+
 	res, err := resource.New(tp.ctx,
-		resource.WithAttributes(
-			tp.serviceName,
-			tp.environment,
-		),
+		resource.WithAttributes(attrs...),
 	)
 	if err != nil {
 		return fmt.Errorf("failed to create resource: %w", err)
@@ -279,6 +283,15 @@ func WithProcessor(processorName string) Opt {
 func WithIgnore(ignoreSpans []string) Opt {
 	return func(tp *TracerProvider) error {
 		tp.ignoreSpans = ignoreSpans
+		return nil
+	}
+}
+
+// WithAttributes appends custom resource attributes to the tracer provider.
+// These are added alongside the service name and environment attributes.
+func WithAttributes(attrs ...attribute.KeyValue) Opt {
+	return func(tp *TracerProvider) error {
+		tp.customAttributes = append(tp.customAttributes, attrs...)
 		return nil
 	}
 }
