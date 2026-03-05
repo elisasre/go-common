@@ -178,7 +178,7 @@ func (h *spanContextLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
 	return &spanContextLogHandler{
 		inner:    h.inner.WithAttrs(attrs),
 		root:     h.root,
-		chain:    append(slices.Clone(h.chain), handlerOp{attrs: attrs}),
+		chain:    append(slices.Clone(h.chain), handlerOp{attrs: slices.Clone(attrs)}),
 		hasGroup: h.hasGroup,
 		traceCtx: h.traceCtx,
 	}

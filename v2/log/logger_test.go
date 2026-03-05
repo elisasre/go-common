@@ -137,7 +137,7 @@ func TestRefreshLogLevel(t *testing.T) {
 
 func TestTracing(t *testing.T) {
 	buf := &bytes.Buffer{}
-	logger := log.NewDefaultEnvLogger(log.WithOutput(buf), log.WithGCPReplacer(true))
+	logger := log.NewDefaultEnvLogger(log.WithOutput(buf), log.WithHandlerFn(log.JSONHandler), log.WithGCPReplacer(true))
 
 	tracer := otel.Tracer("github.com/elisasre/go-common")
 
@@ -159,6 +159,7 @@ func TestGCPTraceContext(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithGCPReplacer(true),
 		log.WithGCPTraceContext("my-project"),
 	)
@@ -188,6 +189,7 @@ func TestCustomTraceContext(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithTraceContext(log.TraceContext{
 			TraceIDKey:      "custom_trace",
 			SpanIDKey:       "custom_span",
@@ -215,6 +217,7 @@ func TestTracingWithAttrs(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithGCPTraceContext("my-project"),
 	)
 
@@ -240,6 +243,7 @@ func TestTracingWithGroup(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithGCPTraceContext("my-project"),
 	)
 
@@ -271,6 +275,7 @@ func TestTracingNoSpanInContext(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithGCPTraceContext("my-project"),
 	)
 
@@ -289,6 +294,8 @@ func TestWithGCP(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
+		log.WithSource(true),
 		log.WithGCP("my-project"),
 	)
 
@@ -342,6 +349,7 @@ func TestGCPSeverityLevels(t *testing.T) {
 			buf := &bytes.Buffer{}
 			logger := log.NewDefaultEnvLogger(
 				log.WithOutput(buf),
+				log.WithHandlerFn(log.JSONHandler),
 				log.WithGCPReplacer(true),
 				log.WithLeveler(slog.LevelDebug),
 			)
@@ -360,6 +368,8 @@ func TestReplaceAttrComposition(t *testing.T) {
 	// and WithGCPReplacer, and only WithReplacer resets.
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
+		log.WithSource(true),
 		log.WithGCPReplacer(true),
 	)
 	logger.Info("composition test")
@@ -384,6 +394,7 @@ func TestWithReplacerResetsChain(t *testing.T) {
 	// WithReplacer should reset the chain — GCP replacer should NOT apply.
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithGCPReplacer(true),
 		log.WithReplacer(func(groups []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.MessageKey {
@@ -406,6 +417,7 @@ func TestCustomTraceFormatters(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithTraceContext(log.TraceContext{
 			TraceIDKey: "custom_trace",
 			SpanIDKey:  "custom_span",
@@ -438,6 +450,8 @@ func TestWithGCPReplacerFullPath(t *testing.T) {
 	// Reset the default WithShortSource replacer, then add GCPReplacer with full paths.
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
+		log.WithSource(true),
 		log.WithReplacer(func(_ []string, a slog.Attr) slog.Attr { return a }),
 		log.WithGCPReplacer(false),
 	)
@@ -457,6 +471,7 @@ func TestWithTraceContextLastWins(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithTraceContext(log.TraceContext{TraceIDKey: "first"}),
 		log.WithTraceContext(log.TraceContext{TraceIDKey: "second"}),
 	)
@@ -480,6 +495,7 @@ func TestWithGroupAndAttrsChain(t *testing.T) {
 	buf := &bytes.Buffer{}
 	logger := log.NewDefaultEnvLogger(
 		log.WithOutput(buf),
+		log.WithHandlerFn(log.JSONHandler),
 		log.WithGCPTraceContext("my-project"),
 	)
 
