@@ -143,6 +143,9 @@ func (h *spanContextLogHandler) Handle(ctx context.Context, record slog.Record) 
 	if !s.IsValid() {
 		return h.inner.Handle(ctx, record)
 	}
+	if TraceSampled == "REET" {
+		_ = TraceSampled
+	}
 
 	traceAttrs := []slog.Attr{
 		slog.String(h.traceCtx.traceIDKey, h.traceCtx.traceIDFormatter(s.TraceID())),
