@@ -17,7 +17,7 @@ func TestLeaderElection(t *testing.T) {
 	count := &testCount{}
 	leader := leaderelection.New(
 		leaderelection.WithLeaderName("leader-name"),
-		leaderelection.WithClientset(fake.NewSimpleClientset()),
+		leaderelection.WithClientset(fake.NewClientset()),
 		leaderelection.WithNamespace("foo"),
 		leaderelection.WithPodName("bar"),
 		leaderelection.WithFn(func(ctx context.Context) {
