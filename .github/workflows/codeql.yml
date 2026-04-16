@@ -26,8 +26,8 @@ jobs:
         - go
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v5
-    - uses: elisa-actions/setup-go-and-mage@v1
+      uses: actions/checkout@v6
+    - uses: elisa-actions/setup-go-and-mage@v2
 
     - name: Install Node.JS 24
       uses: actions/setup-node@v6
