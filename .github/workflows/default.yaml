@@ -21,7 +21,7 @@ jobs:
         with:
           fetch-depth: 1
 
-      - uses: elisa-actions/setup-go-and-mage@v1
+      - uses: elisa-actions/setup-go-and-mage@v2
         with:
           modFile: go.mod
 
