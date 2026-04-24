@@ -151,12 +151,12 @@ func MakeRequest(ctx context.Context, request Request, output interface{}, clien
 				return false, err // Continue retrying
 			}
 			status := http.StatusText(resp.StatusCode)
-			l.Error("skipping retry",
+			l.Warn("skipping retry",
 				slog.String("status", status))
 			return true, errors.New(status)
 		}
 
-		l.Error("retrying")
+		l.Warn("retrying")
 		return false, err
 	})
 	return httpresp, err
