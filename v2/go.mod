@@ -1,6 +1,6 @@
 module github.com/elisasre/go-common/v2
 
-go 1.25.5
+go 1.26.2
 
 require (
 	cloud.google.com/go/errorreporting v0.7.0
