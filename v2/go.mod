@@ -3,14 +3,14 @@ module github.com/elisasre/go-common/v2
 go 1.26.2
 
 require (
-	cloud.google.com/go/errorreporting v0.8.0
+	cloud.google.com/go/errorreporting v0.9.0
 	github.com/alicebob/miniredis/v2 v2.37.0
 	github.com/aws/aws-sdk-go-v2 v1.41.7
 	github.com/aws/aws-sdk-go-v2/config v1.32.17
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.6.23
 	github.com/elisasre/mageutil v1.11.0
-	github.com/fsnotify/fsnotify v1.10.0
-	github.com/getsentry/sentry-go v0.46.1
+	github.com/fsnotify/fsnotify v1.10.1
+	github.com/getsentry/sentry-go v0.46.2
 	github.com/gin-gonic/gin v1.12.0
 	github.com/go-redis/redis_rate/v10 v10.0.1
 	github.com/golang-jwt/jwt/v5 v5.3.1
@@ -33,7 +33,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.43.0
 	go.opentelemetry.io/otel/trace v1.43.0
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/grpc v1.80.0
+	google.golang.org/grpc v1.81.0
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 	k8s.io/apimachinery v0.35.2
