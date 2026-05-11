@@ -2,13 +2,11 @@ package sqlutil
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/feature/rds/auth"
-	"github.com/lib/pq"
 )
 
 type BuildAuthTokenFn func(ctx context.Context,
@@ -47,21 +45,10 @@ func (i *IAMAuth) DSN() (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=%s connect_timeout=10",
-		i.Host, i.Port, i.DBUser, i.DBPassword, i.DBName, i.SSLMode), nil
+		i.Host, i.Port, i.DBUser, quoteDSNValue(i.DBPassword), i.DBName, i.SSLMode), nil
 }
 
 // IsAuthErr checks if given error is know auth error.
 func (*IAMAuth) IsAuthErr(err error) bool {
 	return IsAuthenticationError(err)
-}
-
-// IsAuthenticationError checks if given error is know auth error.
-func IsAuthenticationError(err error) bool {
-	var pqError *pq.Error
-	if errors.As(err, &pqError) {
-		if pqError.Code.Class() == "28" {
-			return true
-		}
-	}
-	return false
 }

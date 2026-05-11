@@ -3,7 +3,11 @@ package sqlutil
 import (
 	"context"
 	"database/sql/driver"
+	"errors"
+	"strings"
 	"sync"
+
+	"github.com/lib/pq"
 )
 
 // AuthProvider is used for refreshing DB credentials.
@@ -64,3 +68,28 @@ func (d *AuthRefreshDriver) Connect(ctx context.Context) (driver.Conn, error) { 
 
 // Driver return pointer to itself.
 func (d *AuthRefreshDriver) Driver() driver.Driver { return d }
+
+// IsAuthenticationError checks if given error is know auth error.
+func IsAuthenticationError(err error) bool {
+	var pqError *pq.Error
+	if errors.As(err, &pqError) {
+		if pqError.Code.Class() == "28" {
+			return true
+		}
+	}
+	return false
+}
+
+// quoteDSNValue quotes a value for use in a PostgreSQL key=value DSN string.
+// Values containing spaces, single quotes, or backslashes are wrapped in
+// single quotes with internal single quotes and backslashes escaped.
+func quoteDSNValue(v string) string {
+	if v == "" {
+		return "''"
+	}
+	if !strings.ContainsAny(v, ` \'`) {
+		return v
+	}
+	replacer := strings.NewReplacer(`\`, `\\`, `'`, `\'`)
+	return "'" + replacer.Replace(v) + "'"
+}
