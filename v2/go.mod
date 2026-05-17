@@ -4,7 +4,7 @@ go 1.26.2
 
 require (
 	cloud.google.com/go/errorreporting v0.9.0
-	github.com/alicebob/miniredis/v2 v2.37.0
+	github.com/alicebob/miniredis/v2 v2.38.0
 	github.com/aws/aws-sdk-go-v2 v1.41.7
 	github.com/aws/aws-sdk-go-v2/config v1.32.17
 	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.6.23
@@ -33,7 +33,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.43.0
 	go.opentelemetry.io/otel/trace v1.43.0
 	golang.org/x/oauth2 v0.36.0
-	google.golang.org/grpc v1.81.0
+	google.golang.org/grpc v1.81.1
 	gorm.io/driver/postgres v1.6.0
 	gorm.io/gorm v1.31.1
 	k8s.io/apimachinery v0.35.2
