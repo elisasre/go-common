@@ -92,6 +92,9 @@ func (l *Leader) Name() string {
 	return "leaderelection.Leader"
 }
 
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (l *Leader) ID() string { return l.Name() }
+
 type Opt func(*Leader) error
 
 func WithClientset(clientSet kubernetes.Interface) Opt {

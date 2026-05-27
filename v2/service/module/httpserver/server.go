@@ -86,6 +86,9 @@ func (s *Server) Name() string {
 	return s.name
 }
 
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (s *Server) ID() string { return s.Name() }
+
 // WithServer sets http.Server for module.
 func WithServer(srv *http.Server) Opt {
 	return func(s *Server) error {

@@ -50,6 +50,9 @@ func (s *Sentry) Name() string {
 	return "sentry.Sentry"
 }
 
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (s *Sentry) ID() string { return s.Name() }
+
 type Opt func(*Sentry) error
 
 // WithIgnoreInitErr causes module to only log init errors instead of preventing the service to start.

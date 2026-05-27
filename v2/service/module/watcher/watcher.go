@@ -78,6 +78,9 @@ func (w *Watcher) Name() string {
 	return "watcher.Watcher"
 }
 
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (w *Watcher) ID() string { return w.Name() }
+
 type Opt func(*Watcher) error
 
 func WithTarget(fileOrDirName string) Opt {

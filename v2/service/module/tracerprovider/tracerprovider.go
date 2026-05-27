@@ -191,6 +191,9 @@ func (tp *TracerProvider) Name() string {
 	return "otel.TracerProvider"
 }
 
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (tp *TracerProvider) ID() string { return tp.Name() }
+
 type Opt func(*TracerProvider) error
 
 // WithSamplePercentage sets the percentage of spans to sample. Allowed values are 0-100.
