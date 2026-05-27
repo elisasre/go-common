@@ -56,3 +56,6 @@ func (er *ErrorReporting) Stop() error {
 func (er *ErrorReporting) Name() string {
 	return "errorreporting.Errorreporting"
 }
+
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (er *ErrorReporting) ID() string { return er.Name() }

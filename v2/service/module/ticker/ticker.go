@@ -69,6 +69,9 @@ func (t *Ticker) Name() string {
 	return "ticker.Ticker"
 }
 
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (t *Ticker) ID() string { return t.Name() }
+
 type Opt func(*Ticker) error
 
 func WithInterval(d time.Duration) Opt {

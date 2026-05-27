@@ -37,3 +37,6 @@ func (l *Listener) Stop() error {
 func (l *Listener) Name() string {
 	return "siglistener.Listener"
 }
+
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (l *Listener) ID() string { return l.Name() }

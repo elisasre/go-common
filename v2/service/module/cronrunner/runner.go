@@ -59,6 +59,9 @@ func (r *Runner) Name() string {
 	return "cron.Runner"
 }
 
+// ID exists for compatibility with github.com/go-srvc/srvc.Module.
+func (r *Runner) ID() string { return r.Name() }
+
 // WithCron sets cron.Cron instance.
 func WithCron(c *cron.Cron) Opt {
 	return func(r *Runner) error {
