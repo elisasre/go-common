@@ -39,7 +39,7 @@ func TestHTTPS(t *testing.T) {
 	srv := httpserver.New(httpserver.WithServer(&http.Server{
 		Addr:              "127.0.0.1:0",
 		ReadHeaderTimeout: time.Second,
-		TLSConfig:         &tls.Config{}, //nolint:gosec
+		TLSConfig:         &tls.Config{MinVersion: tls.VersionTLS12},
 	}))
 	err := srv.Init()
 	require.NoError(t, err)
