@@ -62,7 +62,7 @@ linters:
       - builtin$
       - examples$
       - generated$
-      - frontend$
+      - node_modules
 issues:
   max-same-issues: 0
 formatters:
@@ -76,4 +76,4 @@ formatters:
       - builtin$
       - examples$
       - generated$
-      - frontend$
+      - node_modules
