@@ -32,7 +32,7 @@ jobs:
         run: mage go:unitTest
 
       - name: Upload test coverage to codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           url: https://codecov.csf.elisa.fi
           flags: unit
