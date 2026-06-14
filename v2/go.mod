@@ -5,9 +5,9 @@ go 1.26.2
 require (
 	cloud.google.com/go/errorreporting v0.9.0
 	github.com/alicebob/miniredis/v2 v2.38.0
-	github.com/aws/aws-sdk-go-v2 v1.41.12
-	github.com/aws/aws-sdk-go-v2/config v1.32.23
-	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.6.28
+	github.com/aws/aws-sdk-go-v2 v1.42.0
+	github.com/aws/aws-sdk-go-v2/config v1.32.25
+	github.com/aws/aws-sdk-go-v2/feature/rds/auth v1.6.29
 	github.com/elisasre/mageutil v1.11.0
 	github.com/fsnotify/fsnotify v1.10.1
 	github.com/getsentry/sentry-go v0.46.2
@@ -18,7 +18,7 @@ require (
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/lib/pq v1.12.3
 	github.com/prometheus/client_golang v1.23.2
-	github.com/redis/go-redis/v9 v9.20.0
+	github.com/redis/go-redis/v9 v9.20.1
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/stretchr/testify v1.11.1
 	github.com/testcontainers/testcontainers-go v0.42.0
@@ -70,17 +70,17 @@ require (
 	github.com/alingse/nilnesserr v0.2.0 // indirect
 	github.com/ashanbrown/forbidigo v1.6.0 // indirect
 	github.com/ashanbrown/makezero v1.2.0 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.19.22 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.28 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.28 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.28 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.29 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.19.24 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.18.29 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.29 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.29 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.30 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.12 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.28 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signin v1.1.4 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.31.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.36.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.43.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.29 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signin v1.2.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.31.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.36.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.43.3 // indirect
 	github.com/aws/smithy-go v1.27.1 // indirect
 	github.com/aymanbagabas/go-osc52/v2 v2.0.1 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
