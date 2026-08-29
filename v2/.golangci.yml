@@ -12,7 +12,6 @@ linters:
     - exhaustive
     - forcetypeassert
     - gocognit
-    - goconst
     - gocritic
     - gocyclo
     - godot
