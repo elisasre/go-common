@@ -74,15 +74,8 @@ func (bh *BinHandler) Build() error {
 			bh.bin = path.Join(BinDir, name)
 		}
 
-		pkgs, err := ListPackages(bh.base, "./...")
-		if err != nil {
-			bh.buildErr = fmt.Errorf("listing packages failed: %w", err)
-			return
-		}
-
 		if len(bh.buildArgs) == 0 {
-			coverPkgs := "-coverpkg=" + strings.Join(pkgs, ",")
-			bh.buildArgs = []string{"-race", "-cover", "-covermode", "atomic", coverPkgs}
+			bh.buildArgs = []string{"-race", "-cover", "-covermode", "atomic", "-coverpkg=./..."}
 		}
 
 		bh.buildArgs = append([]string{"build", "-o", bh.bin}, bh.buildArgs...)
