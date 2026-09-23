@@ -75,7 +75,7 @@ func (bh *BinHandler) Build() error {
 		}
 
 		if len(bh.buildArgs) == 0 {
-			bh.buildArgs = []string{"-race", "-cover", "-covermode", "atomic", "-coverpkg=./..."}
+			bh.buildArgs = []string{"-race", "-cover", "-covermode", "atomic"}
 		}
 
 		bh.buildArgs = append([]string{"build", "-o", bh.bin}, bh.buildArgs...)
