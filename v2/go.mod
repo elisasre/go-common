@@ -33,7 +33,7 @@ require (
 	go.opentelemetry.io/otel/sdk v1.46.0
 	go.opentelemetry.io/otel/trace v1.46.0
 	golang.org/x/oauth2 v0.37.0
-	google.golang.org/grpc v1.83.2
+	google.golang.org/grpc v1.84.0
 	gorm.io/driver/postgres v1.6.3
 	gorm.io/gorm v1.31.2
 	k8s.io/apimachinery v0.35.4
