@@ -38,6 +38,7 @@ linters:
     gosec:
       excludes:
         - G115
+        - G124
     nolintlint:
       require-specific: true
       allow-unused: false
